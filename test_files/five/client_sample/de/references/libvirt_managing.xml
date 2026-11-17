@@ -1,0 +1,959 @@
+<?xml version="1.0"?><!DOCTYPE topic [
+  <!ENTITY % entities SYSTEM "../common/generic-entities.ent">
+  %entities;
+]>
+
+<topic xml:id="libvirt-managing" role="reference" xml:lang="de" xmlns="http://docbook.org/ns/docbook" version="5.2" xmlns:its="http://www.w3.org/2005/11/its" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:trans="http://docbook.org/ns/transclusion">
+  <title>Grundlegende &vmguest;-Verwaltung</title>
+  <info>
+    <dm:docmanager xmlns:dm="urn:x-suse:ns:docmanager">
+      <dm:bugtracker/>
+      <dm:translation>yes</dm:translation>
+    </dm:docmanager>
+  <revhistory xml:id="rh-cha-libvirt-managing">
+   <revision>
+     <date>2025-06-19</date>
+     <revdescription>
+       <para/>
+     </revdescription>
+   </revision>
+ </revhistory>
+</info>
+  <para>
+    Die meisten Verwaltungsaufgaben, wie das Starten oder Stoppen eines &vmguest;, können entweder über die grafische Anwendung &vmm; oder über die Befehlszeile mit <command>virsh</command> erledigt werden. Das Verbinden mit der grafischen Konsole über VNC ist nur von einer grafischen Benutzeroberfläche aus möglich.
+  </para>
+  <note>
+    <title>Verwalten von &vmguest;n auf einem Remote-&vmhost;</title>
+    <para>
+      Wenn sie auf einem &vmhost; gestartet werden, können die &libvirt;-Werkzeuge &vmm;, <command>virsh</command> und <command>virt-viewer</command> verwendet werden, um &vmguest;e auf dem Host zu verwalten. Es ist jedoch auch möglich, &vmguest;e auf einem Remote-&vmhost; zu verwalten. Dies erfordert die Konfiguration des Remote-Zugriffs für &libvirt; auf dem Host. Anweisungen finden Sie unter <xref linkend="libvirt-connect"/>.
+    </para>
+    <para>
+      Um eine Verbindung zu einem solchen Remote-Host mit &vmm; herzustellen, müssen Sie eine Verbindung einrichten, wie in <xref linkend="sec-libvirt-connect-connecting-vmm"/> erläutert. Wenn Sie eine Verbindung zu einem Remote-Host über <command>virsh</command> oder <command>virt-viewer</command> herstellen, müssen Sie einen Verbindungs-URI mit dem Parameter <option>-c</option> angeben, zum Beispiel <command>virsh -c
+      qemu+tls://&wsIIIname;/system</command>. Die Form des Verbindungs-URI hängt vom Verbindungstyp und dem Hypervisor ab&mdash;siehe <xref linkend="sec-libvirt-connect-connecting"/> für Details.
+    </para>
+    <para>
+      Beispiele in diesem Kapitel sind alle ohne Verbindungs-URI aufgeführt.
+    </para>
+  </note>
+  <section xml:id="sec-libvirt-managing-list">
+    <title>Auflisten von &vmguest;n</title>
+
+    <para>
+      Die &vmguest;-Auflistung zeigt alle &vmguest;e, die von &libvirt; auf einem &vmhost; verwaltet werden.
+    </para>
+
+    <section xml:id="sec-libvirt-managing-list-vmm">
+      <title>Auflisten von &vmguest;n mit &vmm;</title>
+      <para>
+        Das Hauptfenster von &vmm; listet alle &vmguest;e für jeden &vmhost; auf, mit dem es verbunden ist. Jeder &vmguest;-Eintrag enthält den Namen der Maschine, ihren Status (<guimenu>Running</guimenu>, <guimenu>Paused</guimenu> oder <guimenu>Shutoff</guimenu>), der als Symbol und im Klartext angezeigt wird, sowie eine CPU-Auslastungsanzeige.
+      </para>
+    </section>
+
+    <section xml:id="sec-libvirt-managing-list-virsh">
+      <title>Auflisten von &vmguest;n mit <command>virsh</command></title>
+      <para>
+        Verwenden Sie den Befehl <command>virsh</command> <option>list</option>, um eine Liste von &vmguest;n zu erhalten:
+      </para>
+      <variablelist>
+        <varlistentry>
+          <term>Alle laufenden Gäste auflisten</term>
+          <listitem>
+<screen>&prompt.user;virsh list</screen>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>Alle laufenden und inaktiven Gäste auflisten</term>
+          <listitem>
+<screen>&prompt.user;virsh list --all</screen>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+      <para>
+        Für weitere Informationen und zusätzliche Optionen siehe <command>virsh help
+        list</command> oder <command>man 1 virsh</command>.
+      </para>
+    </section>
+  </section>
+  <section xml:id="sec-libvirt-managing-console">
+    <title>Zugriff auf das &vmguest; über die Konsole</title>
+
+    <para>
+      &vmguest;s können über eine VNC-Verbindung (grafische Konsole) oder, falls vom Gastbetriebssystem unterstützt, über eine serielle Konsole aufgerufen werden.
+    </para>
+
+    <section xml:id="sec-libvirt-managing-console-vnc">
+      <title>Öffnen einer grafischen Konsole</title>
+      <para>
+        Das Öffnen einer grafischen Konsole zu einem &vmguest; ermöglicht es Ihnen, wie bei einem physischen Host über eine VNC-Verbindung mit der Maschine zu interagieren. Wenn der Zugriff auf den VNC-Server eine Authentifizierung erfordert, werden Sie aufgefordert, einen Benutzernamen (falls zutreffend) und ein Passwort einzugeben.
+      </para>
+      <para>
+        Wenn Sie in die VNC-Konsole klicken, wird der Cursor <quote>grabbed</quote> und kann außerhalb der Konsole nicht mehr verwendet werden. Um ihn freizugeben, drücken Sie <keycombo> <keycap function="alt"/>
+        <keycap function="control"/> </keycombo>.
+      </para>
+      <tip>
+        <title>Nahtlose (absolute) Cursorbewegung</title>
+        <para>
+          Um zu verhindern, dass die Konsole den Cursor erfasst, und um eine nahtlose Cursorbewegung zu ermöglichen, fügen Sie dem &vmguest; ein Tablet-Eingabegerät hinzu. Für weitere Informationen siehe <xref linkend="sec-libvirt-config-input"/>.
+        </para>
+      </tip>
+      <para>
+        Bestimmte Tastenkombinationen wie <keycombo>
+        <keycap function="control"/> <keycap function="alt"/>
+        <keycap function="delete"/> </keycombo> werden vom Hostsystem interpretiert und nicht an das &vmguest; weitergeleitet. Um solche Tastenkombinationen an ein &vmguest; weiterzuleiten, öffnen Sie das Menü <guimenu>Send Key</guimenu> im VNC-Fenster und wählen Sie den gewünschten Tastenkombinationseintrag aus. Das Menü <guimenu>Send Key</guimenu> ist nur verfügbar, wenn &vmm; und <command>virt-viewer</command> verwendet werden. Mit &vmm; können Sie alternativ die <quote>sticky key</quote>-Funktion verwenden, wie in <xref linkend="tip-libvirt-inst-vmm-sticky"/> erläutert.
+      </para>
+      <note>
+        <title>Unterstützte VNC-Viewer</title>
+        <para>
+          Grundsätzlich können alle VNC-Viewer eine Verbindung zur Konsole eines &vmguest; herstellen. Wenn Sie jedoch SASL-Authentifizierung und/oder eine TLS/SSL-Verbindung für den Zugriff auf den Gast verwenden, sind die Optionen begrenzt. Gängige VNC-Viewer wie <command>tightvnc</command> oder <command>tigervnc</command> unterstützen weder SASL-Authentifizierung noch TLS/SSL.
+        </para>
+      </note>
+      <section xml:id="sec-libvirt-managing-console-vnc-vmm">
+        <title>Öffnen einer grafischen Konsole mit &vmm;</title>
+        <procedure>
+          <step>
+            <para>
+              Klicken Sie im &vmm; mit der rechten Maustaste auf einen &vmguest;-Eintrag.
+            </para>
+          </step>
+          <step>
+            <para>
+              Wählen Sie <guimenu>Open</guimenu> aus dem Kontextmenü.
+            </para>
+          </step>
+        </procedure>
+      </section>
+      <section xml:id="sec-libvirt-managing-vnc-viewer">
+        <title>Öffnen einer grafischen Konsole mit <command>virt-viewer</command></title>
+        <para>
+          <command>virt-viewer</command> ist ein einfacher VNC-Viewer mit zusätzlicher Funktionalität zur Anzeige von &vmguest;-Konsolen. Er kann beispielsweise im Modus <quote>wait</quote> gestartet werden, in dem er auf den Start eines &vmguest; wartet, bevor er eine Verbindung herstellt. Er unterstützt auch das automatische Wiederverbinden mit einem &vmguest;, der neu gestartet wird.
+        </para>
+        <para>
+          <command>virt-viewer</command> adressiert &vmguest;s nach Name, ID oder UUID. Verwenden Sie <command>virsh</command> <option>list --all</option>, um diese Daten zu erhalten.
+        </para>
+        <para>
+          Um eine Verbindung zu einem Gast herzustellen, der läuft oder pausiert ist, verwenden Sie entweder die ID, die UUID oder den Namen. &vmguest;s, die ausgeschaltet sind, haben keine ID&mdash;Sie können nur über die UUID oder den Namen eine Verbindung zu ihnen herstellen.
+        </para>
+        <variablelist>
+          <varlistentry>
+            <term>Verbindung mit dem Gast mit der ID <literal>8</literal> herstellen</term>
+            <listitem>
+<screen>&prompt.user;virt-viewer 8</screen>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>Verbindung mit dem inaktiven Gast namens <literal>sles12</literal> herstellen; das Verbindungsfenster öffnet sich, sobald der Gast startet</term>
+            <listitem>
+<screen>&prompt.user;virt-viewer --wait sles12</screen>
+              <para>
+                Mit der Option <option>--wait</option> wird die Verbindung aufrechterhalten, auch wenn der &vmguest; momentan nicht läuft. Wenn der Gast startet, wird der Viewer gestartet.
+              </para>
+            </listitem>
+          </varlistentry>
+        </variablelist>
+        <para>
+          Für weitere Informationen siehe <command>virt-viewer</command> <option>--help</option> oder <command>man 1 virt-viewer</command>.
+        </para>
+        <note>
+          <title>Passworteingabe bei Remoteverbindungen mit SSH</title>
+          <para>
+            Bei der Verwendung von <command>virt-viewer</command> zum Öffnen einer Verbindung zu einem Remote-Host über SSH muss das SSH-Passwort zweimal eingegeben werden. Das erste Mal zur Authentifizierung bei &libvirt;, das zweite Mal zur Authentifizierung beim VNC-Server. Das zweite Passwort muss in der Befehlszeile angegeben werden, in der virt-viewer gestartet wurde.
+          </para>
+        </note>
+      </section>
+    </section>
+
+    <section xml:id="sec-libvirt-managing-console-serial">
+      <title>Öffnen einer seriellen Konsole</title>
+      <para>
+        Der Zugriff auf die grafische Konsole einer virtuellen Maschine erfordert eine grafische Umgebung auf dem Client, der auf den &vmguest; zugreift. Alternativ können virtuell verwaltete Maschinen mit libvirt auch von der Shell aus über die serielle Konsole und <command>virsh</command> aufgerufen werden. Um eine serielle Konsole zu einer &vmguest; namens <quote>sles12</quote> zu öffnen, führen Sie den folgenden Befehl aus:
+      </para>
+<screen>&prompt.user;virsh console sles12</screen>
+      <para>
+        <command>virsh console</command> akzeptiert zwei optionale Flags: <option>--safe</option> stellt den exklusiven Zugriff auf die Konsole sicher, <option>--force</option> trennt alle bestehenden Sitzungen vor dem Verbinden. Beide Funktionen müssen vom Gastbetriebssystem unterstützt werden.
+      </para>
+      <para>
+        Die Möglichkeit, sich über eine serielle Konsole mit einer &vmguest; zu verbinden, erfordert, dass das Gastbetriebssystem den Zugriff über die serielle Konsole unterstützt und ordnungsgemäß unterstützt wird. Weitere Informationen finden Sie im Handbuch des Gastbetriebssystems.
+      </para>
+      <tip>
+        <title>Aktivieren des seriellen Konsolenzugriffs für &sle; und &opensuse; Gäste</title>
+        <para>
+          Der Zugriff auf die serielle Konsole ist in &sle; und &opensuse; standardmäßig deaktiviert. Um ihn zu aktivieren, gehen Sie wie folgt vor:
+        </para>
+        <variablelist>
+          <varlistentry>
+            <term>&slsa; und &opensuse;</term>
+            <listitem>
+              <para>
+                Fügen Sie <literal>console=ttyS0</literal> zum Kernel-Befehlszeilenparameter hinzu.
+              </para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>&slsa; 11</term>
+            <listitem>
+              <para>
+                Fügen Sie <literal>console=ttyS0</literal> zum Kernel-Befehlszeilenparameter hinzu. Bearbeiten Sie zusätzlich <filename>/etc/inittab</filename> und entfernen Sie das Kommentarzeichen vor der Zeile mit dem folgenden Inhalt:
+              </para>
+<screen>#S0:12345:respawn:/sbin/agetty -L 9600 ttyS0 vt102</screen>
+            </listitem>
+          </varlistentry>
+        </variablelist>
+      </tip>
+    </section>
+  </section>
+  <section xml:id="sec-libvirt-managing-status">
+    <title>Ändern des Zustands einer &vmguest;: starten, stoppen, pausieren</title>
+
+    <para>
+      Das Starten, Stoppen oder Pausieren einer &vmguest; kann entweder mit &vmm; oder <command>virsh</command> erfolgen. Sie können auch konfigurieren, dass eine &vmguest; automatisch gestartet wird, wenn der &vmhost; bootet.
+    </para>
+
+    <para>
+      Wenn Sie eine &vmguest; herunterfahren, können Sie sie entweder ordnungsgemäß herunterfahren oder das Herunterfahren erzwingen. Letzteres entspricht dem Ziehen des Netzsteckers bei einem physischen Host und wird nur empfohlen, wenn es keine Alternativen gibt. Das Erzwingen eines Herunterfahrens kann zu Dateisystembeschädigungen und Datenverlust auf der &vmguest; führen.
+    </para>
+
+    <tip>
+      <title>Ordnungsgemäßes Herunterfahren</title>
+      <para>
+        Um ein ordnungsgemäßes Herunterfahren durchführen zu können, muss die &vmguest; so konfiguriert sein, dass sie <xref linkend="gloss-vt-acpi"/> unterstützt. Wenn Sie den Gast mit &vmm; erstellt haben, sollte ACPI im &vmguest; verfügbar sein.
+      </para>
+      <para>
+        Je nach Gastbetriebssystem reicht die Verfügbarkeit von ACPI möglicherweise nicht aus, um ein ordnungsgemäßes Herunterfahren durchzuführen. Es wird dringend empfohlen, das Herunterfahren und den Neustart eines Gastes zu testen, bevor dieser produktiv eingesetzt wird. &opensuse; oder &sled; können beispielsweise eine &pk;-Autorisierung für das Herunterfahren und den Neustart erfordern. Stellen Sie sicher, dass diese Richtlinie auf allen &vmguest;s deaktiviert ist.
+      </para>
+      <para>
+        Wenn ACPI während der Installation eines Windows XP/Windows Server 2003-Gastes aktiviert wurde, reicht es nicht aus, es nur in der &vmguest;-Konfiguration einzuschalten. Für weitere Informationen siehe:
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            <link xlink:href="https://support.microsoft.com/en-us/kb/314088"></link>
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <link xlink:href="https://support.microsoft.com/en-us/kb/309283"></link>
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        Unabhängig von der Konfiguration des &vmguest; ist ein ordnungsgemäßes Herunterfahren jederzeit aus dem Gastbetriebssystem heraus möglich.
+      </para>
+    </tip>
+
+    <section xml:id="sec-libvirt-managing-status-vmm">
+      <title>Ändern des Zustands eines &vmguest; mit &vmm;</title>
+      <para>
+        Das Ändern des Zustands eines &vmguest; kann entweder über das Hauptfenster von &vmm; oder über ein VNC-Fenster erfolgen.
+      </para>
+      <procedure>
+        <title>Zustandsänderung über das &vmm;-Fenster</title>
+        <step>
+          <para>
+            Klicken Sie mit der rechten Maustaste auf einen &vmguest;-Eintrag.
+          </para>
+        </step>
+        <step>
+          <para>
+            Wählen Sie <guimenu>Run</guimenu>, <guimenu>Pause</guimenu> oder eine der <guimenu>Shutdown options</guimenu> aus dem Kontextmenü.
+          </para>
+        </step>
+      </procedure>
+      <procedure>
+        <title>Zustandsänderung über das VNC-Fenster</title>
+        <step>
+          <para>
+            Öffnen Sie ein VNC-Fenster wie in <xref linkend="sec-libvirt-managing-console-vnc-vmm"/> beschrieben.
+          </para>
+        </step>
+        <step>
+          <para>
+            Wählen Sie <guimenu>Run</guimenu>, <guimenu>Pause</guimenu> oder eine der <guimenu>Shut Down</guimenu>-Optionen entweder über die Symbolleiste oder über das Menü <guimenu>Virtual Machine</guimenu>.
+          </para>
+        </step>
+      </procedure>
+      <section xml:id="sec-libvirt-managing-status-vmm-autostart">
+        <title>Automatisches Starten eines &vmguest;</title>
+        <para>
+          Sie können einen Gast automatisch starten, wenn der &vmhost; hochfährt. Diese Funktion ist standardmäßig nicht aktiviert und muss für jeden &vmguest; einzeln aktiviert werden. Es gibt keine Möglichkeit, sie global zu aktivieren.
+        </para>
+        <procedure>
+          <step>
+            <para>
+              Doppelklicken Sie auf den &vmguest;-Eintrag in &vmm;, um dessen Konsole zu öffnen.
+            </para>
+          </step>
+          <step>
+            <para>
+              Wählen Sie <menuchoice> <guimenu>View</guimenu> <guimenu>Details</guimenu></menuchoice>, um das Konfigurationsfenster für &vmguest; zu öffnen.
+            </para>
+          </step>
+          <step>
+            <para>
+              Wählen Sie <guimenu>Boot Options</guimenu> und aktivieren Sie <guimenu>Start virtual machine on host boot up</guimenu>.
+            </para>
+          </step>
+          <step>
+            <para>
+              Speichern Sie die neue Konfiguration mit <guimenu>Apply</guimenu>.
+            </para>
+          </step>
+        </procedure>
+      </section>
+    </section>
+
+    <section xml:id="sec-libvirt-managing-status-virsh">
+      <title>Ändern des Zustands eines &vmguest; mit <command>virsh</command></title>
+      <para>
+        In den folgenden Beispielen wird der Zustand einer &vmguest; namens <quote>sles12</quote> geändert.
+      </para>
+      <variablelist>
+        <varlistentry>
+          <term>Starten</term>
+          <listitem>
+<screen>&prompt.user;virsh start sles12</screen>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>Anhalten</term>
+          <listitem>
+<screen>&prompt.user;virsh suspend sles12</screen>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>Fortsetzen (einer angehaltenen &vmguest;)</term>
+          <listitem>
+<screen>&prompt.user;virsh resume sles12</screen>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>Neustart</term>
+          <listitem>
+<screen>&prompt.user;virsh reboot sles12</screen>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>Ordnungsgemäßes Herunterfahren</term>
+          <listitem>
+<screen>&prompt.user;virsh shutdown sles12</screen>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>Herunterfahren erzwingen</term>
+          <listitem>
+<screen>&prompt.user;virsh destroy sles12</screen>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>Automatischen Start einschalten</term>
+          <listitem>
+<screen>&prompt.user;virsh autostart sles12</screen>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>Automatischen Start ausschalten</term>
+          <listitem>
+<screen>&prompt.user;virsh autostart --disable sles12</screen>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </section>
+  </section>
+  <section xml:id="sec-libvirt-manage-save">
+    <title>Speichern und Wiederherstellen des Zustands einer &vmguest;</title>
+
+    <para>
+      Das Speichern einer &vmguest; bewahrt den exakten Zustand des Arbeitsspeichers des Gastes. Der Vorgang ähnelt dem <emphasis>hibernating</emphasis> eines Computers. Eine gespeicherte &vmguest; kann schnell in denselben Betriebszustand wie vor dem Speichervorgang zurückversetzt werden.
+    </para>
+
+    <para>
+      Beim Speichern wird die &vmguest; angehalten, ihr aktueller Speicherzustand in einer Datei gesichert und anschließend der Gast gestoppt. Der Vorgang erstellt keine Kopie eines Teils der virtuellen Festplatte der &vmguest;. Die zum Speichern der virtuellen Maschine benötigte Zeit hängt von der Menge des zugewiesenen Arbeitsspeichers ab. Die Ressourcen der &vmguest; werden nach einem erfolgreichen Speichervorgang an den &vmhost; zurückgegeben.
+    </para>
+
+    <para>
+      Der Wiederherstellungsvorgang lädt die zuvor gespeicherte Speicherzustandsdatei einer &vmguest; und startet diese. Der Gast wird nicht gebootet, sondern an dem Punkt fortgesetzt, an dem er zuvor gespeichert wurde. Der Vorgang ähnelt dem Beenden des Ruhezustands.
+    </para>
+
+    <para>
+      &libvirt; unterstützt verschiedene Speicherdateiformate. Das Standardformat heißt <option>raw</option> und besteht aus einem sequenziellen Datenstrom von &vmguest; Speicherseiten. Das sequenzielle Layout des <option>raw</option>-Formats ist für mehrere Leser und Schreiber nicht gut geeignet.
+    </para>
+
+    <para>
+      Zusätzlich zum <option>raw</option>-Speicherdateiformat unterstützt &libvirt; auch mehrere komprimierte Formate: <option>zstd</option>, <option>lzop</option>, <option>gzip</option>, <option>bzip2</option> und <option>xz</option>. Ähnlich wie das <option>raw</option>-Format bestehen die komprimierten Formate aus einem sequenziellen Datenstrom von &vmguest; Speicherseiten, werden jedoch vor dem Schreiben in oder Lesen aus der Speicherdatei durch den genannten Komprimierungsalgorithmus komprimiert. Diese Formate sparen Platz auf dem Gerät, das die Speicherdatei enthält, erhöhen jedoch die Speicher-/Wiederherstellungszeiten und die CPU-Auslastung des Hosts.
+    </para>
+
+    <para>
+      Das <option>sparse</option>-Speicherdateiformat verwendet vorab berechnete, feste Offsets innerhalb der Speicherdatei, um die &vmguest;-Speicherseiten zu lesen/schreiben. Dies führt zu einer Speicherdatei, die ungefähr der logischen Größe des Speichers des &vmguest; entspricht, obwohl ihre Größe auf dem Datenträger von der tatsächlichen Speicherauslastung des &vmguest; abhängt. Mit festen Offsets für die &vmguest;-Speicherseiten ist das <option>sparse</option>-Format gut geeignet, um mehrere Leser und Schreiber zu unterstützen, was die Speicher- und Wiederherstellungszeiten für &vmguest; mit großen Speicherzuweisungen verbessern kann.
+    </para>
+
+    <para>
+      Das Standard-Speicherdateiformat kann mit der Einstellung <option>save_image_format</option> in <filename>/etc/libvirt/qemu.conf</filename> geändert werden. Das Format kann auch bei der Durchführung eines Speichervorgangs mit <command>virsh</command> angegeben werden. Weitere Informationen zum Speichern und Wiederherstellen mit <command>virsh</command> finden Sie unter <xref linkend="sec-libvirt-manage-save-virsh"/>.
+    </para>
+
+    <para>
+      Da der Zustand des &vmguest; in einer Datei gespeichert wird, stellen Sie sicher, dass auf dem Gerät, das die Speicherdatei hostet, genügend Speicherplatz vorhanden ist. Bei Verwendung des <option>sparse</option>-Speicherdateiformats entspricht die logische Größe der Speicherdatei ungefähr der &vmguest;-Speicherzuweisung. Die tatsächliche Dateigröße auf dem Datenträger ist jedoch normalerweise kleiner und hängt von der &vmguest;-Speicherauslastung ab. Nicht verwendeter Speicher im &vmguest; wird nicht in die Speicherdatei geschrieben, daher der Begriff <literal>sparse</literal>.
+    </para>
+
+    <para>
+      Beim <option>raw</option>-Speicherdateiformat sind die logische Dateigröße und die Dateigröße auf dem Datenträger identisch, und beide hängen von der Speicherauslastung des &vmguest; ab. Unabhängig davon, ob das <option>raw</option>- oder <option>sparse</option>-Format verwendet wird, kann die Größe der Speicherdatei auf dem Datenträger in Megabyte durch Ausführen des folgenden Befehls im &vmguest; geschätzt werden:
+    </para>
+
+<screen>&prompt.user;free -mh | awk '/^Mem:/ {print $3}'</screen>
+
+    <para>
+      Die komprimierten Formate führen zu einer geringeren Größe auf dem Datenträger, abhängig von der Effizienz des angegebenen Komprimierungsalgorithmus.
+    </para>
+
+    <warning xml:id="adm-vm-restore">
+      <title>Gespeicherte Gäste immer wiederherstellen</title>
+      <para>
+        Nach einem erfolgreichen Speichervorgang macht das Booten oder Starten des &vmguest; auf andere Weise als durch einen Wiederherstellungsvorgang die gespeicherte Zustandsdatei obsolet. Die Speicherdatei kann Dateisystemdaten enthalten, die nicht auf den Datenträger geschrieben wurden. Der Versuch, den gespeicherten Zustand wiederherzustellen, nachdem die &vmguest; auf andere Weise ausgeführt wurde, kann zu einer Beschädigung des Dateisystems führen.
+      </para>
+      <para>
+        Verwenden Sie beim Speichern und Wiederherstellen von &vmguest;n immer dieselbe Anwendung. Wenn beispielsweise <command>virsh</command> zum Speichern einer &vmguest; verwendet wird, stellen Sie diese nicht mit &vmm; wieder her. Stellen Sie in diesem Fall sicher, dass die Wiederherstellung mit <command>virsh</command> erfolgt.
+      </para>
+    </warning>
+
+    <important>
+      <title>Synchronisieren Sie die Zeit der &vmguest; nach der Wiederherstellung.</title>
+      <para>
+        Wenn Sie die &vmguest; nach einer langen Pause (Stunden) seit dem Speichern wiederherstellen, verweigert der Zeitsynchronisierungsdienst, zum Beispiel &chronyd;, möglicherweise die Synchronisierung der Zeit. Synchronisieren Sie in diesem Fall die Zeit der &vmguest; manuell. Für &kvm;-Hosts können Sie beispielsweise den &qemu;-Gast-Agenten verwenden und den Gast mit <command>guest-set-time</command> anweisen. Weitere Einzelheiten finden Sie im Artikel <citetitle>&qemu; Gast-Agent</citetitle>.
+      </para>
+    </important>
+
+    <section xml:id="sec-libvirt-manage-save-vmm">
+      <title>Speichern/Wiederherstellen mit &vmm;</title>
+      <procedure>
+        <title>Speichern einer &vmguest;</title>
+        <step>
+          <para>
+            Öffnen Sie ein VNC-Verbindungsfenster zu einer &vmguest;. Stellen Sie sicher, dass der Gast ausgeführt wird.
+          </para>
+        </step>
+        <step>
+          <para>
+            Wählen Sie <menuchoice> <guimenu>Virtuelle Maschine</guimenu> <guimenu>Herunterfahren</guimenu> <guimenu>Speichern</guimenu> </menuchoice>.
+          </para>
+        </step>
+      </procedure>
+      <procedure>
+        <title>Wiederherstellen einer &vmguest;</title>
+        <step>
+          <para>
+            Öffnen Sie ein VNC-Verbindungsfenster zu einer &vmguest;. Stellen Sie sicher, dass der Gast nicht ausgeführt wird.
+          </para>
+        </step>
+        <step>
+          <para>
+            Wählen Sie <menuchoice> <guimenu>Virtuelle Maschine</guimenu> <guimenu>Wiederherstellen</guimenu> </menuchoice>.
+          </para>
+          <para>
+            Wenn die &vmguest; zuvor mit &vmm; gespeichert wurde, wird Ihnen keine Option zum <guimenu>Ausführen</guimenu> des Gastes angeboten. Beachten Sie jedoch die Vorbehalte für Maschinen, die mit <command>virsh</command> gespeichert wurden und in <xref linkend="adm-vm-restore"/> beschrieben sind.
+          </para>
+        </step>
+      </procedure>
+    </section>
+
+    <section xml:id="sec-libvirt-manage-save-virsh">
+      <title>Speichern und Wiederherstellen mit <command>virsh</command></title>
+      <para>
+        &libvirt; bietet mehr Kontrolle über die Speicher- und Wiederherstellungsvorgänge als &vmm;. <command>virsh save</command> und <command>virsh
+        restore</command> unterstützen verschiedene Optionen zur Änderung des Verhaltens der Vorgänge. In der einfachsten Form wird eine &vmguest; durch Angabe ihres Namens, ihrer ID oder UUID und eines Dateinamens gespeichert. Zum Beispiel:
+      </para>
+<screen>&prompt.user;virsh save openSUSE-Leap /virtual/saves/openSUSE-Leap.vmsav</screen>
+      <para>
+        Ein grundlegender &vmguest;-Wiederherstellungsvorgang erfordert lediglich die Angabe des Speicherdateinamens. Zum Beispiel:
+      </para>
+<screen>&prompt.user;virsh restore /virtual/saves/openSUSE-Leap.vmsav</screen>
+      <para>
+        Da die Speichergröße von &vmguest; zunimmt, erfordern Speicher- und Wiederherstellungsvorgänge möglicherweise zusätzliche Optionen, um zufriedenstellende Übertragungsraten zu erreichen, insbesondere wenn die Speicher-Image-Dateien durch Speicher mit hohem Durchsatz unterstützt werden. Der &vmhost;-Dateisystem-Cache ist in diesen Szenarien oft kontraproduktiv und sollte mit der <option>bypass-cache</option>-Option vermieden werden. Zum Beispiel:
+      </para>
+<screen>&prompt.user;virsh save --bypass-cache openSUSE-Leap /virtual/saves/openSUSE-Leap.vmsav</screen>
+<screen>&prompt.user;virsh restore --bypass-cache /virtual/saves/openSUSE-Leap.vmsav</screen>
+      <para>
+        Die Zeit, die zum Speichern und Wiederherstellen von &vmguest;n auf Speicher mit hohem Durchsatz benötigt wird, kann durch die Verwendung mehrerer Kanäle zum Schreiben und Lesen der &vmguest;-Speicherseiten verbessert werden. Wie in <xref linkend="sec-libvirt-manage-save"/> erwähnt, ist das <option>sparse</option>-Image-Format erforderlich, um mehrere Kanäle zu verwenden. Bei der Auswahl der Anzahl der Kanäle muss darauf geachtet werden, dass der Vorgang andere auf der &vmhost; laufende Arbeitslasten nicht beeinträchtigt. Wenn die &vmhost;-Ressourcen statisch partitioniert sind, empfiehlt es sich im Allgemeinen, die gleiche Anzahl an Kanälen wie die für die &vmguest; dedizierten physischen CPUs zu verwenden. Die vCPUs einer &vmguest; werden zu Beginn eines Speichervorgangs angehalten, daher wäre es sicher, diese CPU-Ressourcen zum Speichern der &vmguest;-Speicherseiten zu verwenden.
+      </para>
+      <para>
+        Die folgenden Beispiele speichern und wiederherstellen eine &vmguest; unter Verwendung von 4 Kanälen, während gleichzeitig der &vmhost;-Dateisystem-Cache umgangen wird:
+      </para>
+<screen>&prompt.user;virsh save --bypass-cache --image-format sparse --parallel-channels 4 openSUSE-Leap /virtual/saves/openSUSE-Leap.vmsav</screen>
+<screen>&prompt.user;virsh restore --bypass-cache --parallel-channels 4 /virtual/saves/openSUSE-Leap.vmsav</screen>
+      <para>
+        Das Image-Format ist in der Speicher-Image-Datei kodiert und muss während eines Wiederherstellungsvorgangs nicht angegeben werden.
+      </para>
+      <para>
+        Weitere Informationen zu Speichern/Wiederherstellen und den unterstützten Optionen finden Sie unter <command>virsh help save</command>, <command>virsh help restore</command> oder <command>man 1 virsh</command>.
+      </para>
+    </section>
+  </section>
+  <section xml:id="sec-libvirt-managing-snapshots">
+    <title>Erstellen und Verwalten von Snapshots</title>
+
+    <para>
+      &vmguest;-Snapshots sind Snapshots der vollständigen virtuellen Maschine, einschließlich des Zustands von CPU, RAM, Geräten und dem Inhalt aller beschreibbaren Festplatten. Um Snapshots virtueller Maschinen zu verwenden, müssen alle angeschlossenen Festplatten das qcow2-Disk-Image-Format verwenden, und mindestens eine davon muss beschreibbar sein.
+    </para>
+
+    <para>
+      Snapshots ermöglichen es Ihnen, den Zustand der Maschine zu einem bestimmten Zeitpunkt wiederherzustellen. Dies ist nützlich, wenn eine fehlerhafte Konfiguration oder die Installation einer Vielzahl von Paketen rückgängig gemacht werden soll. Nach dem Starten eines Snapshots, der erstellt wurde, während die &vmguest; ausgeschaltet war, müssen Sie diese booten. Alle Änderungen, die danach auf die Festplatte geschrieben werden, gehen beim Starten des Snapshots verloren.
+    </para>
+
+    <note>
+      <para>
+        Snapshots werden nur auf &kvm; &vmhost;s unterstützt.
+      </para>
+    </note>
+
+    <section xml:id="libvirt-snapshots-terminology">
+      <title>Terminologie</title>
+      <para>
+        Es gibt verschiedene spezifische Begriffe, die zur Beschreibung der Snapshot-Typen verwendet werden:
+      </para>
+      <variablelist>
+        <varlistentry>
+          <term>Interne Snapshots</term>
+          <listitem>
+            <para>
+              Snapshots, die in der qcow2-Datei des ursprünglichen &vmguest; gespeichert werden. Die Datei enthält sowohl den gespeicherten Zustand des Snapshots als auch die Änderungen, die seit der Erstellung des Snapshots vorgenommen wurden. Der Hauptvorteil interner Snapshots besteht darin, dass sie alle in einer Datei gespeichert werden und es daher einfach ist, sie auf mehrere Maschinen zu kopieren oder zu verschieben.
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>Externe Snapshots</term>
+          <listitem>
+            <para>
+              Beim Erstellen eines externen Snapshots wird die ursprüngliche qcow2-Datei gespeichert und schreibgeschützt, während eine neue qcow2-Datei erstellt wird, um die Änderungen aufzunehmen. Die ursprüngliche Datei wird manchmal als <emphasis>backing</emphasis>- oder <emphasis>base</emphasis>-Datei bezeichnet, während die neue Datei mit allen Änderungen als <emphasis>overlay</emphasis>- oder <emphasis>derived</emphasis>-Datei bezeichnet wird. Externe Snapshots sind nützlich bei der Durchführung von Backups von &vmguest;s. Externe Snapshots werden jedoch nicht von &vmm; unterstützt und können nicht direkt von <command>virsh</command> gelöscht werden. Weitere Informationen zu externen Snapshots in &qemu; finden Sie unter <link xlink:href="https://documentation.suse.com/sles/&productnumber;/html/SLES-virtualization-qemu/index.html#qemu-guest-inst-qemu-img-effect">Manipulate disk images effectively</link>.
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>Live-Snapshots</term>
+          <listitem>
+            <para>
+              Snapshots, die erstellt werden, während das ursprüngliche &vmguest; läuft. Interne Live-Snapshots unterstützen das Speichern der Geräte sowie der Speicher- und Festplattenzustände, während externe Live-Snapshots mit <command>virsh</command> das Speichern entweder des Speicherzustands, des Festplattenzustands oder beider unterstützen.
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>Offline-Snapshots</term>
+          <listitem>
+            <para>
+              Snapshots, die von einem &vmguest; erstellt werden, das ausgeschaltet ist. Dies gewährleistet die Datenintegrität, da alle Prozesse des Gastsystems gestoppt sind und kein Speicher verwendet wird.
+            </para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </section>
+
+    <section xml:id="sec-libvirt-managing-snapshots-vmm">
+      <title>Erstellen und Verwalten von Snapshots mit &vmm;</title>
+      <important>
+        <title>Nur interne Snapshots</title>
+        <para>
+          &vmm; unterstützt nur interne Snapshots, entweder live oder offline.
+        </para>
+      </important>
+      <para>
+        Um die Snapshot-Verwaltungsansicht in &vmm; zu öffnen, öffnen Sie das VNC-Fenster wie in <xref linkend="sec-libvirt-managing-console-vnc-vmm"/> beschrieben. Wählen Sie nun entweder <menuchoice> <guimenu>Ansicht</guimenu> <guimenu>Snapshots</guimenu> </menuchoice> oder klicken Sie in der Symbolleiste auf <guimenu>VM-Snapshots verwalten</guimenu>.
+      </para>
+      <informalfigure>
+        <mediaobject>
+          <imageobject role="fo">
+            <imagedata fileref="virt_vmm_snapshots_list.png" width="75%"/>
+          </imageobject>
+          <imageobject role="html">
+            <imagedata fileref="virt_vmm_snapshots_list.png" width="75%"/>
+          </imageobject>
+        </mediaobject>
+      </informalfigure>
+      <para>
+        Die Liste der vorhandenen Snapshots für den ausgewählten &vmguest; wird im linken Teil des Fensters angezeigt. Der zuletzt gestartete Snapshot ist mit einem grünen Häkchen markiert. Der rechte Teil des Fensters zeigt Details des aktuell in der Liste markierten Snapshots. Diese Details umfassen den Titel und Zeitstempel des Snapshots, den Status des &vmguest; zum Zeitpunkt der Snapshot-Erstellung sowie eine Beschreibung. Snapshots von laufenden Gästen enthalten auch einen Screenshot. Die <guimenu>Beschreibung</guimenu> kann direkt in dieser Ansicht geändert werden. Andere Snapshot-Daten können nicht geändert werden.
+      </para>
+      <section xml:id="sec-libvirt-managing-snapshots-vmm-add">
+        <title>Erstellen eines Snapshots</title>
+        <para>
+          Um einen neuen Snapshot eines &vmguest; zu erstellen, gehen Sie wie folgt vor:
+        </para>
+        <procedure>
+          <step>
+            <para>
+              Fahren Sie optional den &vmguest; herunter, um einen Offline-Snapshot zu erstellen.
+            </para>
+          </step>
+          <step>
+            <para>
+              Klicken Sie in der linken unteren Ecke des VNC-Fensters auf <guimenu>Hinzufügen</guimenu>.
+            </para>
+            <para>
+              Das Fenster <guimenu>Snapshot erstellen</guimenu> öffnet sich.
+            </para>
+          </step>
+          <step>
+            <para>
+              Geben Sie einen <guimenu>Namen</guimenu> und optional eine Beschreibung an. Der Name kann nach der Erstellung des Snapshots nicht mehr geändert werden. Verwenden Sie einen <quote>aussagekräftigen Namen</quote>, um den Snapshot später leicht identifizieren zu können.
+            </para>
+          </step>
+          <step>
+            <para>
+              Bestätigen Sie mit <guimenu>Finish</guimenu>.
+            </para>
+          </step>
+        </procedure>
+      </section>
+      <section xml:id="sec-libvirt-managing-snapshots-vmm-delete">
+        <title>Einen Snapshot löschen</title>
+        <para>
+          Um einen Snapshot einer &vmguest; zu löschen, gehen Sie wie folgt vor:
+        </para>
+        <procedure>
+          <step>
+            <para>
+              Klicken Sie in der unteren linken Ecke des VNC-Fensters auf <guimenu>Delete</guimenu>.
+            </para>
+          </step>
+          <step>
+            <para>
+              Bestätigen Sie den Löschvorgang mit <guimenu>Yes</guimenu>.
+            </para>
+          </step>
+        </procedure>
+      </section>
+      <section xml:id="sec-libvirt-managing-snapshots-vmm-start">
+        <title>Einen Snapshot starten</title>
+        <para>
+          Um einen Snapshot zu starten, gehen Sie wie folgt vor:
+        </para>
+        <procedure>
+          <step>
+            <para>
+              Klicken Sie in der unteren linken Ecke des VNC-Fensters auf <guimenu>Run</guimenu>.
+            </para>
+          </step>
+          <step>
+            <para>
+              Bestätigen Sie den Start mit <guimenu>Yes</guimenu>.
+            </para>
+          </step>
+        </procedure>
+      </section>
+    </section>
+
+    <section xml:id="sec-libvirt-managing-snapshots-virsh">
+      <title>Erstellen und Verwalten von Snapshots mit <command>virsh</command></title>
+      <para>
+        Um alle vorhandenen Snapshots für eine Domain (<replaceable>admin_server</replaceable> im Folgenden) aufzulisten, führen Sie den Befehl <literal>snapshot-list</literal> aus:
+      </para>
+<screen>&prompt.user;virsh snapshot-list --domain sle-ha-node1
+ Name                 Creation Time             State
+------------------------------------------------------------
+ sleha_12_sp2_b2_two_node_cluster 2016-06-06 15:04:31 +0200 shutoff
+ sleha_12_sp2_b3_two_node_cluster 2016-07-04 14:01:41 +0200 shutoff
+ sleha_12_sp2_b4_two_node_cluster 2016-07-14 10:44:51 +0200 shutoff
+ sleha_12_sp2_rc3_two_node_cluster 2016-10-10 09:40:12 +0200 shutoff
+ sleha_12_sp2_gmc_two_node_cluster 2016-10-24 17:00:14 +0200 shutoff
+ sleha_12_sp3_gm_two_node_cluster 2017-08-02 12:19:37 +0200 shutoff
+ sleha_12_sp3_rc1_two_node_cluster 2017-06-13 13:34:19 +0200 shutoff
+ sleha_12_sp3_rc2_two_node_cluster 2017-06-30 11:51:24 +0200 shutoff
+ sleha_15_b6_two_node_cluster 2018-02-07 15:08:09 +0100 shutoff
+ sleha_15_rc1_one-node 2018-03-09 16:32:38 +0100 shutoff</screen>
+      <para>
+        Der zuletzt gestartete Snapshot wird mit <literal>snapshot-current command:</literal> angezeigt
+      </para>
+<screen>&prompt.user;virsh snapshot-current --domain admin_server
+Basic installation incl. SMT for CLOUD4
+</screen>
+      <para>
+        Details zu einem bestimmten Snapshot erhalten Sie durch Ausführen des Befehls <literal>snapshot-info</literal>:
+      </para>
+<screen>&prompt.user;virsh snapshot-info --domain admin_server \
+   -name  "Basic installation incl. SMT for CLOUD4"
+Name:           Basic installation incl. SMT for CLOUD4
+Domain:         admin_server
+Current:        yes
+State:          shutoff
+Location:       internal
+Parent:         Basic installation incl. SMT for CLOUD3-HA
+Children:       0
+Descendants:    0
+Metadata:       yes
+</screen>
+      <section xml:id="sec-libvirt-managing-snapshots-virsh-add">
+        <title>Interne Snapshots erstellen</title>
+        <para>
+          Um einen internen Snapshot einer &vmguest; zu erstellen, ob live oder offline, verwenden Sie den Befehl <literal>snapshot-create-as</literal> wie folgt:
+        </para>
+<screen>&prompt.user;virsh snapshot-create-as --domain admin_server<co xml:id="virsh-snapshot-add-domain"/> --name "Snapshot 1"<co xml:id="virsh-snapshot-add-name"/> \
+--description "First snapshot"<co xml:id="virsh-snapshot-add-description"/></screen>
+        <calloutlist>
+          <callout arearefs="virsh-snapshot-add-domain">
+            <para>
+              Domainname.  (obligatorisch):
+            </para>
+          </callout>
+          <callout arearefs="virsh-snapshot-add-name">
+            <para>
+              Name des Snapshots. Es wird empfohlen, einen <quote>aussagekräftigen Namen</quote> zu verwenden, da dies die Identifizierung des Snapshots erleichtert.  (obligatorisch):
+            </para>
+          </callout>
+          <callout arearefs="virsh-snapshot-add-description">
+            <para>
+              Beschreibung für den Snapshot. Optional.
+            </para>
+          </callout>
+        </calloutlist>
+      </section>
+      <section xml:id="sec-libvirt-managing-snapshots-virsh-add-ext">
+        <title>Externe Snapshots erstellen</title>
+        <para>
+          Mit <command>virsh</command> können Sie externe Snapshots des Speicherzustands, des Festplattenzustands oder beider Zustände des Gastes erstellen.
+        </para>
+        <para>
+          Um sowohl Live- als auch Offline-Snapshots des Gast-Datenträgers zu erstellen, geben Sie die Option <option>--disk-only</option> an:
+        </para>
+<screen>&prompt.user;virsh snapshot-create-as --domain admin_server --name \
+ "Offline external snapshot" --disk-only</screen>
+        <para>
+          Sie können die Option <option>--diskspec</option> angeben, um zu steuern, wie die externen Dateien erstellt werden:
+        </para>
+<screen>&prompt.user;virsh snapshot-create-as --domain admin_server --name \
+ "Offline external snapshot" \
+ --disk-only --diskspec vda,snapshot=external,file=/path/to/snapshot_file</screen>
+        <para>
+          Um einen Live-Snapshot des Gast-Arbeitsspeichers zu erstellen, geben Sie die Optionen <option>--live</option> und <option>--memspec</option> an:
+        </para>
+<screen>&prompt.user;virsh snapshot-create-as --domain admin_server --name \
+ "Offline external snapshot" --live \
+ --memspec snapshot=external,file=/path/to/snapshot_file</screen>
+        <para>
+          Um einen Live-Snapshot sowohl des Gast-Datenträgers als auch des Arbeitsspeicherzustands zu erstellen, kombinieren Sie die Optionen <option>--live</option>, <option>--diskspec</option> und <option>--memspec</option>:
+        </para>
+<screen>&prompt.user;virsh snapshot-create-as --domain admin_server --name \
+ "Offline external snapshot" --live \
+ --memspec snapshot=external,file=/path/to/snapshot_file
+ --diskspec vda,snapshot=external,file=/path/to/snapshot_file</screen>
+        <para>
+          Weitere Informationen finden Sie im Abschnitt <citetitle>SNAPSHOT COMMANDS</citetitle> in <command>man 1 virsh</command>.
+        </para>
+      </section>
+      <section xml:id="sec-libvirt-managing-snapshots-virsh-delete">
+        <title>Einen Snapshot löschen</title>
+        <para>
+          Externe Snapshots können nicht mit <command>virsh</command> gelöscht werden. Um einen internen Snapshot eines &vmguest; zu löschen und den belegten Speicherplatz freizugeben, verwenden Sie den Befehl <literal>snapshot-delete</literal>:
+        </para>
+<screen>&prompt.user;virsh snapshot-delete --domain admin_server --snapshotname "Snapshot 2"</screen>
+      </section>
+      <section xml:id="sec-libvirt-managing-snapshots-virsh-start">
+        <title>Einen Snapshot starten</title>
+        <para>
+          Um einen Snapshot zu starten, verwenden Sie den Befehl <literal>snapshot-revert</literal>:
+        </para>
+<screen>&prompt.user;virsh snapshot-revert --domain admin_server --snapshotname "Snapshot 1"</screen>
+        <para>
+          Um den aktuellen Snapshot zu starten (denjenigen, von dem aus &vmguest; gestartet wurde), reicht es aus, <option>--current</option> zu verwenden, anstatt den Snapshot-Namen anzugeben:
+        </para>
+<screen>&prompt.user;virsh snapshot-revert --domain admin_server --current</screen>
+      </section>
+    </section>
+  </section>
+  <section xml:id="sec-libvirt-managing-delete">
+    <title>Löschung eines &vmguest;</title>
+
+    <para>
+      Standardmäßig entfernt das Löschen eines &vmguest; mit <command>virsh</command> nur dessen XML-Konfiguration. Da angeschlossener Speicher standardmäßig nicht gelöscht wird, können Sie ihn mit einem anderen &vmguest; wiederverwenden. Mit &vmm; können Sie auch die Speicherdateien eines Gastes löschen.
+    </para>
+
+    <section xml:id="sec-libvirt-managing-delete-vmm">
+      <title>Löschung eines &vmguest; mit &vmm;</title>
+      <procedure>
+        <step>
+          <para>
+            Klicken Sie im &vmm; mit der rechten Maustaste auf einen &vmguest;-Eintrag.
+          </para>
+        </step>
+        <step>
+          <para>
+            Wählen Sie im Kontextmenü <guimenu>Delete</guimenu>.
+          </para>
+        </step>
+        <step>
+          <para>
+            Ein Bestätigungsfenster öffnet sich. Ein Klick auf <guimenu>Delete</guimenu> löscht das &vmguest; dauerhaft. Der Löschvorgang ist nicht rückgängig zu machen.
+          </para>
+          <para>
+            Sie können den virtuellen Datenträger des Gastes auch dauerhaft löschen, indem Sie <guimenu>Delete Associated Storage Files</guimenu> aktivieren. Auch dieser Löschvorgang ist nicht rückgängig zu machen.
+          </para>
+        </step>
+      </procedure>
+    </section>
+
+    <section xml:id="sec-libvirt-managing-delete-virsh">
+      <title>Löschung eines &vmguest; mit <command>virsh</command></title>
+      <para>
+        Um eine &vmguest; zu löschen, muss sie zuerst heruntergefahren werden. Es ist nicht möglich, einen laufenden Gast zu löschen. Informationen zum Herunterfahren finden Sie unter <xref linkend="sec-libvirt-managing-status"/>.
+      </para>
+      <para>
+        Um eine &vmguest; mit <command>virsh</command> zu löschen, führen Sie <command>virsh</command> <option>undefine</option> <replaceable>VM_NAME</replaceable> aus.
+      </para>
+<screen>&prompt.user;virsh undefine sles12</screen>
+      <para>
+        Es gibt keine Option, die angehängten Speicherdateien automatisch zu löschen. Wenn diese von libvirt verwaltet werden, löschen Sie sie wie in <xref linkend="sec-libvirt-storage-virsh-del-volumes"/> beschrieben.
+      </para>
+    </section>
+  </section>
+  <section xml:id="cha-libvirt-admin-monitor">
+    <title>Überwachung</title>
+
+    <para/>
+
+    <section xml:id="cha-libvirt-admin-monitor-virt-manager">
+      <title>Überwachung mit &vmm;</title>
+      <para>
+        Nach dem Starten von &vmm; und dem Verbinden mit dem &vmhost; wird ein CPU-Auslastungsdiagramm aller laufenden Gäste angezeigt.
+      </para>
+      <para>
+        Es ist auch möglich, Informationen über die Festplatten- und Netzwerkauslastung mit diesem Werkzeug zu erhalten, Sie müssen dies jedoch zuerst unter <guimenu>Einstellungen</guimenu> aktivieren:
+      </para>
+      <procedure>
+        <step>
+          <para>
+            Run <command>virt-manager</command>
+          </para>
+        </step>
+        <step>
+          <para>
+            Wählen Sie <menuchoice><guimenu>Bearbeiten</guimenu> <guimenu>Einstellungen</guimenu></menuchoice>.
+          </para>
+        </step>
+        <step>
+          <para>
+            Wechseln Sie den Reiter von <guimenu>Allgemein</guimenu> zu <guimenu>Abfrage</guimenu>.
+          </para>
+        </step>
+        <step>
+          <para>
+            Aktivieren Sie die Kontrollkästchen für die Art der Aktivität, die Sie sehen möchten: <guimenu>Festplatten-E/A abfragen</guimenu>, <guimenu>Netzwerk-E/A abfragen</guimenu> und <guimenu>Speicherstatistiken abfragen</guimenu>.
+          </para>
+        </step>
+        <step>
+          <para>
+            Ändern Sie bei Bedarf auch das Aktualisierungsintervall über <guimenu>Status alle n Sekunden aktualisieren</guimenu>.
+          </para>
+        </step>
+        <step>
+          <para>
+            Schließen Sie den Dialog <guimenu>Einstellungen</guimenu>.
+          </para>
+        </step>
+        <step>
+          <para>
+            Aktivieren Sie die Diagramme, die unter <menuchoice> <guimenu>Ansicht</guimenu> <guimenu>Diagramm</guimenu> </menuchoice> angezeigt werden sollen.
+          </para>
+        </step>
+      </procedure>
+      <para>
+        Anschließend werden die Festplatten- und Netzwerkstatistiken auch im Hauptfenster von &vmm; angezeigt.
+      </para>
+      <para>
+        Genauere Daten sind über das VNC-Fenster verfügbar. Öffnen Sie ein VNC-Fenster wie in <xref linkend="sec-libvirt-managing-console-vnc"/> beschrieben. Wählen Sie <guimenu>Details</guimenu> aus der Symbolleiste oder dem Menü <guimenu>Ansicht</guimenu>. Die Statistiken werden über den Eintrag <guimenu>Performance</guimenu> im linken Baummenü angezeigt.
+      </para>
+    </section>
+
+    <section xml:id="cha-libvirt-admin-monitor-virt-top">
+      <title>Überwachung mit <command>virt-top</command></title>
+      <para>
+        <command>virt-top</command> ist ein Befehlszeilenwerkzeug, das dem bekannten Prozessüberwachungswerkzeug <command>top</command> ähnelt. <command>virt-top</command> verwendet libvirt und ist daher in der Lage, Statistiken für &vmguest;s anzuzeigen, die auf verschiedenen Hypervisoren laufen.
+      </para>
+      <para>
+        Standardmäßig zeigt <command>virt-top</command> Statistiken für alle laufenden &vmguest;s an. Zu den angezeigten Daten gehören der Prozentsatz des verwendeten Arbeitsspeichers (<literal>%MEM</literal>) und der CPU (<literal>%CPU</literal>) sowie die Betriebszeit des Gastes (<literal>TIME</literal>). Die Daten werden regelmäßig aktualisiert (standardmäßig alle drei Sekunden). Das Folgende zeigt die Ausgabe auf einem &vmhost; mit sieben &vmguest;s, von denen vier inaktiv sind:
+      </para>
+<screen>virt-top 13:40:19 - x86_64 8/8CPU 1283MHz 16067MB 7.6% 0.5%
+7 domains, 3 active, 3 running, 0 sleeping, 0 paused, 4 inactive D:0 O:0 X:0
+CPU: 6.1%  Mem: 3072 MB (3072 MB by guests)
+
+   ID S RDRQ WRRQ RXBY TXBY %CPU %MEM    TIME   NAME
+    7 R  123    1  18K  196  5.8  6.0   0:24.35 sled12_sp1
+    6 R    1    0  18K    0  0.2  6.0   0:42.51 sles12_sp1
+    5 R    0    0  18K    0  0.1  6.0  85:45.67 opensuse_leap
+    -                                           (Ubuntu_1410)
+    -                                           (debian_780)
+    -                                           (fedora_21)
+    -                                           (sles11sp3)</screen>
+      <para>
+        Standardmäßig ist die Ausgabe nach ID sortiert. Verwenden Sie die folgenden Tastenkombinationen, um das Sortierfeld zu ändern:
+      </para>
+      <simplelist><member><keycombo><keycap function="shift"/><keycap>P</keycap></keycombo>: CPU-Auslastung
+    </member><member><keycombo><keycap function="shift"/><keycap>M</keycap></keycombo>: gesamter vom Gast belegter Arbeitsspeicher
+    </member><member>Zeit
+    </member><member><keycombo><keycap function="shift"/><keycap>I</keycap></keycombo>: ID
+    </member>
+      </simplelist>
+      <para>
+        Um ein anderes Feld für die Sortierung zu verwenden, drücken Sie <keycombo>
+        <keycap function="shift"/> <keycap>F</keycap> </keycombo> und wählen Sie ein Feld aus der Liste aus. Um die Sortierreihenfolge umzuschalten, verwenden Sie <keycombo>
+        <keycap function="shift"/> <keycap>R</keycap> </keycombo>.
+      </para>
+      <para>
+        <command>virt-top</command> unterstützt auch verschiedene Ansichten der &vmguest;-Daten, die durch Drücken der folgenden Tasten im laufenden Betrieb geändert werden können:
+      </para>
+      <simplelist><member><keycap>0</keycap>: Standardansicht</member><member><keycap>1</keycap>: physische CPUs anzeigen</member><member><keycap>2</keycap>: Netzwerkschnittstellen anzeigen</member><member><keycap>3</keycap>: virtuelle Festplatten anzeigen</member>
+      </simplelist>
+      <para>
+        <command>virt-top</command> unterstützt weitere Tastenkombinationen zur Änderung der Datenansicht sowie viele Befehlszeilenoptionen, die das Verhalten des Programms beeinflussen. Für weitere Informationen siehe <command>man 1
+        virt-top</command>.
+      </para>
+    </section>
+
+    <section xml:id="cha-libvirt-admin-monitor-kvm-stat">
+      <title>Überwachung mit <command>kvm_stat</command></title>
+      <para>
+        <command>kvm_stat</command> kann verwendet werden, um &kvm;-Leistungsereignisse zu verfolgen. Es überwacht <filename>/sys/kernel/debug/kvm</filename>, daher muss debugfs eingehängt sein. Auf &productname; sollte es standardmäßig eingehängt sein. Falls es nicht eingehängt ist, verwenden Sie den folgenden Befehl:
+      </para>
+<screen>&prompt.sudo;mount -t debugfs none /sys/kernel/debug</screen>
+      <para>
+        <command>kvm_stat</command> kann in drei verschiedenen Modi verwendet werden:
+      </para>
+<screen>kvm_stat                    # update in 1 second intervals
+kvm_stat -1                 # 1 second snapshot
+kvm_stat -l &gt; kvmstats.log  # update in 1 second intervals in log format
+                            # can be imported to a spreadsheet</screen>
+      <example>
+        <title>Typische Ausgabe von <command>kvm_stat</command></title>
+<screen>kvm statistics
+
+ efer_reload                  0       0
+ exits                 11378946  218130
+ fpu_reload               62144     152
+ halt_exits              414866     100
+ halt_wakeup             260358      50
+ host_state_reload       539650     249
+ hypercalls                   0       0
+ insn_emulation         6227331  173067
+ insn_emulation_fail          0       0
+ invlpg                  227281      47
+ io_exits                113148      18
+ irq_exits               168474     127
+ irq_injections          482804     123
+ irq_window               51270      18
+ largepages                   0       0
+ mmio_exits                6925       0
+ mmu_cache_miss           71820      19
+ mmu_flooded              35420       9
+ mmu_pde_zapped           64763      20
+ mmu_pte_updated              0       0
+ mmu_pte_write           213782      29
+ mmu_recycled                 0       0
+ mmu_shadow_zapped       128690      17
+ mmu_unsync                  46      -1
+ nmi_injections               0       0
+ nmi_window                   0       0
+ pf_fixed               1553821     857
+ pf_guest               1018832     562
+ remote_tlb_flush        174007      37
+ request_irq                  0       0
+ signal_exits                 0       0
+ tlb_flush               394182     148</screen>
+      </example>
+      <para>
+        Siehe <link xlink:href="https://clalance.blogspot.com/2009/01/kvm-performance-tools.html"></link> für weitere Informationen zur Interpretation dieser Werte.
+      </para>
+    </section>
+  </section>
+</topic>

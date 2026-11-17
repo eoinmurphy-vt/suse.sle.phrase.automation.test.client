@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- This file originates from the project https://github.com/openSUSE/doc-kit -->
+<!-- This file can be edited downstream. -->
+<!DOCTYPE topic
+[
+  <!ENTITY % entities SYSTEM "../common/generic-entities.ent">
+    %entities;
+]>
+<!-- refers to legacy doc: https://github.com/SUSE/doc-unversioned/blob/main/openscap/xml/article_openscap.xml -->
+<!-- point back to this document with a similar comment added to your legacy doc piece -->
+<topic xml:id="openscap-system-remediating"
+ role="task" xml:lang="de"
+ xmlns="http://docbook.org/ns/docbook" version="5.2"
+ xmlns:its="http://www.w3.org/2005/11/its"
+ xmlns:xi="http://www.w3.org/2001/XInclude"
+ xmlns:xlink="http://www.w3.org/1999/xlink"
+ xmlns:trans="http://docbook.org/ns/transclusion">
+  <info>
+    <title>Behebung von Schwachstellen</title>
+    <meta name="maintainer" content="souvik.sarkar@suse.com" its:translate="no"/>
+    <abstract>
+      <para>
+        Wenden Sie Korrekturen an, um Ihr &suselinux;-System mit <command>oscap</command>, &ssg;-Shell-Skripten oder Ansible-Playbooks in Übereinstimmung mit einem Sicherheitsprofil zu bringen.
+      </para>
+    </abstract>
+  </info>
+  <section xml:id="openscap-system-remediating-intro">
+    <title>Einführung</title>
+    <para>
+      Nach dem Scannen Ihres Systems können Sie festgestellte Richtlinienverstöße automatisch oder manuell beheben. Das &ssg; stellt Korrektur-Skripte in zwei Formaten bereit – Shell-Skripte und Ansible-Playbooks –, die <command>oscap</command> direkt anwenden kann oder die Sie überprüfen und unabhängig ausführen können.
+    </para>
+    <important>
+      <title>Automatische Behebung nicht immer verfügbar</title>
+      <para>
+        Eine automatische Behebung wird für Korrekturen, die zu störend sind, um sie sicher auf einem laufenden System anzuwenden, nicht angeboten. Solche Regeln müssen manuell behoben werden.
+      </para>
+    </important>
+    <para>
+      Der gesamte Behebungsprozess sieht wie folgt aus:
+    </para>
+    <procedure>
+      <step>
+        <para>
+          <command>oscap</command> scannt das System und markiert jede nicht bestandene Regel als Kandidaten für die Behebung.
+        </para>
+      </step>
+      <step>
+        <para>
+          Für jede nicht bestandene Regel lokalisiert <command>oscap</command> das entsprechende <tag class="element">xccdf:fix</tag>-Element in der XCCDF-Datei, bereitet die Umgebung vor und führt das Korrektur-Skript aus.
+        </para>
+      </step>
+      <step>
+        <para>
+          Nach der Ausführung der Korrektur bewertet <command>oscap</command> die Regel erneut, um zu bestätigen, ob die Korrektur erfolgreich war.
+        </para>
+      </step>
+      <step>
+        <para>
+          Alle Ergebnisse der Behebung werden in einer XCCDF-Ausgabedatei gespeichert.
+        </para>
+      </step>
+    </procedure>
+    <note>
+      <para>
+        Die Behebung muss mehr als einmal ausgeführt werden. Regeln werden in alphabetischer Reihenfolge angewendet. Einige Regeln hängen von anderen ab, und das System muss möglicherweise zwischen den Durchläufen neu gestartet werden, damit die Änderungen wirksam werden.
+      </para>
+    </note>
+  </section>
+  <section xml:id="openscap-system-remediating-fly">
+    <title>Behebung während des Betriebs</title>
+    <para>
+      Der einfachste Ansatz ist das Scannen und Beheben in einem einzigen Befehl unter Verwendung der Option <option>--remediate</option>. Das System wird zuerst gescannt, und dann versucht <command>oscap</command> sofort, jede nicht bestandene Regel zu beheben.
+    </para>
+    <warning>
+      <title>Verwendung der Option <option>--skip-rule</option></title>
+      <para>
+        Verwenden Sie immer <option>--skip-rule</option>, um die Regel <literal>xccdf_org.ssgproject.content_rule_accounts_authorized_local_users</literal> zu überspringen, es sei denn, Sie haben die Variable <literal>var_accounts_authorized_local_users_regex</literal> explizit konfiguriert. Wird dies nicht getan, funktioniert <command>sudo</command> nach einem Neustart möglicherweise nicht.
+      </para>
+    </warning>
+<screen>&prompt.sudo;<command>oscap xccdf eval --remediate \
+  --profile xccdf_org.ssgproject.content_profile_hipaa \
+  --results /tmp/results.xml \
+  --report /tmp/report.html \
+  --skip-rule xccdf_org.ssgproject.content_rule_accounts_authorized_local_users \
+  /usr/share/xml/scap/ssg/content/ssg-sle16-ds.xml</command></screen>
+    <para>
+      Damit die Änderungen wirksam werden, starten Sie das System neu.
+    </para>
+<screen>&prompt.sudo;<command>reboot</command></screen>
+    <para>
+      In der resultierenden <filename>/tmp/results.xml</filename>-Datei enthält das erste <tag class="element">TestResult</tag>-Element die Scan-Ergebnisse vor der Fehlerbehebung. Das zweite <tag class="element">TestResult</tag>-Element enthält die Ergebnisse nach der Fehlerbehebung, wobei ein Regelergebnis von <literal>fixed</literal> eine erfolgreiche Korrektur anzeigt und <literal>error</literal> anzeigt, dass die Korrektur nicht erfolgreich war.
+    </para>
+  </section>
+  <section xml:id="openscap-system-remediating-post-scan">
+    <title>Fehlerbehebung nach dem Scannen</title>
+    <para>
+      Alternativ können Sie den Scan und die Fehlerbehebung in zwei Schritte unterteilen. Dies ermöglicht es Ihnen, die Scan-Ergebnisse zu überprüfen, bevor Sie Korrekturen anwenden.
+    </para>
+    <procedure>
+      <step>
+        <para>
+          Scannen Sie das System und speichern Sie die Ergebnisse:
+        </para>
+<screen>&prompt.sudo;<command>oscap xccdf eval \
+  --profile xccdf_org.ssgproject.content_profile_hipaa \
+  --results /tmp/results.xml \
+  /usr/share/xml/scap/ssg/content/ssg-sle16-ds.xml</command></screen>
+        <para>
+          Die Ergebnisse werden in einem <tag class="element">TestResult</tag>-Element in <filename>/tmp/results.xml</filename> gespeichert. Das System wird nur ausgewertet – in dieser Phase werden keine Änderungen vorgenommen.
+        </para>
+      </step>
+      <step>
+        <para>
+          Führen Sie die Fehlerbehebung unter Verwendung der Ergebnisdatei aus dem vorherigen Schritt als Eingabe aus:
+        </para>
+<screen>&prompt.sudo;<command>oscap xccdf remediate \
+  --results /tmp/results.xml \
+  /tmp/results.xml</command></screen>
+        <para>
+          <command>oscap</command> erstellt ein neues <tag class="element">xccdf:TestResult</tag>-Element in derselben Datei, übernimmt Daten aus dem ersten Ergebnis und wendet Korrekturen nur auf die Regeln an, die beim ersten Scan fehlgeschlagen sind.
+        </para>
+      </step>
+    </procedure>
+  </section>
+  <section xml:id="openscap-system-remediating-review">
+    <title>Generieren von Fehlerbehebungsskripten zur Überprüfung</title>
+    <para>
+      Um die Anweisungen zur Fehlerbehebung vor der Anwendung zu überprüfen, verwenden Sie <command>oscap xccdf
+      generate fix</command>, um den Korrekturinhalt in einer Datei zu speichern, ohne ihn auszuführen.
+    </para>
+    <para>
+      So generieren Sie ein Shell-Skript:
+    </para>
+<screen>&prompt.user;<command>oscap xccdf generate fix \
+  --template urn:xccdf:fix:script:sh \
+  --profile xccdf_org.ssgproject.content_profile_hipaa \
+  --output my-remediation-script.sh \
+  /usr/share/xml/scap/ssg/content/ssg-sle16-ds.xml</command></screen>
+    <para>
+      So generieren Sie ein Ansible-Playbook:
+    </para>
+<screen>&prompt.user;<command>oscap xccdf generate fix \
+  --template urn:xccdf:fix:script:ansible \
+  --profile xccdf_org.ssgproject.content_profile_hipaa \
+  --output my-remediation-playbook.yml \
+  /usr/share/xml/scap/ssg/content/ssg-sle16-ds.xml</command></screen>
+  </section>
+  <section xml:id="openscap-system-remediating-shell-scripts">
+    <title>Fehlerbehebung mit SSG-Shell-Skripten</title>
+    <para>
+      Das &ssg; liefert vorgefertigte Shell-Skripte für jedes unterstützte Profil. Diese können für eine einfache Fehlerbehebung ohne Bedingungen oder Anpassungen verwendet werden.
+    </para>
+    <procedure>
+      <step>
+        <para>
+          Listen Sie die verfügbaren Shell-Skripte auf:
+        </para>
+<screen>&prompt.user;<command>ls -l /usr/share/scap-security-guide/bash/</command></screen>
+        <para>
+          Skriptnamen folgen dem Format <filename>sle16-script-<replaceable>PROFILE-NAME</replaceable>.sh</filename>. Die unterstützten Profilnamen sind: <literal>anssi_bp28_minimal</literal>, <literal>anssi_bp28_intermediary</literal>, <literal>anssi_bp28_enhanced</literal>, <literal>anssi_bp28_high</literal>, <literal>hipaa</literal> und <literal>pci-dss-4</literal>.
+        </para>
+      </step>
+      <step>
+        <para>
+          Machen Sie das Skript ausführbar:
+        </para>
+<screen>&prompt.sudo;<command>chmod +x sle16-script-<replaceable>PROFILE-NAME</replaceable>.sh</command></screen>
+      </step>
+      <step>
+        <para>
+          Führen Sie das Skript aus:
+        </para>
+<screen>&prompt.sudo;<command>./sle16-script-<replaceable>PROFILE-NAME</replaceable>.sh</command></screen>
+      </step>
+    </procedure>
+    <note>
+      <para>
+        Innerhalb jedes Skripts folgen die Regeln dem Format: <literal># BEGIN fix
+        (<replaceable>N</replaceable>/<replaceable>TOTAL</replaceable>) for
+        <replaceable>RULE-ID</replaceable></literal> bis <literal># END fix for
+        <replaceable>RULE-ID</replaceable></literal>. Regeln, die eine Zeile enthalten, die mit <literal>IS MISSING!</literal> endet, haben keine automatische Korrektur und müssen manuell angewendet werden.
+      </para>
+    </note>
+  </section>
+  <section xml:id="openscap-system-remediating-ansible">
+    <title>Korrektur mit Ansible-Playbooks</title>
+    <para>
+      Für jedes unterstützte Profil liefert &ssg; auch Ansible-Playbooks, die Sie zur Korrektur verwenden können.
+    </para>
+    <procedure>
+      <step>
+        <para>
+          Installieren Sie das Paket <package>ansible</package>.
+        </para>
+<screen>&prompt.sudo;<command>zypper install ansible</command></screen>
+      </step>
+      <step>
+        <para>
+          Listen Sie die verfügbaren Ansible-Playbooks auf:
+        </para>
+<screen>&prompt.user;<command>ls -l /usr/share/scap-security-guide/ansible/</command></screen>
+        <para>
+          Playbook-Namen folgen dem Format <filename>sle16-playbook-<replaceable>PROFILE-NAME</replaceable>.yml</filename>.
+        </para>
+      </step>
+      <step>
+        <para>
+          Erstellen Sie eine Inventardatei <filename>ansible_inventory.yml</filename> mit dem folgenden Inhalt:
+        </para>
+<screen>all:
+  hosts:
+    localhost
+  vars:
+    ansible_connection: local</screen>
+      </step>
+      <step>
+        <para>
+          Führen Sie das Playbook aus:
+        </para>
+<screen>&prompt.sudo;<command>ansible-playbook -i ansible_inventory.yml \
+  sle16-playbook-<replaceable>PROFILE-NAME</replaceable>.yml</command></screen>
+      </step>
+      <step>
+        <para>
+          Um bestimmte Regeln während der Ausführung zu überspringen, verwenden Sie die Option <option>--tags</option>. Finden Sie das Tag für eine Regel, indem Sie in der Playbook-Datei danach suchen. Zum Beispiel:
+        </para>
+<screen>&prompt.sudo;<command>ansible-playbook -i ansible_inventory.yml \
+  sle16-playbook-<replaceable>PROFILE-NAME</replaceable>.yml \
+  --tags "package_aide_installed,aide_build_database"</command></screen>
+      </step>
+    </procedure>
+    <note>
+      <para>
+        Möglicherweise müssen Sie die Korrekturschritte mehr als einmal wiederholen. Einige Regeln erfordern einen Systemneustart, um wirksam zu werden, und Regeln werden in alphabetischer Reihenfolge ausgeführt, was bedeutet, dass Abhängigkeiten zwischen Regeln möglicherweise nicht in einem einzigen Durchgang aufgelöst werden.
+      </para>
+    </note>
+  </section>
+  <section xml:id="openscap-system-remediating-customizing">
+    <title>Anpassen von &ssg; mit SCAP Workbench</title>
+    <para>
+      Wenn die verfügbaren Profile nicht vollständig Ihren Anforderungen entsprechen, können Sie mit SCAP Workbench ein angepasstes Profil erstellen und es als Anpassungsdatei speichern. Die Anpassungsdatei kann dann mit <command>oscap</command> unter Verwendung der Option <option>--tailoring-file</option> angewendet werden.
+    </para>
+    <procedure>
+      <step>
+        <para>
+          SCAP Workbench starten:
+        </para>
+<screen>&prompt.sudo;<command>scap-workbench</command></screen>
+      </step>
+      <step>
+        <para>
+          Wählen Sie <literal>SLE16</literal> als Zielsystemvariante aus und wählen Sie dann <guilabel>Load Content</guilabel>.
+        </para>
+      </step>
+      <step>
+        <para>
+          Wählen Sie ein Basisprofil aus der Dropdown-Liste <guilabel>Profile</guilabel> aus und wählen Sie dann <guilabel>Customize</guilabel>.
+        </para>
+      </step>
+      <step>
+        <para>
+          Legen Sie eine eindeutige ID für das benutzerdefinierte Profil im folgenden Format fest: <literal>xccdf_<replaceable>REVERSE-DNS</replaceable>_profile_<replaceable>PROFILE-NAME</replaceable></literal>. Zum Beispiel,
+        </para>
+        <warning>
+          <para>
+            Die Profil-ID kann nicht mehr geändert werden, nachdem sie in SCAP Workbench festgelegt wurde.
+          </para>
+        </warning>
+      </step>
+      <step>
+        <para>
+          Heben Sie die Auswahl aller Regeln auf, die Sie nicht einbeziehen möchten, und wählen Sie dann <guilabel>OK</guilabel>.
+        </para>
+      </step>
+      <step>
+        <para>
+          Speichern Sie die Anpassung als Tailoring-Datei: Wählen Sie <guilabel>Select customization file</guilabel> > <guilabel>Open</guilabel> > <guilabel>Save customization only</guilabel>.
+        </para>
+      </step>
+      <step>
+        <para>
+          Wenden Sie die Tailoring-Datei mit <command>oscap</command> an:
+        </para>
+<screen>&prompt.sudo;<command>oscap xccdf eval \
+  --profile xccdf_org.<replaceable>mycompany</replaceable>_profile_<replaceable>server</replaceable> \
+  --tailoring-file <replaceable>ssg-sle16-ds-tailoring.xml</replaceable> \
+  --report /tmp/report.html \
+  /usr/share/xml/scap/ssg/content/ssg-sle16-ds.xml</command></screen>
+      </step>
+    </procedure>
+  </section>
+</topic>

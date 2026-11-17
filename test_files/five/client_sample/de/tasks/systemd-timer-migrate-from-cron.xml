@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic
+[
+  <!ENTITY % entities SYSTEM "../common/generic-entities.ent">
+    %entities;
+]>
+<topic xml:id="systemd-timer-catchup"
+       role="task" xml:lang="de"
+       xmlns="http://docbook.org/ns/docbook" version="5.2"
+       xmlns:its="http://www.w3.org/2005/11/its"
+       xmlns:xi="http://www.w3.org/2001/XInclude"
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       xmlns:trans="http://docbook.org/ns/transclusion">
+  <info>
+    <title>&systemd;-Timer: Migration von cron zu &systemd;-Timern</title>
+    <meta name="maintainer" content="fs@suse.com" its:translate="no"/>
+    <abstract>
+      <para>
+        Alle cron-Jobs können zu &systemd;-Timern migriert werden. Anleitungen und ein Beispiel finden Sie hier.
+      </para>
+    </abstract>
+  </info>
+  <procedure>
+    <step>
+      <para>
+        Erstellen Sie eine Servicedatei, die das Skript ausführt. Details finden Sie unter <xref linkend="systemd-timer-example-service"/>.
+      </para>
+    </step>
+    <step>
+      <para>
+        Erstellen Sie eine Timer-Datei, die die Servicedatei ausführt. Allgemeine Anleitungen finden Sie unter <xref linkend="systemd-timer-example-timer"/>.
+      </para>
+      <substeps>
+        <step>
+          <para>
+            Konvertieren Sie Kalendereinträge. Die Zeit wird in cron und &systemd; unterschiedlich angegeben. Verwenden Sie die folgenden Muster als Konvertierungsvorlage:
+          </para>
+<screen>Cron:               Minute Hour Day Month DayOfWeek
+systemd: OnCalendar=DayOfWeek Year-Month-Day Hour:Minute:Second</screen>
+          <para>
+            Um den konvertierten Kalendereintrag zu testen, befolgen Sie die Anweisungen in <xref linkend="systemd-timer-test"/>.
+          </para>
+        </step>
+        <step>
+          <para>
+            Konvertieren von cron-Spitznamen (<literal>@<replaceable>NICK</replaceable></literal>):
+          </para>
+<screen>Cron     : &systemd; timer
+-------- : ----------------------------
+@reboot  : OnBootSec=1s
+@yearly  : OnCalendar=*-01-01 00:00:00
+@annually: OnCalendar=*-01-01 00:00:00
+@monthly : OnCalendar=*-*-01 00:00:00
+@weekly  : OnCalendar=Sun *-*-* 00:00:00
+@daily   : OnCalendar=*-*-* 00:00:00
+@hourly  : OnCalendar=*-*-* *:00:00</screen>
+        </step>
+        <step>
+          <para>
+            Konvertieren von Variablenzuweisungen. Die &systemd;-Variablenzuweisung muss in den <literal>[Service]</literal>-Abschnitt. Sie können <envar>MAILTO</envar> nicht auf diese Weise konvertieren&mdash;beziehen Sie sich für diesen Fall auf den nächsten Schritt.
+          </para>
+<screen>cron: <replaceable>VARIABLE</replaceable>=<replaceable>VALUE</replaceable>
+systemd: Environment="<replaceable>VARIABLE</replaceable>=<replaceable>VALUE</replaceable>"</screen>
+        </step>
+        <step>
+          <para>
+            Richten Sie E-Mail-Benachrichtigungen ein, um die MAILTO-Funktion von cron zu ersetzen, indem Sie die Anweisungen in <xref linkend="systemd-mailto"/> befolgen.
+          </para>
+        </step>
+      </substeps>
+    </step>
+  </procedure>
+  <example>
+    <title>Migration von cron zu &systemd;-Timern</title>
+    <para>
+      Hier sind die crontab-Einträge, die das Skript <literal>helloworld.sh</literal> 5 Minuten nach dem Booten und jeden Montag bis Freitag um 10 Uhr aufrufen:
+    </para>
+<screen>@reboot sleep 300 &amp;&amp; /usr/local/bin/helloworld.sh
+0 10 * * * 1-5 /usr/local/bin/helloworld.sh</screen>
+    <para>
+      Die &systemd;-Servicedatei (<filename>helloworld.service</filename>), die das Skript aufruft, sieht wie folgt aus:
+    </para>
+<screen>[Unit]
+Description="Hello World script"
+[Service]
+ExecStart=/usr/local/bin/helloworld.sh</screen>
+    <para>
+      Die Timer-Datei (<filename>helloworld.timer</filename>) sieht wie folgt aus:
+    </para>
+<screen>[Unit]
+Description="Run helloworld.service 5min after boot and at 10am every Mon-Fri"
+[Timer]
+OnBootSec=5min
+OnCalendar=Mon..Fri *-*-* 10:00:00
+Unit=helloworld.service
+[Install]
+WantedBy=multi-user.target</screen>
+  </example>
+</topic>

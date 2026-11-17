@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic
+[
+  <!ENTITY % entities SYSTEM "../common/generic-entities.ent">
+    %entities;
+]>
+<!-- refers to legacy doc: <add github link to legacy doc piece, if applicable> -->
+<!-- point back to this document with a similar comment added to your legacy doc piece -->
+<!-- refer to README.md for file and id naming conventions -->
+<!-- metadata is dealt with on the assembly level -->
+<topic xml:id="supportconfig-submitting-archive"
+ role="task" xml:lang="de"
+ xmlns="http://docbook.org/ns/docbook" version="5.2"
+ xmlns:its="http://www.w3.org/2005/11/its"
+ xmlns:xi="http://www.w3.org/2001/XInclude"
+ xmlns:xlink="http://www.w3.org/1999/xlink"
+ xmlns:trans="http://docbook.org/ns/transclusion">
+  <info>
+    <title>Übermittlung von Informationen an den Global Technical Support</title>
+    <meta name="maintainer" content="jsindelarova@suse.com" its:translate="no"/>
+    <abstract>
+      <!-- can be changed via merge in the assembly -->
+      <para>
+        Das Thema beschreibt das Verfahren zur Übermittlung des bereits erstellten Archivs an den technischen Support.
+      </para>
+    </abstract>
+  </info>
+  <para>
+    Nachdem Sie das Archiv mit dem <command>supportconfig</command>-Tool erstellt haben, können Sie das Archiv an &suse; übermitteln.
+  </para>
+  <section xml:id="supportconfig-submitting-archive-sr">
+    <title>Erstellen einer Serviceanforderungsnummer</title>
+    <para>
+      Bevor Sie die <command>supportconfig</command>-Daten an den Global Technical Support übergeben, müssen Sie zuerst eine Serviceanforderungsnummer generieren. Sie benötigen diese, um das Archiv an den Support hochzuladen.
+    </para>
+    <para>
+      Um eine Serviceanforderung zu erstellen, gehen Sie zu <link xlink:href="https://scc.suse.com/support/requests"></link> und befolgen Sie die Anweisungen auf dem Bildschirm. Notieren Sie sich die Serviceanforderungsnummer.
+    </para>
+    <note>
+      <title>Datenschutzerklärung</title>
+      <para>
+        &suse; behandelt Systemberichte als vertrauliche Daten. Einzelheiten zu unserer Verpflichtung zum Datenschutz finden Sie unter <link xlink:href="https://www.suse.com/company/policies/privacy/"></link>.
+      </para>
+    </note>
+  </section>
+  <section xml:id="supportconfig-submitting-archive-targets">
+    <title>Hochladen von Zielen</title>
+    <para>
+      Nachdem Sie eine Serviceanforderungsnummer erstellt haben, können Sie Ihre <command>supportconfig</command>-Archive an den Global Technical Support hochladen. In den folgenden Beispielen dient <emphasis>12345678901</emphasis> als Platzhalter für Ihre Serviceanforderungsnummer. Ersetzen Sie den Platzhalter durch die Serviceanforderungsnummer, die Sie in <xref linkend="supportconfig-submitting-archive-sr"/> erstellt haben.
+    </para>
+    <para>
+      Die folgenden Verfahren setzen voraus, dass Sie bereits ein <command>supportconfig</command>-Archiv erstellt, es aber noch nicht hochgeladen haben.
+    </para>
+    <procedure xml:id="pro-admsupport-submit-cli">
+      <title>Übermittlung von Informationen an den Support auf Servern mit Internetverbindung</title>
+      <step>
+        <para>
+          Führen Sie das <command>supportconfig</command>-Tool wie folgt aus:
+        </para>
+        <substeps performance="required">
+          <step>
+            <para>
+              Um das Standard-Upload-Ziel <uri>https://support-ftp.us.suse.com/incoming/upload.php?file=<replaceable>TARBALL</replaceable></uri> zu verwenden, führen Sie Folgendes aus:
+            </para>
+<screen>&prompt.sudo;supportconfig -ur <replaceable>12345678901</replaceable></screen>
+          </step>
+          <step>
+            <para>
+              Verwenden Sie für das FTPS-Upload-Ziel <uri>ftps://support-ftp.us.suse.com</uri> den folgenden Befehl:
+            </para>
+            <!--taroth 2014-04-04: bnc#871918-->
+<screen>&prompt.sudo;supportconfig -ar <replaceable>12345678901</replaceable></screen>
+            <para>
+              Um ein anderes Upload-Ziel zu verwenden, zum Beispiel für den EMEA-Bereich, verwenden Sie <option>-U</option> gefolgt von der jeweiligen URL, entweder <uri>https://support-ftp.emea.suse.com/incoming/upload.php?file=<replaceable>TARBALL</replaceable></uri> oder <uri>ftps://support-ftp.emea.suse.com/incoming/</uri>:
+            </para>
+<screen>&prompt.sudo;supportconfig -r <replaceable>12345678901</replaceable> -U <replaceable>https://support-ftp.emea.suse.com/incoming</replaceable> </screen>
+          </step>
+        </substeps>
+      </step>
+      <step>
+        <para>
+          Nachdem das TAR-Archiv im Eingangsverzeichnis unseres FTP-Servers eingetroffen ist, wird es automatisch an Ihre Serviceanfrage angehängt.
+        </para>
+      </step>
+    </procedure>
+    <para>
+      Wenn die Server keine Internetverbindung bereitstellen, befolgen Sie die nachstehenden Schritte:
+    </para>
+    <procedure>
+      <title>Übermittlung von Informationen an den Support auf Servern ohne Internetverbindung</title>
+      <step>
+        <para>
+          Führen Sie das Folgende aus:
+        </para>
+<screen>&prompt.sudo;supportconfig -r <replaceable>12345678901</replaceable></screen>
+      </step>
+      <step>
+        <para>
+          Laden Sie das <filename>/var/log/scc_<replaceable>SR12345678901</replaceable>*txz</filename> Archiv manuell auf einen unserer Server hoch. Die Auswahl eines Servers hängt von Ihrem Standort auf der Welt ab:
+        </para>
+        <itemizedlist mark="bullet" spacing="normal">
+          <listitem>
+            <para>
+              <!-- TODO: Fix outdated links -->
+              Nordamerika: HTTPS <uri>https://support-ftp.us.suse.com/incoming/upload.php?file=<replaceable>TARBALL</replaceable></uri>, FTPS <uri>ftps://support-ftp.us.suse.com/incoming/</uri>
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              EMEA, Europa, Naher Osten und Afrika: FTP <uri>https://support-ftp.emea.suse.com/incoming/upload.php?file=<replaceable>TARBALL</replaceable></uri>, FTPS <uri>ftps://support-ftp.emea.suse.com/incoming/</uri>
+            </para>
+          </listitem>
+        </itemizedlist>
+      </step>
+      <step>
+        <para>
+          Nachdem das TAR-Archiv im Eingangsverzeichnis unseres FTP-Servers eingetroffen ist, wird es automatisch an Ihre Serviceanfrage angehängt.
+        </para>
+      </step>
+    </procedure>
+  </section>
+</topic>

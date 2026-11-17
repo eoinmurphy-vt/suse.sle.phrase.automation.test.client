@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic
+[
+  <!ENTITY % entities SYSTEM "../common/generic-entities.ent">
+    %entities;
+]>
+<!-- refers to legacy doc: https://github.com/SUSE/doc-sleha/edit/main/xml/ha_config_cli.xml -->
+
+<topic xml:id="ha-crmsh-using-interactive-mode"
+ role="task" xml:lang="de"
+ xmlns="http://docbook.org/ns/docbook" version="5.2"
+ xmlns:its="http://www.w3.org/2005/11/its"
+ xmlns:xi="http://www.w3.org/2001/XInclude"
+ xmlns:xlink="http://www.w3.org/1999/xlink"
+ xmlns:trans="http://docbook.org/ns/transclusion">
+  <info>
+    <title>Verwendung des &crmshell; im interaktiven Modus</title>
+    <meta name="maintainer" content="tahlia.richardson@suse.com" its:translate="no"/>
+    <abstract>
+      <xi:include href="../snippets/ha-crmsh-interactive-mode.xml"/>
+    </abstract>
+  </info>
+
+  <procedure>
+    <step>
+      <para>
+        Melden Sie sich entweder als &rootuser;-Benutzer oder als Benutzer mit <command>sudo</command>-Berechtigungen an.
+      </para>
+    </step>
+    <step>
+      <para>
+        Interaktiven Modus starten:
+      </para>
+<screen>&prompt.user;<command>sudo crm</command></screen>
+      <para>
+        Die Eingabeaufforderung ändert sich zu <prompt>crm(live/HOSTNAME)#</prompt>. Zur besseren Lesbarkeit lassen wir jedoch den Hostnamen in unserer Dokumentation weg:
+      </para>
+<screen><prompt>crm(live)#</prompt></screen>
+      <tip>
+        <title>Direktes Starten eines Unterbefehls</title>
+        <para>
+          Sie können den interaktiven Modus auch direkt auf der Ebene des Unterbefehls starten. Zum Beispiel:
+        </para>
+<screen>&prompt.user;<command>sudo crm configure</command>
+&prompt.crm.conf;</screen>
+      </tip>
+    </step>
+    <step>
+      <para>
+        Sie können mit den folgenden Optionen durch den interaktiven Modus navigieren:
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            Auflisten der verfügbaren Unterbefehle:
+          </para>
+<screen>&prompt.crm;<command>ls</command></screen>
+        </listitem>
+        <listitem>
+          <para>
+            Geben Sie den Namen eines Unterbefehls ein, um auf diese Ebene zu wechseln. Zum Beispiel:
+          </para>
+<screen>&prompt.crm;<command>resource</command>
+<prompt>crm(live)resource#</prompt></screen>
+        </listitem>
+        <listitem>
+          <para>
+            Wechseln Sie zwischen Unterbefehlen mit <command>cd</command>. Zum Beispiel:
+          </para>
+<screen><prompt>crm(live)resource#</prompt> <command>cd ../node</command>
+<prompt>crm(live)node#</prompt></screen>
+        </listitem>
+        <listitem>
+          <para>
+            Gehen Sie eine Ebene zurück mit <command>up</command> oder <command>cd</command>:
+          </para>
+<screen><prompt>crm(live)node#</prompt> <command>up</command>
+&prompt.crm;</screen>
+        </listitem>
+      </itemizedlist>
+    </step>
+    <step>
+      <para>
+        Nehmen Sie Ihre Änderungen vor. Dieses Beispiel zeigt Befehle zum Konfigurieren einer virtuellen IP-Adresse und zum Hinzufügen einer Standortbeschränkung, damit die IP-Adresse auf einem Knoten namens <literal>&node1;</literal> ausgeführt wird. Da sich beide Befehle unter dem Unterbefehl <command>crm configure</command> befinden, können Sie auf die Ebene <command>configure</command> wechseln, um die tatsächlich einzugebenden Befehle zu verkürzen.
+      </para>
+      <example>
+        <title>Hinzufügen einer virtuellen IP-Adresse mit einer Standortbeschränkung für Knoten &node1;</title>
+<screen>&prompt.crm;<command>configure</command>
+&prompt.crm.conf;<command>primitive vip1 IPaddr2 params ip=&subnetI;.5</command>
+&prompt.crm.conf;<command>location loc-vip1-on-alice vip1 inf: alice</command>
+&prompt.crm.conf;<command>show changed</command></screen>
+      </example>
+    </step>
+    <step>
+      <para>
+        Übernehmen Sie Ihre Änderungen, um sie auf den Live-Cluster anzuwenden:
+      </para>
+<screen>&prompt.crm.conf;<command>commit</command></screen>
+      <para>
+        Sie müssen Ihre Änderungen übernehmen, bevor Sie den interaktiven Modus beenden, zur Ebene <command>crm</command> zurückkehren oder zu einem anderen Unterbefehl wechseln. Die Änderungen gehen verloren, wenn Sie sie nicht übernehmen, aber das &crmshell; warnt Sie, bevor dies geschieht.
+      </para>
+    </step>
+    <step>
+      <para>
+        Interaktiven Modus beenden:
+      </para>
+<screen>&prompt.crm.conf;<command>quit</command></screen>
+    </step>
+  </procedure>
+
+  <itemizedlist>
+    <title>Für weitere Informationen: </title>
+    <listitem>
+      <para>
+        <link xlink:href="https://crmsh.github.io/man-5.0/#topics.Introduction.Interface"></link>
+      </para>
+    </listitem>
+  </itemizedlist>
+</topic>

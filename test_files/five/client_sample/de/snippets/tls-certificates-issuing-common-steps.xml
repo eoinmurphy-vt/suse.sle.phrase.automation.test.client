@@ -1,0 +1,23 @@
+<!DOCTYPE procedure [
+  <!ENTITY % entities SYSTEM "../common/generic-entities.ent">
+  %entities;
+]>
+<procedure xmlns="http://docbook.org/ns/docbook"  version="5.2"
+xmlns:xi="http://www.w3.org/2001/XInclude"
+xmlns:xlink="http://www.w3.org/1999/xlink">
+  <step>
+    <para>
+      <emphasis role="bold">Installieren Sie das Zertifikat auf dem Server.</emphasis> Installieren Sie das signierte Zertifikat auf dem Server, der es verwenden wird. Dies beinhaltet in der Regel die Konfiguration der Serversoftware&mdash;wie zum Beispiel des Apache-Webservers&mdash;zur Verwendung des Zertifikats für die Sicherung der Kommunikation.
+    </para>
+  </step>
+  <step>
+    <para>
+      <emphasis role="bold">Konfigurieren Sie den Server und den Client für eine sichere Kommunikation.</emphasis> Nachdem das Zertifikat auf dem Server installiert wurde, konfigurieren Sie die Server- und Clientsoftware für die Verwendung sicherer Kommunikationsprotokolle, zum Beispiel HTTPS, das das Zertifikat zur Verschlüsselung und Authentifizierung nutzt.
+    </para>
+  </step>
+  <step>
+    <para>
+      <emphasis role="bold">Regelmäßige Wartung und Erneuerung.</emphasis> Überwachen Sie regelmäßig die Gültigkeit des Zertifikats und erneuern Sie es, bevor es abläuft. Bewahren Sie den privaten Schlüssel sicher auf und stellen Sie sicher, dass die Zertifikate ordnungsgemäß konfiguriert und bei Bedarf aktualisiert werden.
+    </para>
+  </step>
+</procedure>

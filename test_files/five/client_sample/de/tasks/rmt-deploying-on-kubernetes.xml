@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic
+[
+  <!ENTITY % entities SYSTEM "../common/generic-entities.ent">
+    %entities;
+]>
+<!-- refers to legacy doc: https://github.com/SUSE/doc-sle/blob/main/xml/rmt_install.xml -->
+<!-- refer to README.md for file and id naming conventions -->
+<!-- metadata is dealt with on the assembly level -->
+<topic xml:id="rmt-deploying-on-kubernetes"
+ role="task" xml:lang="de"
+ xmlns="http://docbook.org/ns/docbook" version="5.2"
+ xmlns:its="http://www.w3.org/2005/11/its"
+ xmlns:xi="http://www.w3.org/2001/XInclude"
+ xmlns:xlink="http://www.w3.org/1999/xlink"
+ xmlns:trans="http://docbook.org/ns/transclusion">
+  <info>
+    <title>Bereitstellung von &rmt; auf dem &kube;-Cluster</title>
+    <meta name="maintainer" content="amrita.sakthivel@suse.com" its:translate="no"/>
+    <abstract>
+      <para>
+       Dieser Abschnitt beschreibt, wie &rmt; auf einem &kube;-Cluster bereitgestellt wird. Es verwendet <productname>Helm</productname> als Paketmanager, um mit dem &kube;-Cluster zu interagieren. Weitere Informationen zur Verwendung von <productname>Helm</productname> finden Sie unter <link xlink:href="https://helm.sh/docs/intro/using_helm/"></link>.
+      </para>
+    </abstract>
+  </info>
+
+  <section xml:id="rmt-deploying-on-kubernetes-prerequisites">
+    <title>Voraussetzungen</title>
+    <itemizedlist>
+      <listitem>
+        <para>
+          Ausführen des &kube;-Clusters
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <command>helm</command>-Befehl, der für die Interaktion mit dem Cluster konfiguriert ist
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Eine Speicherklasse für die persistenten Volumes von &rmt; und &mariadb;. Das Beispiel in <xref linkend="rmt-deploying-on-kubernetes-values"/> verwendet die <literal>local-path</literal>-Speicherklasse, die nur in Rancher-Workloads verfügbar ist. Installieren Sie auf anderen Clustern den <literal>local-path</literal>-Speicher-Provisioner:
+        </para>
+<screen>&prompt.user;kubectl apply -f \
+https://raw.githubusercontent.com/rancher/local-path-provisioner/\
+v0.0.26/deploy/local-path-storage.yaml</screen>
+       <para>
+          Alternativ setzen Sie <literal>app.storage.class</literal> und <literal>db.storage.class</literal> auf eine Speicherklasse, die bereits in Ihrem Cluster vorhanden ist.
+        </para>
+      </listitem>
+    </itemizedlist>
+  </section>
+
+  <section xml:id="rmt-deploying-on-kubernetes-components">
+    <title>Anwendungskomponenten</title>
+    <para>
+      Jede Komponente der &rmt;-Anwendung wird in einem eigenen Container bereitgestellt. &rmt; besteht aus den folgenden Komponenten:
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>Server</term>
+        <listitem>
+          <para>
+            Containerisierte Version des &rmt;-Anwendungsservers mit der Möglichkeit, dessen Konfiguration über Helm-Werte zu übergeben. Die Speicherung erfolgt auf einem Volume, das dem &kube;-Cluster zugewiesen ist. Passen Sie die Größe des Speichers an die Anzahl der Repositories an, die Sie spiegeln müssen.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>&mariadb;</term>
+        <listitem>
+          <para>
+            Das Datenbank-Backend für &rmt;. Es ist keine Aufgabe nach der Installation erforderlich, da &rmt; die erforderliche Datenbank und die Tabellen beim Start erstellt. Wenn in der <filename>values.yaml</filename>-Datei keine Passwörter angegeben sind, werden diese automatisch generiert.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>nginx</term>
+        <listitem>
+          <para>
+            Ein für &rmt;-Routen konfigurierter Webserver. Ein korrekt konfigurierter Webserver ermöglicht es Ihnen, Ihren Ingress-Datenverkehr (für &rmt;) direkt an diesen nginx-Dienst zu leiten. Sie müssen Ingress nicht für &rmt;-spezifische Pfadbehandlung konfigurieren, da nginx das Pfad-Routing automatisch übernimmt.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </section>
+
+  <section xml:id="rmt-deploying-on-kubernetes-values">
+    <title>Die Datei <filename>values.yaml</filename> </title>
+    <para>
+      Das &rmt;-Chart enthält die <filename>values.yaml</filename>-Datei, in der alle Parameter dokumentiert und ihre Standardwerte definiert sind. Sie können diese Werte überschreiben, indem Sie Ihre eigene Werte-Datei bereitstellen, zum Beispiel:
+    </para>
+<screen>&prompt.user;cat &lt;&lt; EOF &gt; rmt-config.yaml
+---
+app:
+  storage:
+    class: local-path<co xml:id="co-kubernetes-values-appstorage"/>
+  scc:
+    enabled: false
+    username: "UXXXXXXX"
+    password: "PASSXXXX"
+    products_enable:
+      - SLES/15.3/x86_64
+      - sle-module-python2/15.3/x86_64
+    products_disable:
+      - sle-module-legacy/15.3/x86_64
+      - sle-module-cap-tools/15.3/x86_64
+db:
+  storage:
+    class: local-path<co xml:id="co-kubernetes-values-dbstorage"/>
+ingress:
+  enabled: true
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: "/"
+          pathType: Prefix
+  tls:
+    - secretName: rmt-cert
+      hosts:
+        - chart-example.local
+EOF
+</screen>
+    <calloutlist>
+      <callout arearefs="co-kubernetes-values-appstorage co-kubernetes-values-dbstorage">
+        <para>
+          Die Storage-Klasse für die &rmt;- und &mariadb;-Persistent Volumes. Die Storage-Klasse muss im Cluster vorhanden sein. Für weitere Informationen siehe <xref linkend="rmt-deploying-on-kubernetes-prerequisites"/>.
+        </para>
+      </callout>
+    </calloutlist>
+    <para>
+      Und um &rmt; zu installieren, führen Sie Folgendes aus:
+    </para>
+<screen>&prompt.user;helm install rmtsle oci://registry.suse.com/suse/rmt-helm -f rmt-config.yaml</screen>
+   <variablelist xml:id="rmt-deploying-on-kubernetes-required-values">
+            <title>Erforderliche Werte</title>
+            <varlistentry>
+          <term><emphasis role="strong">Schlüssel</emphasis>: app.scc.password</term>
+          <listitem>
+            <para>
+              <emphasis role="strong">Typ</emphasis>: string
+            </para>
+            <para>
+              Standard
+            </para>
+            <para>
+              <emphasis role="strong">Beschreibung</emphasis>: <link xlink:href="&sccurl;">&scc;</link> Proxy-Passwort. Die Passwort-Zeichenfolge muss in Anführungszeichen gesetzt werden. Wenn das Anführungszeichen <literal>"</literal> Teil der Zeichenfolge ist, muss es mit <literal>\</literal> maskiert werden.
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><emphasis role="strong">Schlüssel</emphasis>: app.scc.username</term>
+          <listitem>
+            <para>
+              <emphasis role="strong">Typ</emphasis>: string
+            </para>
+            <para>
+              Standard
+            </para>
+            <para>
+              <emphasis role="strong">Beschreibung</emphasis>: <link xlink:href="&sccurl;">&scc;</link> Proxy-Benutzername. Die Benutzername-Zeichenfolge muss in Anführungszeichen gesetzt werden. Wenn das Anführungszeichen <literal>"</literal> Teil der Zeichenfolge ist, muss es mit <literal>\</literal> maskiert werden.
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><emphasis role="strong">Schlüssel</emphasis>: app.scc.products_enable</term>
+          <listitem>
+            <para>
+              <emphasis role="strong">Typ</emphasis>: list
+            </para>
+            <para>
+              Standard
+            </para>
+            <para>
+              <emphasis role="strong">Beschreibung</emphasis>: Liste der Produkte, die für das Spiegeln aktiviert werden sollen
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><emphasis role="strong">Key</emphasis>: app.scc.products_disable</term>
+          <listitem>
+            <para>
+              <emphasis role="strong">Typ</emphasis>: list
+            </para>
+            <para>
+              Standard
+            </para>
+            <para>
+              <emphasis role="strong">Beschreibung</emphasis>: Liste der Produkte, die für das Spiegeln deaktiviert werden sollen
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><emphasis role="strong">Schlüssel</emphasis>: app.storage.class</term>
+          <listitem>
+            <para>
+              <emphasis role="strong">Typ</emphasis>: string
+            </para>
+            <para>
+              Standard
+            </para>
+            <para>
+              Beschreibung Kubernetes
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><emphasis role="strong">Key</emphasis>: db.storage.class</term>
+          <listitem>
+            <para>
+              <emphasis role="strong">Typ</emphasis>: string
+            </para>
+            <para>
+              Standard
+            </para>
+            <para>
+              Beschreibung Kubernetes
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><emphasis role="strong">Schlüssel</emphasis>: ingress.enabled</term>
+          <listitem>
+            <para>
+              <emphasis role="strong">Typ</emphasis>: bool
+            </para>
+            <para>
+              Standard
+            </para>
+            <para>
+              Beschreibung Ingress aktiviert
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><emphasis role="strong">Key</emphasis>: ingress.hosts[0]</term>
+          <listitem>
+            <para>
+              <emphasis role="strong">Typ</emphasis>: object
+            </para>
+            <para>
+              Standard
+            </para>
+            <para>
+              Beschreibung DNS-Name, unter dem der &rmt;-Dienst für Clients erreichbar sein wird
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><emphasis role="strong">Key</emphasis>: ingress.tls[0].hosts[0]</term>
+          <listitem>
+            <para>
+              <emphasis role="strong">Typ</emphasis>: string
+            </para>
+            <para>
+              Standard
+            </para>
+            <para>
+              Beschreibung DNS-Name, unter dem der &rmt;-Dienst für Clients erreichbar sein wird
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><emphasis role="strong">Key</emphasis>: ingress.tls[0].secretName</term>
+          <listitem>
+            <para>
+              <emphasis role="strong">Typ</emphasis>: string
+            </para>
+            <para>
+              Standard
+            </para>
+            <para>
+              Beschreibung TLS-Ingress-Zertifikat
+            </para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+   </section>
+</topic>

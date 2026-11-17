@@ -1,0 +1,15 @@
+<!-- include like this:
+<xi:include href="../snippets/openwebui-tip-default-model.xml"/>
+-->
+<!DOCTYPE tip [
+  <!ENTITY % entities SYSTEM "../common/generic-entities.ent">
+  %entities;
+]>
+<tip xmlns="http://docbook.org/ns/docbook"  version="5.2"
+xmlns:xi="http://www.w3.org/2001/XInclude"
+xmlns:xlink="http://www.w3.org/1999/xlink">
+  <title>Ihr Standardmodell</title>
+  <para>
+    Um das ausgewählte Modell zu Ihrem Standardmodell zu machen, klicken Sie neben dem Namen des KI-Modells auf <guimenu>Als Standard festlegen</guimenu>.
+  </para>
+</tip>
