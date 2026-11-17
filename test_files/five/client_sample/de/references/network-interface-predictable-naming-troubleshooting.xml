@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic
+[
+  <!ENTITY % entities SYSTEM "../common/generic-entities.ent">
+    %entities;
+]>
+<topic xml:id="network-interface-predictable-naming-troubleshooting"
+ role="reference" xml:lang="de"
+ xmlns="http://docbook.org/ns/docbook" version="5.2"
+ xmlns:its="http://www.w3.org/2005/11/its"
+ xmlns:xi="http://www.w3.org/2001/XInclude"
+ xmlns:xlink="http://www.w3.org/1999/xlink"
+ xmlns:trans="http://docbook.org/ns/transclusion">
+  <info>
+    <title>Fehlersuche</title>
+    <meta name="maintainer" content="tbazant@suse.com" its:translate="no"/>
+  </info>
+  <bridgehead><systemitem>udev</systemitem>-basierte Netzwerkschnittstellennamen gemischt mit traditionellen Namen</bridgehead>
+  <para>
+    Wenn gemischte Namensschemata auf Ihrem System auftreten, kann <systemitem>udev</systemitem> möglicherweise keine korrekten Namen für bestimmte Geräte erstellen. Es gibt zwei häufigste Gründe für ein solches Verhalten:
+  </para>
+  <itemizedlist>
+    <listitem>
+      <para>
+        Es werden keine verwendbaren Informationen vom Kernel an <systemitem>udev</systemitem> bereitgestellt. Daher kann <systemitem>udev</systemitem> keinen Gerätenamen ermitteln.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        Die an <systemitem>udev</systemitem> bereitgestellten Informationen sind nicht geeignet, wie zum Beispiel nicht eindeutige Geräte-IDs.
+      </para>
+    </listitem>
+  </itemizedlist>
+  <para>
+    Die Lösung besteht darin, benutzerdefinierte Namensregeln <systemitem>udev</systemitem> für die Geräte zu erstellen, die nicht ordnungsgemäß durch die derzeit verwendeten <systemitem>udev</systemitem>-Regeln benannt werden. Überprüfen Sie die Dateien im Verzeichnis <filename>/etc/udev/rules.d</filename>, zum Beispiel <filename>70-persistent-net.rules</filename>.
+  </para>
+</topic>

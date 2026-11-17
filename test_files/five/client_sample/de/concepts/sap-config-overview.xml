@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- This file originates from the project https://github.com/openSUSE/doc-kit -->
+<!-- This file can be edited downstream. -->
+<!DOCTYPE topic
+[
+  <!ENTITY % entities SYSTEM "../common/generic-entities.ent">
+    %entities;
+]>
+<topic xml:id="sap-config-overview"
+ role="concept" xml:lang="de"
+ xmlns="http://docbook.org/ns/docbook" version="5.2"
+ xmlns:its="http://www.w3.org/2005/11/its"
+ xmlns:xi="http://www.w3.org/2001/XInclude"
+ xmlns:xlink="http://www.w3.org/1999/xlink"
+ xmlns:trans="http://docbook.org/ns/transclusion">
+  <info>
+    <title>Übersicht über den Konfigurations-Workflow</title>
+    <meta name="maintainer" content="eliska.romanova@suse.com" its:translate="no"/>
+    <abstract>
+      <para>
+        Erfahren Sie mehr über den Konfigurations-Workflow, die Anforderungen an die Betriebssystemvorbereitung und die automatisierten Einrichtungsschritte für &sap;-Workloads.
+      </para>
+    </abstract>
+  </info>
+  <para>
+    Ein frisch installiertes Betriebssystem erfordert spezifische Optimierungen, Sicherheitsrichtlinien und Paketabhängigkeiten, um &sap;-Workloads optimal und zuverlässig auszuführen. &productnameshort; automatisiert die Vorbereitung durch den folgenden Workflow:
+  </para>
+  <orderedlist>
+    <listitem>
+      <para>
+        <emphasis role="bold">Installationsmuster.</emphasis> Installieren Sie das spezifische Softwaremuster für Ihre Workload (zum Beispiel &hana; oder &netweaver;).
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        <emphasis role="bold">Optimierung überprüfen.</emphasis> Stellen Sie sicher, dass &saptune; aktiv ist und die korrekten Systemparameter anwendet.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        <emphasis role="bold">Sicherheit überprüfen.</emphasis> Bestätigen Sie, dass &selnx; für die Installationsphase ordnungsgemäß konfiguriert ist.
+      </para>
+    </listitem>
+  </orderedlist>
+</topic>

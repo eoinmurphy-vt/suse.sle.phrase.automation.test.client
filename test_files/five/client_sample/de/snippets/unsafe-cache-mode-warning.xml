@@ -1,0 +1,12 @@
+<!DOCTYPE warning [
+  <!ENTITY % entities SYSTEM "../common/generic-entities.ent">
+  %entities;
+]>
+<warning  xmlns="http://docbook.org/ns/docbook"  version="5.2"
+xmlns:xi="http://www.w3.org/2001/XInclude" 
+xmlns:xlink="http://www.w3.org/1999/xlink">
+  <title>Möglicher Datenverlust</title>
+  <para>
+    Die Verwendung des <emphasis>unsicheren</emphasis> Modus kann bei einem Host-Ausfall zu Datenverlust führen. Verwenden Sie diesen Modus nicht für Produktions-Workloads.
+  </para>
+</warning>

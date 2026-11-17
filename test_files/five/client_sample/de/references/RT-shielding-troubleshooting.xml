@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- This file originates from the project https://github.com/openSUSE/doc-kit -->
+<!-- This file can be edited downstream. -->
+<!DOCTYPE topic
+[
+  <!ENTITY % entities SYSTEM "../common/generic-entities.ent">
+    %entities;
+]>
+<!-- refers to legacy doc: <add github link to legacy doc piece, if applicable> -->
+<!-- point back to this document with a similar comment added to your legacy doc piece -->
+<!-- refer to README.md for file and id naming conventions -->
+<!-- metadata is dealt with on the assembly level -->
+<topic xml:id="rt-shielding-resources-troubleshooting"
+ role="reference" xml:lang="de"
+ xmlns="http://docbook.org/ns/docbook" version="5.2"
+ xmlns:its="http://www.w3.org/2005/11/its"
+ xmlns:xi="http://www.w3.org/2001/XInclude"
+ xmlns:xlink="http://www.w3.org/1999/xlink"
+ xmlns:trans="http://docbook.org/ns/transclusion">
+  <info>
+   <title>Fehlerbehebung bei CPU-Abschirmungsproblemen</title><!-- can be changed via merge in the assembly -->
+    <!--add author's email address-->
+    <meta name="maintainer" content="jsindelarova@suse.com" its:translate="no"/>
+    <abstract><!-- can be changed via merge in the assembly -->
+      <para>
+       Beim Einrichten oder Verwenden einer Abschirmung können verschiedene Fragen oder Probleme auftreten. Die folgende Liste behandelt die häufigsten Fragen.
+      </para>
+    </abstract>
+  </info>
+  <qandaset xml:id="qa-cpu-shielding-troubleshooting">
+    <title>Fehlerbehebung bei der CPU-Abschirmung</title>
+    <qandaentry>
+      <question>
+        <para>Wie überprüfe ich, ob die CPU-Abschirmung in cgroups v2 aktiv ist?</para>
+      </question>
+      <answer>
+        <para>
+          Überprüfen Sie die Datei <filename>cpuset.cpus</filename> auf <filename>workload.slice</filename> im sysfs-Dateisystem unter <filename>/sys/fs/cgroup/workload.slice/cpuset.cpus</filename>. Die Befehlsausgabe darf nur die der Abschirmung zugewiesenen CPUs auflisten.
+        </para>
+      </answer>
+    </qandaentry>
+    <qandaentry>
+      <question>
+        <para>Wie überprüfe ich, ob ein Dienst innerhalb des abgeschirmten Slices ausgeführt wird?</para>
+      </question>
+      <answer>
+        <para>
+          Führen Sie <command>systemctl status <replaceable>SENSITIVE</replaceable>.service</command> aus, um den aktiven Slice und den cgroup-Pfad zu untersuchen. Alternativ führen Sie <command>systemctl show <replaceable>SENSITIVE</replaceable>.service -p Slice,AllowedCPUs</command> aus, um die Konfigurationseigenschaften zu bestätigen.
+        </para>
+      </answer>
+    </qandaentry>
+    <qandaentry>
+      <question>
+        <para>Wie behebe ich Dienstfehler oder fehlerhafte CPU-Zuweisungen?</para>
+      </question>
+      <answer>
+        <para>
+          Verwenden Sie <command>journalctl -u <replaceable>SENSITIVE</replaceable>.service</command>, um Unit-Protokollmeldungen anzuzeigen. Überprüfen Sie, ob Drop-in-Dateien in den korrekten Konfigurationsverzeichnissen vorhanden sind, und führen Sie nach Änderungen <command>systemctl daemon-reload</command> aus.
+        </para>
+      </answer>
+    </qandaentry>
+  </qandaset>
+</topic>

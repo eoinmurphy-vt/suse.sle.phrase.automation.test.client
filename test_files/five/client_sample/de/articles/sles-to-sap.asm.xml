@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- This file originates from the project https://github.com/openSUSE/doc-kit -->
+<!-- This file can be edited downstream. -->
+<!DOCTYPE assembly
+[
+    <!ENTITY % entities SYSTEM "../common/generic-entities.ent">
+    %entities;
+]>
+<assembly version="5.2" xml:lang="de"
+          xmlns:xlink="http://www.w3.org/1999/xlink"
+          xmlns:trans="http://docbook.org/ns/transclusion"
+          xmlns:its="http://www.w3.org/2005/11/its"
+          xmlns:xi="http://www.w3.org/2001/XInclude"
+          xmlns="http://docbook.org/ns/docbook">
+  <!-- R E S O U R C E S -->
+  <!-- Tasks -->
+  <resources>
+    <resource xml:id="_task-sles-to-sap" href="../tasks/sles-to-sap.xml">
+    </resource>
+  </resources>
+  
+  <!-- Legal -->
+  <resources>
+    <resource href="../common/legal.xml" xml:id="_legal">
+      <description>Legal Notice</description>
+    </resource>
+    <resource href="../common/license_gfdl1.2.xml" xml:id="_gfdl">
+      <description>GNU Free Documentation License</description>
+    </resource>
+  </resources>
+  <!-- S T R U C T U R E -->
+  <structure renderas="article" xml:id="sles-to-sap" xml:lang="de">
+    <merge>
+      <title>Migration von &sles; zu &sles4sap;</title>
+      <revhistory xml:id="rh-sles-to-sap">
+        <revision><date>2026-10-05</date>
+          <revdescription>
+            <para>
+              Überarbeitete Zusammenfassung
+            </para>
+          </revdescription>
+        </revision>
+        <revision><date>2026-11-03</date>
+          <revdescription>
+            <para>
+            Ursprüngliche Version
+            </para>
+          </revdescription>
+        </revision>
+      </revhistory>
+      <meta name="maintainer" content="eliska.romanova@suse.com" its:translate="no"/>
+      <meta name="architecture">
+        <phrase>&x86-64;</phrase>
+        <phrase>&power;</phrase>
+      </meta>
+      <meta name="productname" its:translate="no">
+        <productname os="sles4sap" version="&productnumber;">&productname;</productname>
+      </meta>
+      <meta name="title" its:translate="yes">Migration von &sles; zu &sles4sap;</meta>
+      <meta name="description" its:translate="yes">Erfahren Sie, wie Sie ein &sles;-System in eine &sles4sap;-Installation konvertieren</meta>
+      <meta name="social-descr" its:translate="yes">So konvertieren Sie &sles; zu &sles4sap;</meta>
+      <meta name="category" its:translate="no">
+        <phrase>Deployment</phrase>
+      </meta>
+      <meta name="task" its:translate="no">
+        <phrase>Configuration</phrase>
+        <phrase>Installation</phrase>
+        <phrase>Deployment</phrase>
+        <phrase>Migration</phrase>
+      </meta>
+      <meta name="series" its:translate="no">Products &amp; Solutions</meta>
+      <dm:docmanager xmlns:dm="urn:x-suse:ns:docmanager">
+        <dm:bugtracker>
+          <dm:url>https://bugzilla.suse.com/enter_bug.cgi</dm:url>
+          <dm:component>Documentation</dm:component>
+          <dm:product>SUSE Linux Enterprise Server for SAP applications &productnumber;</dm:product>
+          <dm:assignee>eliska.romanova@suse.com</dm:assignee>
+       </dm:bugtracker>
+        <dm:translation>yes</dm:translation>
+      </dm:docmanager>
+      <abstract>
+      <para>Die Migration einer bestehenden Installation von &sles; zu &sles4sap; erfolgt mithilfe des Konvertierungsskripts. Das Skript automatisiert die Systemneuregistrierung, Repository-Abonnements und den Austausch von Release-Paketen. Dies vereinfacht den Migrationsprozess und ermöglicht es Administratoren, ihr Betriebssystem ohne eine vollständige Neuinstallation zu konvertieren.</para>
+<para><emphasis role="bold">Voraussetzungen</emphasis></para>
+<itemizedlist>
+<listitem>
+<para>Eine registrierte Installation von &sles; 16, die für die Ausführung von &sap;-Workloads vorgesehen ist</para>
+</listitem>
+<listitem>
+<para>Ein Registrierungscode und eine E-Mail-Adresse für &sles4sap;</para>
+</listitem>
+</itemizedlist>
+      </abstract>
+    </merge>
+    <module resourceref="_task-sles-to-sap" renderas="section"/>
+    <module resourceref="_legal"/>
+    <module resourceref="_gfdl">
+      <output renderas="appendix"/>
+    </module>
+  </structure>
+</assembly>
