@@ -1,0 +1,346 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- This file originates from the project https://github.com/openSUSE/doc-kit -->
+<!-- This file can be edited downstream. -->
+<!DOCTYPE topic
+[
+  <!ENTITY % entities SYSTEM "../common/generic-entities.ent">
+    %entities;
+]>
+<!-- refers to legacy doc: <add github link to legacy doc piece, if applicable> -->
+<!-- point back to this document with a similar comment added to your legacy doc piece -->
+<!-- refer to README.md for file and id naming conventions -->
+<!-- metadata is dealt with on the assembly level -->
+<topic xml:id="kernel-boot-parameters-modify-introduction"
+ role="concept" xml:lang="en"
+ xmlns="http://docbook.org/ns/docbook" version="5.2"
+ xmlns:its="http://www.w3.org/2005/11/its"
+ xmlns:xi="http://www.w3.org/2001/XInclude"
+ xmlns:xlink="http://www.w3.org/1999/xlink"
+ xmlns:trans="http://docbook.org/ns/transclusion">
+  <info>
+    <title>Introduction to kernel boot parameters</title>
+    <!-- can be changed via merge in the assembly -->
+    <!--add author's email address-->
+    <meta name="maintainer" content="ssarkar@suse.com" its:translate="no"/>
+    <abstract>
+      <!-- can be changed via merge in the assembly -->
+      <para>
+        Kernel boot parameters tell the kernel how to behave at startup. Knowing where they
+        come from and how &grub; passes them to the kernel makes it easier to change them
+        correctly. This knowledge also helps you reason about which change to make for a given
+        problem.
+      </para>
+    </abstract>
+  </info>
+  <section xml:id="kernel-boot-parameters-modify-definition">
+    <title>What are kernel boot parameters?</title>
+    <para>
+      Kernel boot parameters are configurations passed to the kernel during the boot process
+      managed by &grub;. The configurations are instructions to the &grub; boot loader on how
+      to configure certain features and make them behave in the intended manner. The method of
+      modification depends on whether you want the change to affect only the next boot, or all
+      subsequent boots.
+    </para>
+  </section>
+  <section xml:id="kernel-boot-parameters-modification-types">
+    <title>Methods of modification</title>
+    <para>
+      You can modify the kernel boot parameters using the following methods:
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>Temporarily</term>
+        <listitem>
+          <para>
+            Changes are held in memory and apply only to the upcoming boot process. These changes
+            made through the &grub; boot menu are not written to any configuration file and are
+            discarded after reboot.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>Permanently</term>
+        <listitem>
+          <para>
+            Changes are written to the <filename>/etc/default/grub</filename> file and persist
+            across all subsequent boot processes. For permanent changes, we
+            <emphasis role="strong">recommend</emphasis> using the
+            <command>update-bootloader</command> command instead of directly editing the
+            <filename>/etc/default/grub</filename> file.
+          </para>
+          <para>
+            However, if you directly edit the <filename>/etc/default/grub</filename> file, modify
+            the <varname>GRUB_CMDLINE_LINUX</varname> or
+            <varname>GRUB_CMDLINE_LINUX_DEFAULT</varname> variables. After modification, regenerate
+            the &grub; configuration by running the following command with administrative
+            privileges.
+          </para>
+<screen>&prompt.sudo;<command>grub2-mkconfig -o /boot/grub2/grub.cfg</command></screen>
+          <para>
+            This command applies only to the standard, non-immutable system. It fails on the
+            immutable mode of &productnameshort;, whose read-only root file system is only
+            writable inside a new transactional snapshot. There, run
+            <command>update-bootloader</command> through
+            <command>transactional-update</command> instead of calling it directly:
+          </para>
+<screen>&prompt.sudo;<command>transactional-update run update-bootloader --add-option <replaceable>PARAMETER</replaceable>=<replaceable>VALUE</replaceable></command></screen>
+          <para>
+            To only regenerate the &grub; configuration, without adding or removing a parameter,
+            use the dedicated subcommand instead:
+          </para>
+<screen>&prompt.sudo;<command>transactional-update grub.cfg</command></screen>
+          <para>
+            In immutable mode, changes take effect only after a reboot, since they live in a new
+            snapshot until then.
+          </para>
+          <note>
+            <title>Snapshots do not stack without a reboot</title>
+            <para>
+              Each <command>transactional-update run</command> call branches its new snapshot
+              from the currently running system, not from an earlier snapshot you have not yet
+              booted into. Running the command again before rebooting does not combine the two
+              changes: only the most recent snapshot becomes the one that boots next, and it
+              does not include the earlier, not-yet-activated change. Reboot to activate each
+              change before making the next one.
+            </para>
+          </note>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </section>
+  <section xml:id="kernel-boot-parameters-modify-reason">
+    <title>Benefits of modifying kernel boot parameters</title>
+    <para>
+      A few common reasons to modify kernel boot parameters:
+    </para>
+    <itemizedlist>
+      <listitem>
+        <formalpara>
+          <title>Performance</title>
+          <para>
+            Tune the kernel for a specific workload. For example, the <code>quiet</code> parameter
+            suppresses most boot messages, which shortens boot time.
+          </para>
+        </formalpara>
+      </listitem>
+      <listitem>
+        <formalpara>
+          <title>Hardware compatibility</title>
+          <para>
+            Work around a hardware quirk the kernel misdetects by default. For example, the
+            <code>acpi=off</code> parameter disables the Advanced Configuration and Power
+            Interface (ACPI), which can resolve boot problems on older hardware.
+          </para>
+        </formalpara>
+      </listitem>
+      <listitem>
+        <formalpara>
+          <title>Troubleshooting</title>
+          <para>
+            Isolate a driver or subsystem that is preventing the system from booting. For
+            instance, the <parameter>nomodeset</parameter> parameter disables kernel mode setting,
+            which helps when a graphics driver prevents the system from booting.
+          </para>
+        </formalpara>
+      </listitem>
+    </itemizedlist>
+  </section>
+  <section xml:id="kernel-boot-parameters-modify-examples">
+    <title>Examples of commonly modified kernel boot parameters</title>
+    <para>
+      A few of the most commonly modified kernel boot parameters:
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term><parameter>root=</parameter></term>
+        <listitem>
+          <para>
+            Specifies the path to the root file system.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><parameter>quiet</parameter></term>
+        <listitem>
+          <para>
+            Suppresses most boot messages.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><parameter>splash</parameter></term>
+        <listitem>
+          <para>
+            Displays a graphical boot splash screen.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><parameter>nomodeset</parameter></term>
+        <listitem>
+          <para>
+            Disables kernel mode setting.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><parameter>debug</parameter></term>
+        <listitem>
+          <para>
+            Enables debugging output.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><parameter>acpi=</parameter></term>
+        <listitem>
+          <para>
+            Toggles the Advanced Configuration and Power Interface (ACPI) settings.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><parameter>selinux=0</parameter></term>
+        <listitem>
+          <para>
+            Disables SELinux, which is enabled by default on &productnameshort; 16. For the
+            recommended approach, the <literal>permissive</literal> mode alternative, and how to
+            relabel the file system after reenabling SELinux, see
+            <link os="sles" xlink:href="https://documentation.suse.com/sles/&productnumber;/html/SLES-SELinux/index.html#selinux-enable-disable">Disabling
+            and reenabling SELinux</link><link os="sles4sap" xlink:href="https://documentation.suse.com/sles-sap/&productnumber;/html/SAP-SELinux/index.html#selinux-enable-disable">Disabling
+            and reenabling SELinux</link>.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <para>
+      For a detailed understanding of all available kernel parameters and their possible values,
+      source documentation is available at
+      <link
+      xlink:href="https://www.kernel.org/doc/Documentation/admin-guide/kernel-parameters.txt"/>.
+    </para>
+  </section>
+  <section xml:id="kernel-boot-parameters-modify-general-rules">
+    <title>General rules for specifying values of kernel boot parameters</title>
+    <para>
+      When modifying kernel boot parameters, follow these essential formatting rules:
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>Basic Parameter Spacing</term>
+        <listitem>
+          <para>
+            Separate individual parameters with a single space:
+          </para>
+          <itemizedlist>
+            <listitem>
+              <para>
+                With <command>update-bootloader</command>, add each parameter with its own
+                <option>--add-option</option> call. The command inserts the spacing for you:
+              </para>
+<screen>&prompt.sudo;<command>update-bootloader --add-option quiet</command>
+&prompt.sudo;<command>update-bootloader --add-option splash</command></screen>
+            </listitem>
+            <listitem>
+              <para>
+                In the <filename>/etc/default/grub</filename> configuration file for &grub;, use
+                spaces between kernel parameters when passing them as string values to the
+                <varname>GRUB_CMDLINE_LINUX</varname> or
+                <varname>GRUB_CMDLINE_LINUX_DEFAULT</varname> variables.
+              </para>
+            </listitem>
+            <listitem>
+              <para>
+                At the boot menu, press <keycap>E</keycap> to edit, locate the line starting with
+                <literal>linux</literal>, and add parameters with spaces.
+              </para>
+            </listitem>
+          </itemizedlist>
+          <example>
+            <title>Separate individual parameters with a single space</title>
+<screen>root=/dev/sda1 quiet splash</screen>
+          </example>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>Parameter Value Assignment</term>
+        <listitem>
+          <para>
+            When assigning values, use the equals sign (<literal>=</literal>) without spaces:
+          </para>
+          <example>
+            <title>Correct method of assigning values to kernel parameters</title>
+<screen>root=/dev/sda1 video=1920x1080</screen>
+          </example>
+          <example>
+            <title>Incorrect method of assigning values to kernel parameters</title>
+<screen>root = /dev/sda1 video = 1920x1080</screen>
+          </example>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>Values Containing Spaces</term>
+        <listitem>
+          <para>
+            For values containing spaces, the handling differs between methods:
+          </para>
+          <variablelist>
+            <varlistentry>
+              <term><command>update-bootloader</command></term>
+              <listitem>
+                <warning>
+                  <title>Configuration corruption from unescaped spaces</title>
+                  <para>
+                    <command>update-bootloader --add-option</command> does not quote or escape a
+                    value for you: a value containing a space is split into two separate boot
+                    parameters, corrupting the configuration. For a value containing spaces, edit
+                    <filename>/etc/default/grub</filename> directly or use the &grub; boot menu
+                    instead, both described below.
+                  </para>
+                </warning>
+              </listitem>
+            </varlistentry>
+            <varlistentry>
+              <term>&grub; configuration file</term>
+              <listitem>
+                <para>
+                  Use either double quotes with escape characters, or use backslashes.
+                </para>
+                <example>
+                  <title>Kernel parameter values containing spaces in the &grub; configuration file</title>
+<screen>GRUB_CMDLINE_LINUX="root=\"/dev/mapper/<replaceable>USER VOLUME</replaceable>\""</screen>
+<screen>GRUB_CMDLINE_LINUX="root=/dev/mapper/<replaceable>USER<emphasis>\</emphasis> VOLUME</replaceable>"</screen>
+                </example>
+              </listitem>
+            </varlistentry>
+            <varlistentry>
+              <term>&grub; Boot Menu</term>
+              <listitem>
+                <para>
+                  Use only double quotes for values containing spaces:
+                </para>
+                <example>
+                  <title>Kernel parameter values containing spaces in the &grub; boot menu</title>
+<screen>root="/dev/mapper/<replaceable>USER VOLUME</replaceable>"</screen>
+                </example>
+              </listitem>
+            </varlistentry>
+          </variablelist>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>Multiple values for a kernel boot parameter</term>
+        <listitem>
+          <para>
+            Use commas without spaces to separate multiple values for a single parameter in all
+            methods:
+          </para>
+          <example>
+            <title>Multiple values for a kernel boot parameter</title>
+<screen>module_blacklist=nouveau,radeon</screen>
+          </example>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </section>
+</topic>
