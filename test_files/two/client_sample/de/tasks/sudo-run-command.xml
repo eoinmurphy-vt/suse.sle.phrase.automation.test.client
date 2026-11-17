@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic
+[
+  <!ENTITY % entities SYSTEM "../common/generic-entities.ent">
+    %entities;
+]>
+<!-- refers to legacy doc: https://github.com/SUSE/doc-sle/blob/main/xml/adm_sudo.xml -->
+<!-- point back to this document with a similar comment added to your legacy doc piece -->
+<!-- refer to README.md for file and id naming conventions -->
+<!-- metadata is dealt with on the assembly level -->
+<topic xml:id="sudo-run-command"
+ role="task" xml:lang="de"
+ xmlns="http://docbook.org/ns/docbook" version="5.2"
+ xmlns:its="http://www.w3.org/2005/11/its"
+ xmlns:xi="http://www.w3.org/2001/XInclude"
+ xmlns:xlink="http://www.w3.org/1999/xlink"
+ xmlns:trans="http://docbook.org/ns/transclusion">
+  <info>
+    <meta name="maintainer" content="julia.faltenbacher@suse.com" its:translate="no"/>
+    <title>Ausführen eines Befehls, dem &sudo; vorangestellt ist</title>
+    <abstract>
+     <!--Remove later: Please do an editorial and structural review of this module, irrespective of
+    whether you see much changes in this module-->
+      <para>
+        Als normaler Benutzer können Sie jeden Befehl als &rootuser; ausführen, indem Sie &sudo; davor setzen. Dies fordert Sie dazu auf, das &rootuser; Passwort einzugeben. Bei erfolgreicher Authentifizierung wird der Befehl als &rootuser; ausgeführt.
+       </para>
+    </abstract>
+  </info>
+  <para>
+    Wenn Sie einen Befehl ausführen, dem &sudo; vorangestellt ist, fragt das System Sie nach dem Passwort des &rootuser; Kontos. Nach erfolgreicher Authentifizierung wird der Befehl mit Superuser-Rechten ausgeführt.
+  </para>
+  <para>
+    Abhängig von der &sudo; Konfiguration bleiben die erweiterten Berechtigungen für einen bestimmten Zeitraum bestehen, solange Sie in derselben Terminalsitzung arbeiten. Sie müssen also kein Passwort erneut eingeben, wenn Sie einen weiteren &sudo; Befehl ausführen.
+  </para>
+  <procedure>
+    <title>Ausführen eines Befehls, dem &sudo; vorangestellt ist</title>
+    <para>
+      Das folgende Verfahren beschreibt, wie Sie den &sudo; Befehl verwenden, um eine Datei in ein Verzeichnis zu kopieren, in dem nur der &rootuser; Benutzer Bearbeitungsrechte hat.
+    </para>
+    <step>
+      <para>
+        Öffnen Sie ein Terminal und erstellen Sie eine Testdatei mit:
+      </para>
+      <screen>&prompt.user;<command>touch test.txt</command></screen>
+    </step>
+    <step>
+      <para>
+        Versuchen Sie, die Datei in das Verzeichnis <filename>/usr/local/bin/</filename>
+        zu kopieren mit:
+      </para>
+      <screen>&prompt.user;<command>cp test.txt /usr/local/bin</command></screen>
+      <para>
+        Das Terminal gibt zum Beispiel Folgendes zurück:
+      </para>
+<screen>cp: cannot create regular file '/usr/local/bin/test.txt': Permission denied</screen>
+      <para>
+        Diese Meldung erscheint auch, wenn die erforderlichen Berechtigungen nicht für &sudo; erteilt wurden.
+      </para>
+</step>
+    <step>
+      <para>
+       Geben Sie nun denselben Befehl ein, dem &sudo; vorangestellt ist:
+      </para>
+<screen>&prompt.sudo;<command>cp test.txt /usr/local/bin</command></screen>
+    </step>
+    <step>
+      <para>
+        Sie werden aufgefordert, das &rootuser; Passwort einzugeben. Beachten Sie, dass das Passwort während der Eingabe nicht angezeigt wird, weder im Klartext noch als Maskierungszeichen.
+      </para>
+<screen>[sudo] Passwort für root:</screen>
+    </step>
+    <step>
+      <para>
+        Nach erfolgreicher Authentifizierung wird die Testdatei kopiert nach
+        <filename>/usr/local/bin</filename>.
+      </para>
+      </step>
+<result>
+  <para>
+    Sie haben Ihren ersten &sudo; Befehl ausgeführt.
+  </para>
+</result>
+    </procedure>
+</topic>

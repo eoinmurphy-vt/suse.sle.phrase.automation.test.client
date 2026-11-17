@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- This file originates from the project https://github.com/openSUSE/doc-kit -->
+<!-- This file can be edited downstream. -->
+<!DOCTYPE topic
+[
+  <!ENTITY % entities SYSTEM "../common/generic-entities.ent">
+    %entities;
+]>
+<!-- refers to legacy doc: <add github link to legacy doc piece, if applicable> -->
+<!-- point back to this document with a similar comment added to your legacy doc piece -->
+<!-- refer to README.md for file and id naming conventions -->
+<!-- metadata is dealt with on the assembly level -->
+<topic xml:id="kernel-boot-parameters-modify-introduction"
+ role="concept" xml:lang="de"
+ xmlns="http://docbook.org/ns/docbook" version="5.2"
+ xmlns:its="http://www.w3.org/2005/11/its"
+ xmlns:xi="http://www.w3.org/2001/XInclude"
+ xmlns:xlink="http://www.w3.org/1999/xlink"
+ xmlns:trans="http://docbook.org/ns/transclusion">
+  <info>
+    <title>Einführung in Kernel-Boot-Parameter</title>
+    <!-- can be changed via merge in the assembly --> <!--add author's email address-->
+    <meta name="maintainer" content="ssarkar@suse.com" its:translate="no"/>
+    <abstract>
+      <!-- can be changed via merge in the assembly -->
+      <para>
+        Kernel-Boot-Parameter teilen dem Kernel mit, wie er sich beim Start verhalten soll. Zu wissen, woher sie stammen und wie &grub; sie an den Kernel übergibt, erleichtert es, sie korrekt zu ändern. Dieses Wissen hilft Ihnen auch dabei, zu beurteilen, welche Änderung für ein bestimmtes Problem vorzunehmen ist.
+      </para>
+    </abstract>
+  </info>
+  <section xml:id="kernel-boot-parameters-modify-definition">
+    <title>Was sind Kernel-Boot-Parameter?</title>
+    <para>
+      Kernel-Boot-Parameter sind Konfigurationen, die während des von &grub; verwalteten Bootvorgangs an den Kernel übergeben werden. Die Konfigurationen sind Anweisungen an den &grub;-Bootloader, wie bestimmte Funktionen konfiguriert werden sollen und wie sie sich auf die beabsichtigte Weise verhalten sollen. Die Art der Änderung hängt davon ab, ob die Änderung nur den nächsten Bootvorgang oder alle nachfolgenden Bootvorgänge betreffen soll.
+    </para>
+  </section>
+  <section xml:id="kernel-boot-parameters-modification-types">
+    <title>Methoden der Änderung</title>
+    <para>
+      Sie können die Kernel-Boot-Parameter mit den folgenden Methoden ändern:
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>Vorübergehend</term>
+        <listitem>
+          <para>
+            Änderungen werden im Arbeitsspeicher gehalten und gelten nur für den nächsten Bootvorgang. Diese über das &grub;-Bootmenü vorgenommenen Änderungen werden nicht in eine Konfigurationsdatei geschrieben und nach einem Neustart verworfen.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>Dauerhaft</term>
+        <listitem>
+          <para>
+            Änderungen werden in die Datei <filename>/etc/default/grub</filename> geschrieben und bleiben über alle nachfolgenden Bootvorgänge hinweg bestehen. Für dauerhafte Änderungen empfehlen wir
+            <emphasis role="strong">empfehlen</emphasis> die Verwendung der
+            <command>update-bootloader</command> Befehl anstatt die Datei direkt zu bearbeiten.
+            <filename>/etc/default/grub</filename> Datei.
+          </para>
+          <para>
+            Wenn Sie die Datei jedoch direkt bearbeiten, ändern Sie die <filename>/etc/default/grub</filename> Datei, ändern Sie die <varname>GRUB_CMDLINE_LINUX</varname> oder
+            <varname>GRUB_CMDLINE_LINUX_DEFAULT</varname> Variablen. Generieren Sie nach der Änderung die &grub;-Konfiguration neu, indem Sie den folgenden Befehl mit Administratorrechten ausführen.
+          </para>
+<screen>&prompt.sudo;<command>grub2-mkconfig -o /boot/grub2/grub.cfg</command></screen>
+          <para>
+            Dieser Befehl gilt nur für das standardmäßige, nicht unveränderliche System. Er schlägt im unveränderlichen Modus von &productnameshort; fehl, dessen schreibgeschütztes Root-Dateisystem nur innerhalb eines neuen transaktionalen Snapshots beschreibbar ist. Führen Sie dort
+            <command>update-bootloader</command> über
+            <command>transactional-update</command> aus, anstatt es direkt aufzurufen:
+          </para>
+<screen>&prompt.sudo;<command>transactional-update run update-bootloader --add-option <replaceable>PARAMETER</replaceable>=<replaceable>WERT</replaceable></command></screen>
+          <para>
+            Um nur die &grub;-Konfiguration neu zu generieren, ohne einen Parameter hinzuzufügen oder zu entfernen, verwenden Sie stattdessen den dedizierten Unterbefehl:
+          </para>
+<screen>&prompt.sudo;<command>transactional-update grub.cfg</command></screen>
+          <para>
+            Im unveränderlichen Modus werden Änderungen erst nach einem Neustart wirksam, da sie bis dahin in einem neuen Snapshot existieren.
+          </para>
+          <note>
+            <title>Snapshots stapeln sich nicht ohne einen Neustart</title>
+            <para>
+              Jeder <command>transactional-update-Lauf</command> zweigt seinen neuen Snapshot vom aktuell laufenden System ab, nicht von einem früheren Snapshot, den Sie noch nicht gebootet haben. Das erneute Ausführen des Befehls vor einem Neustart kombiniert die beiden Änderungen nicht: Nur der aktuellste Snapshot wird als nächstes gebootet und enthält nicht die frühere, noch nicht aktivierte Änderung. Starten Sie das System neu, um jede Änderung zu aktivieren, bevor Sie die nächste vornehmen.
+            </para>
+          </note>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </section>
+  <section xml:id="kernel-boot-parameters-modify-reason">
+    <title>Vorteile der Änderung von Kernel-Boot-Parametern</title>
+    <para>
+      Einige häufige Gründe für die Änderung von Kernel-Boot-Parametern:
+    </para>
+    <itemizedlist>
+      <listitem>
+        <formalpara>
+          <title>Leistung</title>
+          <para>
+            Optimieren Sie den Kernel für eine bestimmte Arbeitslast. Zum Beispiel, der <code>quiet</code> -Parameter unterdrückt die meisten Boot-Meldungen, was die Bootzeit verkürzt.
+          </para>
+        </formalpara>
+      </listitem>
+      <listitem>
+        <formalpara>
+          <title>Hardwarekompatibilität</title>
+          <para>
+            Umgehung einer Hardware-Besonderheit, die der Kernel standardmäßig falsch erkennt. Zum Beispiel, der
+            <code>acpi=off</code> -Parameter deaktiviert die Advanced Configuration and Power Interface (ACPI), was Boot-Probleme auf älterer Hardware lösen kann.
+          </para>
+        </formalpara>
+      </listitem>
+      <listitem>
+        <formalpara>
+          <title>Fehlersuche</title>
+          <para>
+            Isolierung eines Treibers oder Subsystems, das das Booten des Systems verhindert. Zum Beispiel: der <parameter>nomodeset</parameter> -Parameter deaktiviert das Kernel Mode Setting, was hilfreich ist, wenn ein Grafiktreiber das Booten des Systems verhindert.
+          </para>
+        </formalpara>
+      </listitem>
+    </itemizedlist>
+  </section>
+  <section xml:id="kernel-boot-parameters-modify-examples">
+    <title>Beispiele für häufig geänderte Kernel-Boot-Parameter</title>
+    <para>
+      Einige der am häufigsten geänderten Kernel-Boot-Parameter:
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term><parameter>root=</parameter></term>
+        <listitem>
+          <para>
+            Gibt den Pfad zum /Wurzel-Dateisystem an.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><parameter>quiet</parameter></term>
+        <listitem>
+          <para>
+            Unterdrückt die meisten Boot-Meldungen.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><parameter>splash</parameter></term>
+        <listitem>
+          <para>
+            Zeigt einen grafischen Boot-Splash-Bildschirm an.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><parameter>nomodeset</parameter></term>
+        <listitem>
+          <para>
+            Deaktiviert die Kernel-Mode-Einstellung.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><parameter>Fehlersuche</parameter></term>
+        <listitem>
+          <para>
+            Aktiviert die Debugging-Ausgabe.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><parameter>acpi=</parameter></term>
+        <listitem>
+          <para>
+            Schaltet die Einstellungen der Advanced Configuration and Power Interface (ACPI) um.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><parameter>selinux=0</parameter></term>
+        <listitem>
+          <para>
+            Deaktiviert SELinux, das standardmäßig unter &productnameshort; 16 aktiviert ist. Für den empfohlenen Ansatz, die <literal>permissive</literal> -Modus-Alternative und Informationen zum Neukennzeichnen des Dateisystems nach der erneuten Aktivierung von SELinux, siehe
+            <link os="sles" xlink:href="https://documentation.suse.com/sles/&productnumber;/html/SLES-SELinux/index.html#selinux-enable-disable">Deaktivieren und erneutes Aktivieren von SELinux</link><link os="sles4sap" xlink:href="https://documentation.suse.com/sles-sap/&productnumber;/html/SAP-SELinux/index.html#selinux-enable-disable">Deaktivieren und erneutes Aktivieren von SELinux</link>.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <para>
+      Für ein detailliertes Verständnis aller verfügbaren Kernel-Parameter und ihrer möglichen Werte ist die Quelldokumentation unter verfügbar:
+      <link
+      xlink:href="https://www.kernel.org/doc/Documentation/admin-guide/kernel-parameters.txt"/>.
+    </para>
+  </section>
+  <section xml:id="kernel-boot-parameters-modify-general-rules">
+    <title>Allgemeine Regeln für die Angabe von Werten für Kernel-Boot-Parameter</title>
+    <para>
+      Befolgen Sie beim Ändern von Kernel-Boot-Parametern diese grundlegenden Formatierungsregeln:
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>Grundlegende Parameterabstände</term>
+        <listitem>
+          <para>
+            Trennen Sie einzelne Parameter durch ein einzelnes Leerzeichen:
+          </para>
+          <itemizedlist>
+            <listitem>
+              <para>
+                Mit <command>update-bootloader</command>, fügen Sie jeden Parameter mit seinem eigenen
+                <option>--add-option</option> Aufruf hinzu. Der Befehl fügt den Abstand für Sie ein:
+              </para>
+<screen>&prompt.sudo;<command>update-bootloader --add-option quiet</command>
+&prompt.sudo;<command>update-bootloader --add-option splash</command></screen>
+            </listitem>
+            <listitem>
+              <para>
+                In der <filename>/etc/default/grub</filename> Konfigurationsdatei für &grub;, verwenden Sie Leerzeichen zwischen Kernel-Parametern, wenn Sie diese als String-Werte an den übergeben.
+                <varname>GRUB_CMDLINE_LINUX</varname> oder
+                <varname>GRUB_CMDLINE_LINUX_DEFAULT</varname> Variablen.
+              </para>
+            </listitem>
+            <listitem>
+              <para>
+                Drücken Sie im Boot-Menü auf <keycap>E</keycap> zum Bearbeiten, suchen Sie die Zeile, die mit beginnt
+                <literal>linux</literal>, und fügen Sie Parameter mit Leerzeichen hinzu.
+              </para>
+            </listitem>
+          </itemizedlist>
+          <example>
+            <title>Trennen Sie einzelne Parameter durch ein einzelnes Leerzeichen</title>
+<screen>root=/dev/sda1 quiet splash</screen>
+          </example>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>Parameter-Wert-Zuweisung</term>
+        <listitem>
+          <para>
+            Verwenden Sie beim Zuweisen von Werten das Gleichheitszeichen (<literal>=</literal>) ohne Leerzeichen:
+          </para>
+          <example>
+            <title>Korrekte Methode zum Zuweisen von Werten zu Kernel-Parametern</title>
+<screen>root=/dev/sda1 video=1920x1080</screen>
+          </example>
+          <example>
+            <title>Falsche Methode zum Zuweisen von Werten zu Kernel-Parametern</title>
+<screen>root = /dev/sda1 video = 1920x1080</screen>
+          </example>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>Werte, die Leerzeichen enthalten</term>
+        <listitem>
+          <para>
+            Bei Werten, die Leerzeichen enthalten, unterscheidet sich die Handhabung je nach Methode:
+          </para>
+          <variablelist>
+            <varlistentry>
+              <term><command>update-bootloader</command></term>
+              <listitem>
+                <warning>
+                  <title>Konfigurationsbeschädigung durch nicht maskierte Leerzeichen</title>
+                  <para>
+                    <command>update-bootloader --add-option</command> setzt einen Wert nicht automatisch in Anführungszeichen oder maskiert ihn: Ein Wert, der ein Leerzeichen enthält, wird in zwei separate Boot-Parameter aufgeteilt, wodurch die Konfiguration beschädigt wird. Bearbeiten Sie für einen Wert, der Leerzeichen enthält,
+                    <filename>/etc/default/grub</filename> direkt oder verwenden Sie stattdessen das &grub; Boot-Menü, beide werden unten beschrieben.
+                  </para>
+                </warning>
+              </listitem>
+            </varlistentry>
+            <varlistentry>
+              <term>&grub; Konfigurationsdatei</term>
+              <listitem>
+                <para>
+                  Verwenden Sie entweder doppelte Anführungszeichen mit Escape-Zeichen oder verwenden Sie Backslashes.
+                </para>
+                <example>
+                  <title>Kernel-Parameterwerte mit Leerzeichen in der &grub; Konfigurationsdatei</title>
+<screen>GRUB_CMDLINE_LINUX="root=\"/dev/mapper/<replaceable>BENUTZER-BAND</replaceable>\""</screen>
+<screen>GRUB_CMDLINE_LINUX="root=/dev/mapper/<replaceable>BENUTZER<emphasis>\</emphasis> BAND</replaceable>"</screen>
+                </example>
+              </listitem>
+            </varlistentry>
+            <varlistentry>
+              <term>&grub; Boot-Menü</term>
+              <listitem>
+                <para>
+                  Verwenden Sie für Werte mit Leerzeichen nur doppelte Anführungszeichen:
+                </para>
+                <example>
+                  <title>Kernel-Parameterwerte mit Leerzeichen im &grub; Boot-Menü</title>
+<screen>root="/dev/mapper/<replaceable>BENUTZER-BAND</replaceable>"</screen>
+                </example>
+              </listitem>
+            </varlistentry>
+          </variablelist>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>Mehrere Werte für einen Kernel-Boot-Parameter</term>
+        <listitem>
+          <para>
+            Verwenden Sie Kommas ohne Leerzeichen, um mehrere Werte für einen einzelnen Parameter in allen Methoden zu trennen:
+          </para>
+          <example>
+            <title>Mehrere Werte für einen Kernel-Boot-Parameter</title>
+<screen>module_blacklist=nouveau,radeon</screen>
+          </example>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </section>
+</topic>

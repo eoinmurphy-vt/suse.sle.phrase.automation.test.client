@@ -1,0 +1,12 @@
+<!DOCTYPE important [
+  <!ENTITY % entities SYSTEM "../common/generic-entities.ent">
+  %entities;
+]>
+<important  xmlns="http://docbook.org/ns/docbook"  version="5.2"
+xmlns:xi="http://www.w3.org/2001/XInclude" 
+xmlns:xlink="http://www.w3.org/1999/xlink">
+  <title>Ein Upgrade ist nur von der Version 5.5 möglich.</title>
+  <para>
+    Wenn Sie ein Upgrade von einer anderen 5.X-Version als 5.5 durchführen, müssen Sie zuerst auf 5.5 migrieren, bevor Sie das Upgrade auf 6.0 starten.
+  </para>
+</important>

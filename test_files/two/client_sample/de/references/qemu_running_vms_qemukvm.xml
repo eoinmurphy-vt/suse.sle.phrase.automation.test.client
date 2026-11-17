@@ -1,0 +1,1512 @@
+<?xml version="1.0"?><!DOCTYPE topic [
+  <!ENTITY % entities SYSTEM "../common/generic-entities.ent">
+  %entities;
+]>
+
+<topic xml:id="qemu-running-vms-qemukvm" role="reference" xml:lang="de" xmlns="http://docbook.org/ns/docbook" version="5.2" xmlns:its="http://www.w3.org/2005/11/its" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:trans="http://docbook.org/ns/transclusion">
+  <title>Ausführen virtueller Maschinen mit <command>qemu-system</command></title>
+  <info xmlns:d="http://docbook.org/ns/docbook">
+    <dm:docmanager xmlns:dm="urn:x-suse:ns:docmanager">
+      <dm:bugtracker/>
+      <dm:translation>Ja</dm:translation>
+    </dm:docmanager>
+  <revhistory xml:id="rh-qemu-running">
+   <revision>
+     <date>2025-12-02</date>
+     <revdescription>
+       <para/>
+     </revdescription>
+   </revision>
+ </revhistory>
+</info>
+  <para>
+    Sobald Sie ein fertiges virtuelles Festplatten-Image haben (weitere Informationen zu Festplatten-Images finden Sie unter <xref linkend="qemu-guest-inst-qemu-img"/>), können Sie die zugehörige virtuelle Maschine starten.
+    <xref linkend="qemu-guest-inst-qemu-kvm"/> führte einfache Befehle zum Installieren und Ausführen einer &vmguest; ein. Dieser Artikel konzentriert sich auf eine detailliertere Erklärung der <command>qemu-system-ARCH</command> Nutzung und zeigt Lösungen für spezifischere Aufgaben. Eine vollständige Liste der
+    <command>qemu-system-ARCH</command>-Optionen finden Sie auf der zugehörigen Manpage (<command>man 1 qemu</command>).
+  </para>
+  <section xml:id="qemu-running-basic">
+    <title>Basic <command>qemu-system-ARCH</command> Aufrufe</title>
+
+    <para>
+      Der <command>qemu-system-ARCH</command> -Befehl verwendet die folgende Syntax:
+    </para>
+
+<screen>qemu-system-ARCH <replaceable>OPTIONEN</replaceable><co xml:id="co-qemu-running-basic-opts"/> -drive file=<replaceable>DISK_IMAGE</replaceable><co xml:id="co-qemu-running-basic-img"/></screen>
+
+    <calloutlist>
+      <callout arearefs="co-qemu-running-basic-opts">
+        <para>
+          <command>qemu-system-ARCH</command> versteht viele Optionen. Die meisten davon definieren Parameter der emulierten Hardware, während andere das allgemeinere Verhalten des Emulators beeinflussen. Wenn Sie keine Optionen angeben, werden Standardwerte verwendet, und Sie müssen den Pfad zu einem auszuführenden Festplatten-Image angeben.
+        </para>
+      </callout>
+      <callout arearefs="co-qemu-running-basic-img">
+        <para>
+          Pfad zum Festplatten-Image, das das zu virtualisierende Gastsystem enthält. <command>qemu-system-ARCH</command> unterstützt viele Bildformate. Verwendung: <command>qemu-img</command> <option>--help</option> um diese aufzulisten.
+        </para>
+      </callout>
+    </calloutlist>
+
+    <important>
+      <title>&aarch64; Architektur</title>
+      <para>
+        &kvm; Unterstützung ist nur für 64-Bit Arm® Architektur (&aarch64;) verfügbar. Das Ausführen von &qemu; auf der &aarch64; Architektur erfordert die Angabe von:
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            Ein Maschinentyp, der für &qemu; Arm® virtuelle Maschinen unter Verwendung der
+            <option>-machine virt-<replaceable>VERSION_NUMMER</replaceable></option> option.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            Eine Firmware-Imagedatei unter Verwendung der <option>-bios</option> option.
+          </para>
+          <para>
+            Sie können die Firmware-Imagedateien alternativ unter Verwendung der folgenden Optionen angeben:
+            <option>-drive</option> Optionen, zum Beispiel:
+          </para>
+<screen>
+-drive file=/usr/share/qemu/ovmf-aarch64-code.bin,if=pflash,format=raw,readonly=on -drive file=/usr/share/qemu/ovmf-aarch64-vars.bin,if=pflash,format=raw
+</screen>
+        </listitem>
+        <listitem>
+          <para>
+            Eine CPU der &vmhost; unter Verwendung der <option>-cpu host</option> Option (Standard ist <option>cortex-15</option>).
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            Die gleiche Version des Generic Interrupt Controller (GIC) wie der Host unter Verwendung von <option>-machine gic-version=host</option> Option (Standard ist <option>2</option>).
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            Wenn ein Grafikmodus benötigt wird, ein Grafikgerät vom Typ
+            <literal>virtio-gpu-pci</literal>.
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        Zum Beispiel:
+      </para>
+<screen>
+&prompt.sudo;qemu-system-aarch64 [...] \ -bios /usr/share/qemu/ovmf-aarch64-code.bin \ -cpu host \ -device virtio-gpu-pci \ -machine virt,accel=kvm,gic-version=host
+</screen>
+    </important>
+  </section>
+  <section xml:id="qemu-running-gen-opts">
+    <title>Allgemein <command>qemu-system-ARCH</command> Optionen</title>
+
+    <para>
+      Dieser Abschnitt stellt allgemeine <command>qemu-system-ARCH</command>
+      Optionen sowie Optionen bezüglich der grundlegenden emulierten Hardware vor, wie etwa den Prozessor, den Arbeitsspeicher, den Modelltyp oder die Zeitverarbeitungsmethoden der virtuellen Maschine.
+    </para>
+
+    <variablelist>
+      <varlistentry>
+        <term><literal>-name <replaceable>NAME_OF_GUEST</replaceable></literal></term>
+        <listitem>
+          <para>
+            Gibt den Namen des laufenden Gastsystems an. Der Name wird in der Fensterbeschriftung angezeigt und für den VNC-Server verwendet.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><literal>-boot <replaceable>OPTIONEN</replaceable></literal></term>
+        <listitem>
+          <para>
+            Gibt die Reihenfolge an, in der die definierten Laufwerke gebootet werden. Laufwerke werden durch Buchstaben dargestellt, wobei <literal>a</literal> und
+            <literal>b</literal> für die Diskettenlaufwerke 1 und 2 stehen,
+            <literal>c</literal> für die erste Festplatte steht,
+            <literal>d</literal> für das erste CD-ROM-Laufwerk steht und
+            <literal>n</literal> zu <literal>p</literal> stehen für Ether-boot-Netzwerkadapter.
+          </para>
+          <para>
+            Zum Beispiel, <literal>qemu-system-ARCH [...] -boot order=ndc</literal> versucht zuerst, vom Netzwerk zu booten, dann vom ersten CD-ROM-Laufwerk und schließlich von der ersten Festplatte.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><literal>-pidfile <replaceable>DATEINAME</replaceable></literal></term>
+        <listitem>
+          <para>
+            Speichert die Prozessidentifikationsnummer (PID) von &qemu; in einer Datei. Dies ist nützlich, wenn Sie &qemu; aus einem Skript heraus ausführen.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><literal>-nodefaults</literal></term>
+        <listitem>
+          <para>
+            Standardmäßig erstellt &qemu; grundlegende virtuelle Geräte, selbst wenn Sie diese nicht auf der Befehlszeile angeben. Diese Option schaltet diese Funktion aus, und Sie müssen jedes einzelne Gerät manuell angeben, einschließlich Grafik- und Netzwerkkarten, paralleler oder serieller Schnittstellen oder virtueller Konsolen. Sogar der &qemu;-Monitor ist standardmäßig nicht angeschlossen.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><literal>-daemonize</literal></term>
+        <listitem>
+          <para>
+            <quote>Daemonisiert</quote> den &qemu;-Prozess, nachdem er gestartet wurde. &qemu; trennt sich von der Standardeingabe und Standardausgabe, nachdem es bereit ist, Verbindungen auf einem seiner Geräte zu empfangen.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+
+    <note>
+      <title>SeaBIOS BIOS-Implementierung</title>
+      <para>
+        SeaBIOS ist das verwendete Standard-BIOS. Sie können USB-Geräte sowie jedes Laufwerk (CD-ROM, Diskette oder eine Festplatte) booten. Es bietet Unterstützung für USB-Maus und -Tastatur und unterstützt mehrere VGA-Karten. Weitere Informationen zu SeaBIOS finden Sie auf der <link xlink:href="https://www.seabios.org/SeaBIOS">SeaBIOS-Website</link>.
+      </para>
+    </note>
+
+    <section xml:id="qemu-running-gen-opts-basic">
+      <title>Grundlegende virtuelle Hardware</title>
+      <para/>
+      <section xml:id="sec-qemu-running-gen-opts-machine">
+        <title>Maschinentyp</title>
+        <para>
+          Sie können den Typ der emulierten Maschine angeben. ausführen.
+          <command>qemu-system-ARCH -M help</command> um eine Liste der unterstützten Maschinentypen anzuzeigen.
+        </para>
+        <note>
+          <title>ISA-PC</title>
+          <para>
+            Der Maschinentyp <emphasis>isapc: ISA-only-PC</emphasis> wird nicht unterstützt.
+          </para>
+        </note>
+      </section>
+      <section xml:id="qemu-running-gen-opts-basic-cpu">
+        <title>CPU-Modell</title>
+        <para>
+          Um den Typ des Prozessormodells (CPU) anzugeben, führen Sie folgenden Befehl aus:
+          <command>qemu-system-ARCH -cpu</command>
+          <replaceable>MODELL</replaceable>. Verwendung: <command>qemu-system-ARCH -cpu help</command> um eine Liste der unterstützten CPU-Modelle anzuzeigen.
+        </para>
+      </section>
+      <section xml:id="qemu-running-gen-opts-basic-others">
+        <title>Weitere grundlegende Optionen</title>
+        <para>
+          Im Folgenden finden Sie eine Liste der am häufigsten verwendeten Optionen beim Starten
+          <emphasis>qemu</emphasis> über die Befehlszeile. Um alle verfügbaren Optionen zu sehen, lesen Sie die <emphasis>qemu-doc</emphasis> Manpage.
+        </para>
+        <variablelist>
+          <varlistentry>
+            <term><literal>-m <replaceable>MEGABYTE</replaceable></literal></term>
+            <listitem>
+              <para>
+                Gibt an, wie viele Megabyte für die virtuelle RAM-Größe verwendet werden.
+              </para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term><literal>-balloon virtio</literal></term>
+            <listitem>
+              <para>
+                Gibt ein paravirtualisiertes Gerät an, um die Menge des dem &vmguest; zugewiesenen virtuellen RAMs dynamisch zu ändern. Die Obergrenze ist die Speichermenge, die mit angegeben wurde <literal>-m</literal>.
+              </para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term><literal>-smp <replaceable>NUMBER_OF_CPUS</replaceable></literal></term>
+            <listitem>
+              <para>
+                Gibt an, wie viele CPUs emuliert werden sollen. &qemu; unterstützt bis zu 255 CPUs auf der PC-Plattform (bis zu 64 bei Verwendung der &kvm;-Beschleunigung). Diese Option akzeptiert auch andere CPU-bezogene Parameter, wie die Anzahl der <emphasis>Sockel</emphasis>, die Anzahl der <emphasis>Sockel</emphasis>, die Anzahl der
+                <emphasis>Kerne</emphasis>  pro Sockel oder die Anzahl der
+                <emphasis>Threads</emphasis>  pro Kern.
+              </para>
+            </listitem>
+          </varlistentry>
+        </variablelist>
+        <para>
+          Das Folgende ist ein Beispiel für eine funktionierende
+          <command>qemu-system-ARCH</command> Kommandozeile:
+        </para>
+<screen>
+&prompt.sudo;qemu-system-x86_64 \ -name "&productnameshort; &productnumber;" \ -M pc-q35-8.2 -m 512 \ -machine accel=kvm -cpu kvm64 -smp 2 \ -drive format=raw,file=/images/sles.raw
+</screen>
+        <figure>
+          <title>&qemu; Fenster mit &productnameshort; als &vmguest;</title>
+          <mediaobject>
+            <imageobject role="fo">
+              <imagedata fileref="qemu_win_sles.png" width="70%"/>
+            </imageobject>
+            <imageobject role="html">
+              <imagedata fileref="qemu_win_sles.png" width="70%"/>
+            </imageobject>
+          </mediaobject>
+        </figure>
+        <variablelist>
+          <varlistentry>
+            <term><literal>-no-acpi</literal></term>
+            <listitem>
+              <para>
+                Deaktiviert <xref linkend="gloss-vt-acpi"/> support.
+              </para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term><literal>-S</literal></term>
+            <listitem>
+              <para>
+                &qemu; startet mit angehaltener CPU. Um die CPU zu starten, geben Sie
+                <literal>c</literal> im &qemu; monitor ein. Für weitere Informationen siehe <xref linkend="qemu-monitor"/>.
+              </para>
+            </listitem>
+          </varlistentry>
+        </variablelist>
+      </section>
+    </section>
+
+    <section xml:id="qemu-running-gen-opts-storing-cong">
+      <title>Speichern und Lesen der Konfiguration virtueller Geräte</title>
+      <variablelist>
+        <varlistentry>
+          <term><literal>-readconfig <replaceable>CFG_FILE</replaceable></literal></term>
+          <listitem>
+            <para>
+              Anstatt die Gerätekonfigurationsoptionen jedes Mal in der Befehlszeile einzugeben, wenn Sie &vmguest; ausführen möchten,
+              <command>qemu-system-ARCH</command> kann diese aus einer Datei lesen, die entweder zuvor mit <literal>-writeconfig</literal>
+              oder manuell bearbeitet wurde.
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><literal>-writeconfig <replaceable>CFG_FILE</replaceable></literal></term>
+          <listitem>
+            <para>
+              Gibt die Gerätekonfiguration der aktuellen virtuellen Maschine in eine Textdatei aus. Sie kann folglich mit dem Befehl
+              <literal>-readconfig</literal> option.
+            </para>
+<screen>
+&prompt.sudo;qemu-system-x86_64 -name "&productnameshort; &productnumber;" \ -machine accel=kvm -M pc-i440fx-2.7 -m 512 -cpu kvm64 \ -smp 2 /images/sles.raw -writeconfig /images/sles.cfg (beendet) &prompt.user;cat /images/sles.cfg # qemu config file [drive] index = "0" media = "disk" file = "/images/sles_base.raw"
+</screen>
+            <para>
+              Auf diese Weise können Sie die Konfiguration der Geräte Ihrer virtuellen Maschinen effektiv und übersichtlich verwalten.
+            </para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </section>
+
+    <section xml:id="qemu-running-gen-opts-rtc">
+      <title>Echtzeituhr des Gastsystems</title>
+      <variablelist>
+        <varlistentry>
+          <term><literal>-rtc <replaceable>OPTIONEN</replaceable></literal></term>
+          <listitem>
+            <para>
+              Gibt an, wie die RTC innerhalb eines &vmguest; gehandhabt wird. Standardmäßig wird die Uhr des Gastsystems von der des Hostsystems abgeleitet. Daher empfehlen wir, die Hostsystemuhr mit einer genauen externen Uhr zu synchronisieren, beispielsweise über einen NTP-Dienst.
+            </para>
+            <para>
+              Wenn Sie die &vmguest; Uhr von der des Hosts isolieren müssen, geben Sie <literal>clock=vm</literal> anstelle des Standardwerts
+              <literal>clock=host</literal>.
+            </para>
+            <para>
+              Sie können auch die Anfangszeit der Uhr der &vmguest; mit der <literal>Basis</literal> Option angeben:
+            </para>
+<screen>&prompt.sudo;qemu-system-x86_64 [...] -rtc clock=vm,base=2010-12-03T01:02:00</screen>
+            <para>
+              Anstelle eines Zeitstempels können Sie <literal>utc</literal>
+              oder <literal>localtime</literal>. Ersteres weist &vmguest; an, mit dem aktuellen UTC-Wert zu starten (Coordinated Universal Time, siehe <link xlink:href="https://en.wikipedia.org/wiki/UTC"/>), während Letzteres die lokale Zeiteinstellung anwendet.
+            </para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </section>
+  </section>
+  <section xml:id="qemu-running-devices">
+    <title>Verwendung von Geräten in &qemu;</title>
+
+    <para>
+      &qemu; virtuelle Maschinen emulieren alle Geräte, die zum Ausführen eines &vmguest; benötigt werden. &qemu; unterstützt zum Beispiel verschiedene Arten von Netzwerkkarten, Blockgeräten (Festplatten und Wechseldatenträger), USB-Geräten, Zeichengeräten (serielle und parallele Anschlüsse) oder Multimedia-Geräten (Grafik- und Soundkarten). Dieser Abschnitt stellt Optionen zum Konfigurieren mehrerer Arten unterstützter Geräte vor.
+    </para>
+
+    <tip>
+      <para>
+        Wenn Ihr Gerät, wie zum Beispiel <literal>-drive</literal>, einen speziellen Treiber und einzustellende Treibereigenschaften benötigt, geben Sie diese mit der
+        <literal>-device</literal> Option an und identifizieren Sie sie mit der
+        <literal>drive=</literal> suboption. Zum Beispiel:
+      </para>
+<screen>&prompt.sudo;qemu-system-x86_64 [...] -drive if=none,id=drive0,format=raw \ -device virtio-blk-pci,drive=drive0,scsi=off ...</screen>
+      <para>
+        Um Hilfe zu verfügbaren Treibern und deren Eigenschaften zu erhalten, verwenden Sie
+        <option>-device ?</option> und <option>-device
+        <replaceable>DRIVER</replaceable>,?</option>.
+      </para>
+    </tip>
+
+    <section xml:id="qemu-running-devices-block">
+      <title>Blockgeräte</title>
+      <para>
+        Blockgeräte sind für virtuelle Maschinen unerlässlich. Dies sind feste oder entfernbare Speichermedien, die als <emphasis>Laufwerke</emphasis>. Eine der angeschlossenen Festplatten enthält typischerweise das zu virtualisierende Gastbetriebssystem.
+      </para>
+      <para>
+        <xref linkend="gloss-vt-vm"/> Laufwerke werden definiert mit
+        <literal>-drive</literal>. Diese Option hat viele Unteroptionen, von denen einige in diesem Abschnitt beschrieben werden. Die vollständige Liste finden Sie in der Manpage (<command>man 1 qemu</command>).
+      </para>
+      <variablelist>
+        <title>Unteroptionen für die <literal>-drive</literal> Option</title>
+        <varlistentry>
+          <term><literal>file=image_fname</literal></term>
+          <listitem>
+            <para>
+              Gibt den Pfad zum Disk-Image an, das mit diesem Laufwerk verwendet werden muss. Wenn nicht angegeben, wird ein leeres (entfernbares) Laufwerk angenommen.
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><literal>if=drive_interface</literal></term>
+          <listitem>
+            <para>
+              Gibt den Schnittstellentyp an, mit dem das Laufwerk verbunden ist. Derzeit nur <literal>floppy</literal>,
+              <literal>scsi</literal>, <literal>IDE</literal>, oder
+              <literal>virtio</literal> werden von &suse; unterstützt.
+              <literal>virtio</literal> definiert einen paravirtualisierten Festplattentreiber. Standard ist <literal>IDE</literal>.
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><literal>index=index_of_connector</literal></term>
+          <listitem>
+            <para>
+              Gibt die Indexnummer eines Anschlusses an der Festplattenschnittstelle an (siehe die <literal>falls</literal> Option), an dem das Laufwerk angeschlossen ist. Wenn nicht angegeben, wird der Index automatisch erhöht.
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><literal>media=type</literal></term>
+          <listitem>
+            <para>
+              Gibt den Medientyp an. Kann sein <literal>Festplatte</literal> für Festplatten oder <literal>cdrom</literal> für wechselbare CD-ROM-Laufwerke.
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><literal>format=img_fmt</literal></term>
+          <listitem>
+            <para>
+              Gibt das Format des verbundenen Festplatten-Abbilds an. Wenn nicht angegeben, wird das Format automatisch erkannt. Derzeit unterstützt &suse;
+              <literal>raw</literal> und <literal>qcow2</literal> Formate.
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><literal>cache=method</literal></term>
+          <listitem>
+            <para>
+              Gibt die Caching-Methode für das Laufwerk an. Mögliche Werte sind
+              <literal>unsafe</literal>, <literal>writethrough</literal>,
+              <literal>writeback</literal>, <literal>directsync</literal>, oder
+              <literal>Keine</literal>. Um die Leistung bei der Verwendung des
+              <literal>qcow2</literal> Image-Formats zu verbessern, wählen Sie
+              <literal>writeback</literal>. <literal>Keine</literal> deaktiviert den Host-Seitencache und ist daher die sicherste Option. Der Standardwert für Image-Dateien ist <literal>writeback</literal>. Für weitere Informationen siehe <link xlink:href="https://documentation.suse.com/sles/&productnumber;/html/SLES-virtualization-disk-cache/index.html#virtual-disk-cache">Virtueller Festplattencache</link>.
+            </para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+      <tip>
+        <para>
+          Um die Definition von Blockgeräten zu vereinfachen, versteht &qemu; mehrere Abkürzungen, die Sie bei der Eingabe der
+          <literal>qemu-system-ARCH</literal> Kommandozeile nützlich finden könnten.
+        </para>
+        <para>
+          Sie können verwenden
+        </para>
+<screen>&prompt.sudo;qemu-system-x86_64 -cdrom /images/cdrom.iso</screen>
+        <para>
+          anstelle von
+        </para>
+<screen>&prompt.sudo;qemu-system-x86_64 -drive format=raw,file=/images/cdrom.iso,index=2,media=cdrom</screen>
+        <para>
+          und
+        </para>
+<screen>&prompt.sudo;qemu-system-x86_64 -hda /images/imagei1.raw -hdb /images/image2.raw -hdc \ /images/image3.raw -hdd /images/image4.raw</screen>
+        <para>
+          anstelle von
+        </para>
+<screen>&prompt.sudo;qemu-system-x86_64 -drive format=raw,file=/images/image1.raw,index=0,media=disk \ -drive format=raw,file=/images/image2.raw,index=1,media=disk \ -drive format=raw,file=/images/image3.raw,index=2,media=disk \ -drive format=raw,file=/images/image4.raw,index=3,media=disk</screen>
+      </tip>
+      <tip>
+        <title>Verwendung von Host-Laufwerken anstelle von Images</title>
+        <para>
+          Als Alternative zur Verwendung von Disk-Images (siehe
+          <xref linkend="qemu-guest-inst-qemu-img"/>) können Sie auch vorhandene &vmhost; Disks verwenden, sie als Laufwerke verbinden und von &vmguest; aus darauf zugreifen. Verwenden Sie das Host-Disk-Gerät direkt anstelle von Disk-Image-Dateinamen.
+        </para>
+        <para>
+          Um auf das Host-CD-ROM-Laufwerk zuzugreifen, verwenden Sie
+        </para>
+<screen>&prompt.sudo;qemu-system-x86_64 [...] -drive file=/dev/cdrom,media=cdrom</screen>
+        <para>
+          Um auf die Host-Festplatte zuzugreifen, verwenden Sie
+        </para>
+<screen>&prompt.sudo;qemu-system-x86_64 [...] -drive file=/dev/hdb,media=disk</screen>
+        <para>
+          Ein von einer &vmguest; genutztes Host-Laufwerk darf nicht gleichzeitig vom &vmhost; oder einer anderen &vmguest; verwendet werden.
+        </para>
+      </tip>
+      <section xml:id="kvm-freedisk">
+        <title>Freigeben von ungenutztem Gast-Festplattenspeicher</title>
+        <para>
+          A <xref linkend="gloss-vt-storage-sparse"/> ist eine Art von Disk-Image-Datei, die mit der vom Benutzer hinzugefügten Datenmenge wächst und nur so viel Speicherplatz belegt, wie tatsächlich darin gespeichert ist. Wenn Sie beispielsweise 1&nbsp;GB Daten in das Sparse-Disk-Image kopieren, wächst dessen Größe um 1 GB. Wenn Sie anschließend beispielsweise 500&nbsp;MB der Daten löschen, verringert sich die Image-Größe standardmäßig nicht wie erwartet.
+        </para>
+        <para>
+          Dies ist der Grund, warum die <option>discard=on</option> Option in der &kvm; Befehlszeile eingeführt wurde. Sie weist den Hypervisor an, die <quote>Löcher</quote> nach dem Löschen von Daten aus dem Sparse-Gast-Image automatisch freizugeben. Diese Option ist nur für die
+          <literal>if=scsi</literal> Laufwerksschnittstelle gültig:
+        </para>
+<screen>&prompt.sudo;qemu-system-x86_64 [...] -drive format=<replaceable>img_format</replaceable>,file=<replaceable>/path/to/file.img</replaceable>,if=scsi,discard=on</screen>
+        <important>
+          <title>Support-Status</title>
+          <para>
+            <option>if=scsi</option> wird nicht unterstützt. Diese Schnittstelle wird nicht auf <emphasis>virtio-scsi</emphasis>abgebildet, sondern auf den
+            <emphasis>lsi SCSI-Adapter</emphasis>.
+          </para>
+        </important>
+      </section>
+      <section xml:id="kvm-iothreads">
+        <title>IOThreads</title>
+        <para>
+          IOThreads sind dedizierte Event-Loop-Threads für Virtio-Geräte zur Ausführung von E/A-Anfragen, um die Skalierbarkeit zu verbessern, insbesondere auf einem SMP &vmhost; mit SMP &vmguest;s, die viele Festplattengeräte verwenden. Anstatt das Haupt-Event-Loop von &qemu; für die E/A-Verarbeitung zu verwenden, ermöglichen IOThreads die Verteilung der E/A-Arbeit auf mehrere CPUs und können bei korrekter Konfiguration die Latenz verbessern.
+        </para>
+        <para>
+          IOThreads werden durch die Definition von IOThread-Objekten aktiviert. Virtio-Geräte können diese Objekte dann für ihre E/A-Event-Loops verwenden. Viele Virtio-Geräte können ein einzelnes IOThread-Objekt verwenden, oder Virtio-Geräte und IOThread-Objekte können in einer 1:1-Zuordnung konfiguriert werden. Das folgende Beispiel erstellt ein einzelnes IOThread mit der ID
+          <literal>iothread0</literal>, das dann als Event-Loop für zwei virtio-blk-Geräte verwendet wird.
+        </para>
+<screen>&prompt.sudo;qemu-system-x86_64 [...] -object iothread,id=iothread0\ -drive if=none,id=drive0,cache=none,aio=native,\ format=raw,file=filename -device virtio-blk-pci,drive=drive0,scsi=off,\ iothread=iothread0 -drive if=none,id=drive1,cache=none,aio=native,\ format=raw,file=filename -device virtio-blk-pci,drive=drive1,scsi=off,\ iothread=iothread0 [...]</screen>
+        <para>
+          Das folgende qemu-Befehlszeilenbeispiel veranschaulicht eine 1:1-Zuordnung von Virtio-Gerät zu IOThread:
+        </para>
+<screen>&prompt.sudo;qemu-system-x86_64 [...] -object iothread,id=iothread0\ -object iothread,id=iothread1 -drive if=none,id=drive0,cache=none,aio=native,\ format=raw,file=filename -device virtio-blk-pci,drive=drive0,scsi=off,\ iothread=iothread0 -drive if=none,id=drive1,cache=none,aio=native,\ format=raw,file=filename -device virtio-blk-pci,drive=drive1,scsi=off,\ iothread=iothread1 [...]</screen>
+      </section>
+      <section xml:id="kvm-virtio-blk-use-bio">
+        <title>Bio-basierter E/A-Pfad für virtio-blk</title>
+        <para>
+          Für eine bessere Leistung von E/A-intensiven Anwendungen wurde in Kernel-Version 3.7 ein neuer E/A-Pfad für die virtio-blk-Schnittstelle eingeführt. Dieser bio-basierte Blockgerätetreiber überspringt den E/A-Scheduler, verkürzt dadurch den E/A-Pfad im Gast und weist eine geringere Latenz auf. Dies ist besonders nützlich für Hochgeschwindigkeitsspeichergeräte wie SSD-Festplatten.
+        </para>
+        <para>
+          Der Treiber ist standardmäßig deaktiviert. Um ihn zu verwenden, gehen Sie wie folgt vor:
+        </para>
+        <procedure>
+          <step>
+            <para>
+              Hängen Sie <option>virtio_blk.use_bio=1</option> an die Kernel-Befehlszeile des Gastes an. Sie können dies über
+              <menuchoice><guimenu>&yast;</guimenu><guimenu>System</guimenu><guimenu>Boot Loader</guimenu></menuchoice>.
+            </para>
+            <para>
+              Sie können dies auch durch Bearbeiten von
+              <filename>/etc/default/grub</filename>, suchen Sie nach der Zeile, die <option>GRUB_CMDLINE_LINUX_DEFAULT=</option>, und fügen Sie den Kernel-Parameter am Ende hinzu. Führen Sie dann
+              <command>grub2-mkconfig >/boot/grub2/grub.cfg</command> aus, um das grub2-Startmenü zu aktualisieren.
+            </para>
+          </step>
+          <step>
+            <para>
+              Starten Sie den Gast mit der neuen aktiven Kernel-Befehlszeile neu.
+            </para>
+          </step>
+        </procedure>
+        <tip>
+          <title>Bio-basierter Treiber auf langsamen Geräten</title>
+          <para>
+            Der bio-basierte virtio-blk-Treiber hilft nicht bei langsamen Geräten wie rotierenden Festplatten. Der Grund dafür ist, dass der Vorteil der Zeitplanung größer ist als das, was der verkürzte Bio-Pfad bietet. Verwenden Sie den bio-basierten Treiber nicht auf langsamen Geräten.
+          </para>
+        </tip>
+      </section>
+      <section xml:id="sec-qemu-running-devices-block-iscsi">
+        <title>Direkter Zugriff auf iSCSI-Ressourcen</title>
+        <!-- fate#320080 -->
+        <para>
+          &qemu; lässt sich jetzt integrieren mit <literal>libiscsi</literal>. Dies ermöglicht es &qemu;, direkt auf iSCSI-Ressourcen zuzugreifen und diese als Blockgeräte für virtuelle Maschinen zu verwenden. Diese Funktion erfordert keine Konfiguration des Host-iSCSI-Initiators, wie sie für ein auf libvirt iSCSI-Target basierendes Storage-Pool-Setup erforderlich ist. Stattdessen verbindet sie Gast-Speicherschnittstellen direkt mit einem iSCSI-Target-LUN über die User-Space-Bibliothek libiscsi. iSCSI-basierte Festplattengeräte können auch in der libvirt-XML-Konfiguration angegeben werden.
+        </para>
+        <note>
+          <title>RAW-Bildformat</title>
+          <para>
+            Diese Funktion ist nur bei Verwendung des RAW-Bildformats verfügbar, da das iSCSI-Protokoll bestimmte technische Einschränkungen aufweist.
+          </para>
+        </note>
+        <!--
+          &productnameshort;12SP2 &qemu; acquired a new way of accessing iscsi based
+          storage.
+          virt-manager does not provide a U/I to assist with this setup, so
+          manual libvirt domain xml changes for a guest are required.
+          Initiator names are pre-defined, based on vm uuid or name.
+          -->
+        <para>
+          Das Folgende ist die &qemu; Befehlszeilenschnittstelle für iSCSI-Konnektivität.
+        </para>
+        <note>
+          <title>virt-manager-Einschränkung</title>
+          <para>
+            Die Verwendung der libiscsi-basierten Speicherbereitstellung wird von der virt-manager-Schnittstelle noch nicht unterstützt, sondern müsste stattdessen durch direktes Bearbeiten der Gast-XML konfiguriert werden. Diese neue Art des Zugriffs auf iSCSI-basierten Speicher erfolgt über die Befehlszeile.
+          </para>
+        </note>
+<screen>&prompt.sudo;qemu-system-x86_64 -machine accel=kvm \ -drive file=iscsi://192.168.100.1:3260/iqn.2016-08.com.example:314605ab-a88e-49af-b4eb-664808a3443b/0,\ format=raw,if=none,id=mydrive,cache=none \ -device ide-hd,bus=ide.0,unit=0,drive=mydrive ...</screen>
+        <para>
+          Hier ist ein Beispielausschnitt einer Gast-Domain-XML, die das protokollbasierte iSCSI verwendet:
+        </para>
+<screen>&lt;devices> ... &lt;disk type='network' device='disk'> &lt;driver name='qemu' type='raw'/> &lt;source protocol='iscsi' name='iqn.2013-07.com.example:iscsi-nopool/2'> &lt;host name='example.com' port='3260'/> &lt;/source> &lt;auth username='myuser'> &lt;secret type='iscsi' usage='libvirtiscsi'/> &lt;/auth> &lt;target dev='vda' bus='virtio'/> &lt;/disk> &lt;/devices></screen>
+        <para>
+          Vergleichen Sie dies mit einem Beispiel, das den hostbasierten iSCSI-Initiator verwendet, den virt-manager einrichtet:
+        </para>
+<screen>&lt;devices> ... &lt;disk type='block' device='disk'> &lt;driver name='qemu' type='raw' cache='none' io='native'/> &lt;source dev='/dev/disk/by-path/scsi-0:0:0:0'/> &lt;target dev='hda' bus='ide'/> &lt;address type='drive' controller='0' bus='0' target='0' unit='0'/> &lt;/disk> &lt;controller type='ide' index='0'> &lt;address type='pci' domain='0x0000' bus='0x00' slot='0x01' function='0x1'/> &lt;/controller> &lt;/devices></screen>
+      </section>
+      <section xml:id="qemu-devices-block-rbd">
+        <title>Verwendung von RADOS-Blockgeräten mit &qemu;</title>
+        <para>
+          RADOS Block Devices (RBD) speichern Daten in einem Ceph-Cluster. Sie ermöglichen Snapshotting, Replikation und Datenkonsistenz. Sie können ein RBD von Ihren durch &kvm; verwalteten &vmguest;s ähnlich wie andere Blockgeräte verwenden.
+        </para>
+        <para os="sles">
+          Weitere Einzelheiten finden Sie im
+          <link xlink:href="https://documentation.suse.com/ses/html/ses-all/cha-ceph-kvm.html">&ses;
+          <citetitle>&admin;</citetitle>, Kapitel <citetitle>Ceph als Backend für eine &qemu; &kvm;-Instanz</citetitle></link>.
+        </para>
+      </section>
+    </section>
+
+    <section xml:id="qemu-running-devices-graphic">
+      <title>Grafikgeräte und Anzeigeoptionen</title>
+      <para>
+        Dieser Abschnitt beschreibt &qemu; Optionen, die den Typ der emulierten Grafikkarte und die Art und Weise beeinflussen, wie die grafische Ausgabe der &vmguest; angezeigt wird.
+      </para>
+      <section xml:id="qemu-running-devices-graphic-vga">
+        <title>Grafikkarten definieren</title>
+        <para>
+          &qemu; verwendet <literal>-vga</literal> um eine Grafikkarte zu definieren, die für die grafische Ausgabe der &vmguest; verwendet wird. Der <literal>-vga</literal>
+          Option versteht die folgenden Werte:
+        </para>
+        <variablelist>
+          <varlistentry>
+            <term><literal>Keine</literal></term>
+            <listitem>
+              <para>
+                Deaktiviert Grafikkarten auf &vmguest; (es wird keine Grafikkarte emuliert). Sie können weiterhin über die serielle Konsole auf die laufende &vmguest; zugreifen.
+              </para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term><literal>std</literal></term>
+            <listitem>
+              <para>
+                Emuliert eine standardmäßige VESA 2.0 VBE-Grafikkarte. Verwenden Sie diese, wenn Sie eine hohe Bildschirmauflösung auf der &vmguest; nutzen möchten.
+              </para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>qxl</term>
+            <listitem>
+              <para>
+                QXL ist eine paravirtualisierte Grafikkarte. Sie ist VGA-kompatibel (einschließlich VESA 2.0 VBE-Unterstützung). <literal>qxl</literal> wird empfohlen bei der Verwendung des <literal>spice</literal> Videoprotokolls.
+              </para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>virtio</term>
+            <listitem>
+              <para>
+                Paravirtualisierte VGA-Grafikkarte.
+              </para>
+            </listitem>
+          </varlistentry>
+        </variablelist>
+      </section>
+      <section xml:id="qemu-running-devices-graphic-display">
+        <title>Anzeigeoptionen</title>
+        <para>
+          Die folgenden Optionen beeinflussen die Art und Weise, wie die grafische Ausgabe von &vmguest; angezeigt wird.
+        </para>
+        <variablelist>
+          <varlistentry>
+            <term><literal>-display gtk</literal></term>
+            <listitem>
+              <para>
+                Videoausgabe in einem GTK-Fenster anzeigen. Diese Schnittstelle bietet UI-Elemente zum Konfigurieren und Steuern der VM während der Laufzeit.
+              </para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term><literal>-display sdl</literal></term>
+            <listitem>
+              <para>
+                Videoausgabe über SDL in einem separaten Grafikfenster anzeigen. Weitere Informationen finden Sie in der SDL-Dokumentation.
+              </para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term><literal>-spice option[,option[,...]]</literal></term>
+            <listitem>
+              <para>
+                Aktiviert das Spice-Remote-Desktop-Protokoll.
+              </para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term><literal>-display vnc</literal></term>
+            <listitem>
+              <para>
+                Siehe <xref linkend="qemu-running-vnc"/> für weitere Informationen.
+              </para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term><literal>-nographic</literal></term>
+            <listitem>
+              <para>
+                Deaktiviert die grafische Ausgabe von &qemu;. Der emulierte serielle Anschluss wird auf die Konsole umgeleitet.
+              </para>
+              <para>
+                Nach dem Starten der virtuellen Maschine mit
+                <literal>-nographic</literal>, drücken Sie
+                <keycombo><keycap function="control"/><keycap>A</keycap></keycombo>
+                <keycap>H</keycap> in der virtuellen Konsole, um die Liste weiterer nützlicher Tastenkombinationen anzuzeigen, zum Beispiel um zwischen der Konsole und dem &qemu;-Monitor umzuschalten.
+              </para>
+<screen>&prompt.sudo;qemu-system-x86_64 -hda /images/sles_base.raw -nographic C-a h diese Hilfe anzeigen C-a x Emulator beenden C-a s Festplattendaten zurück in die Datei speichern (falls -snapshot) C-a t Konsolen-Zeitstempel umschalten C-a b Unterbrechung senden (Magic SysRq) C-a c zwischen Konsole und Monitor wechseln C-a C-a sendet C-a (gedrückt C-a c) &qemu; 2.3.1 Monitor - geben Sie 'help' für weitere Informationen ein (qemu)</screen>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term><literal>-no-frame</literal></term>
+            <listitem>
+              <para>
+                Deaktiviert Dekorationen für das &qemu;-Fenster. Praktisch für einen dedizierten Desktop-Arbeitsbereich.
+              </para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term><literal>-full-screen</literal></term>
+            <listitem>
+              <para>
+                Startet die grafische Ausgabe von &qemu; im Vollbildmodus.
+              </para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term><literal>-no-quit</literal></term>
+            <listitem>
+              <para>
+                Deaktiviert die Schließen-Schaltfläche des &qemu;-Fensters und verhindert, dass es gewaltsam geschlossen wird.
+              </para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term><literal>-alt-grab</literal>, <literal>-ctrl-grab</literal></term>
+            <listitem>
+              <para>
+                Standardmäßig gibt das &qemu;-Fenster die
+                <quote>erfasste</quote> Maus nach dem Drücken von
+                <keycombo><keycap function="control"/><keycap function="alt"/></keycombo>. Sie können die Tastenkombination entweder auf ändern zu
+                <keycombo><keycap function="control"/><keycap function="alt"/><keycap function="shift"/></keycombo>
+                (<literal>-alt-grab</literal>), oder die rechte
+                <keycap function="control"/> Taste ("<literal>-ctrl-grab</literal>).
+              </para>
+            </listitem>
+          </varlistentry>
+        </variablelist>
+      </section>
+    </section>
+
+    <section xml:id="qemu-running-devices-usb">
+      <title>USB-Geräte</title>
+      <para>
+        Es gibt zwei Möglichkeiten, USB-Geräte zu erstellen, die vom &vmguest; in &kvm; verwendet werden können: Sie können entweder neue USB-Geräte innerhalb einer &vmguest; emulieren oder ein vorhandenes Host-USB-Gerät einem &vmguest; zuweisen. Um USB-Geräte in &qemu; zu verwenden, müssen Sie zuerst den generischen USB-Treiber mit dem aktivieren
+        <option>-usb</option> option. Anschließend können Sie einzelne Geräte angeben mit dem <option>-usbdevice</option> option.
+      </para>
+      <section xml:id="kvm-usb-emulate">
+        <title>Emulieren von USB-Geräten in &vmguest;</title>
+        <para>
+          &suse; unterstützt derzeit die folgenden Arten von USB-Geräten:
+          <literal>Festplatte</literal>, <literal>Gastgeber</literal>,
+          <literal>seriell</literal>, <literal>Braille</literal>,
+          <literal>Netzwerk</literal>, <literal>Maus</literal>und
+          <literal>Tablet</literal>.
+        </para>
+        <variablelist>
+          <title>Arten von USB-Geräten für die <literal>-usbdevice</literal> Option</title>
+          <varlistentry>
+            <term><literal>Festplatte</literal></term>
+            <listitem>
+              <para>
+                Emuliert ein Massenspeichergerät basierend auf einer Datei. Die optionale
+                <literal>Format</literal> Option wird verwendet, anstatt das Format zu erkennen.
+              </para>
+<screen>&prompt.sudo;qemu-system-x86_64 [...] -usbdevice disk:format=raw:/virt/usb_disk.raw</screen>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term><literal>Gastgeber</literal></term>
+            <listitem>
+              <para>
+                Durchreichen des Gastgeber-Geräts (identifiziert durch bus.addr).
+              </para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term><literal>seriell</literal></term>
+            <listitem>
+              <para>
+                Serieller Konverter für ein Host-Zeichengerät.
+              </para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term><literal>Braille</literal></term>
+            <listitem>
+              <para>
+                Emuliert ein Braille-Gerät unter Verwendung von BrlAPI, um die Braille-Ausgabe anzuzeigen.
+              </para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term><literal>Netzwerk</literal></term>
+            <listitem>
+              <para>
+                Emuliert einen Netzwerkadapter, der CDC-Ethernet- und RNDIS-Protokolle unterstützt.
+              </para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term><literal>Maus</literal></term>
+            <listitem>
+              <para>
+                Emuliert eine virtuelle USB-Maus. Diese Option überschreibt die standardmäßige PS/2-Maus-Emulation. Das folgende Beispiel zeigt den Hardware-Status einer Maus auf einem &vmguest;, das gestartet wurde mit
+                <literal>qemu-system-ARCH [...] -usbdevice mouse</literal>:
+              </para>
+<screen>&prompt.sudo;hwinfo --mouse 20: USB 00.0: 10503 USB-Maus [Erstellt unter usb.122] UDI: /org/freedesktop/Hal/devices/usb_device_627_1_1_if0 [...] Hardware-Klasse: Maus Modell: "Adomax &qemu; USB-Maus" Hotplug: USB Vendor: usb 0x0627 "Adomax Technology Co., Ltd" Device: usb 0x0001 "&qemu; USB Mouse" [...]</screen>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term><literal>Tablet</literal></term>
+            <listitem>
+              <para>
+                Emuliert ein Zeigegerät, das absolute Koordinaten verwendet (wie z. B. einen Touchscreen). Diese Option überschreibt die standardmäßige PS/2-Maus-Emulation. Das Tablet-Gerät ist nützlich, wenn Sie ein &vmguest; über das VNC-Protokoll anzeigen. Siehe
+                <xref linkend="qemu-running-vnc"/> für weitere Informationen.
+              </para>
+            </listitem>
+          </varlistentry>
+        </variablelist>
+      </section>
+    </section>
+
+    <section xml:id="qemu-running-devices-char">
+      <title>Zeichengeräte</title>
+      <para>
+        Verwenden Sie <literal>-chardev</literal> um ein neues Zeichengerät zu erstellen. Die Option verwendet die folgende allgemeine Syntax:
+      </para>
+<screen>qemu-system-x86_64 [...] -chardev <replaceable>BACKEND-TYP</replaceable>,id=<replaceable>ID_STRING</replaceable></screen>
+      <para>
+        wo <replaceable>BACKEND-TYP</replaceable> kann eines der folgenden sein
+        <literal>null</literal>, <literal>Steckdose</literal>,
+        <literal>UDP</literal>, <literal>msmouse</literal>,
+        <literal>vc</literal>, <literal>Datei</literal>,
+        <literal>Rohr</literal>, <literal>Konsole</literal>,
+        <literal>seriell</literal>, <literal>pty</literal>,
+        <literal>stdio</literal>, <literal>Braille</literal>,
+        <literal>tty</literal>, oder <literal>Parallelport</literal>. Alle Zeichengeräte müssen eine eindeutige Identifikationszeichenfolge von bis zu 127 Zeichen Länge haben. Es wird verwendet, um das Gerät in anderen zugehörigen Richtlinien zu identifizieren. Die vollständige Beschreibung aller Unteroptionen des Back-ends finden Sie in der Manpage (<command>man 1 qemu</command>). Eine kurze Beschreibung der verfügbaren <literal>Back-Ends</literal> folgt:
+      </para>
+      <variablelist>
+        <varlistentry>
+          <term><literal>null</literal></term>
+          <listitem>
+            <para>
+              Erstellt ein leeres Gerät, das keine Daten ausgibt und alle empfangenen Daten verwirft.
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><literal>stdio</literal></term>
+          <listitem>
+            <para>
+              Verbindet sich mit der Standardeingabe und Standardausgabe des Prozesses von &qemu;.
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><literal>Steckdose</literal></term>
+          <listitem>
+            <para>
+              Erstellt einen bidirektionalen Stream-Socket. Wenn der
+              <replaceable>PFAD</replaceable> angegeben ist, wird ein Unix-Socket erstellt:
+            </para>
+<screen>&prompt.sudo;qemu-system-x86_64 [...] -chardev \ socket,id=unix_socket1,path=/tmp/unix_socket1,server</screen>
+            <para>
+              Die <replaceable>SERVER</replaceable> -Unteroption gibt an, dass es sich bei dem Socket um einen wartenden Socket handelt.
+            </para>
+            <para>
+              Wenn der <replaceable>PORT</replaceable> ist angegeben, wird ein TCP-Socket erstellt:
+            </para>
+<screen>&prompt.sudo;qemu-system-x86_64 [...] -chardev \ socket,id=tcp_socket1,host=localhost,port=7777,server,nowait</screen>
+            <para>
+              Der Befehl erstellt einen lokalen wartenden (<literal>Server</literal>) TCP-Socket auf Port 7777. &qemu; blockiert nicht, während auf die Verbindung eines Clients mit dem wartenden Port gewartet wird (<literal>nowait</literal>).
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><literal>UDP</literal></term>
+          <listitem>
+            <para>
+              Sendet den gesamten Netzwerkverkehr vom &vmguest; über das UDP-Protokoll an einen Remote-Host.
+            </para>
+<screen>&prompt.sudo;qemu-system-x86_64 [...] \ -chardev udp,id=udp_fwd,host=&wsIVname;,port=7777</screen>
+            <para>
+              Der Befehl bindet Port 7777 auf dem Remote-Host &wsIVname; und sendet &vmguest; Netzwerkverkehr dorthin.
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><literal>vc</literal></term>
+          <listitem>
+            <para>
+              Erstellt eine neue &qemu; Textkonsole. Sie können optional die Abmessungen der virtuellen Konsole angeben:
+            </para>
+<screen>&prompt.sudo;qemu-system-x86_64 [...] -chardev vc,id=vc1,width=640,height=480 \ -mon chardev=vc1</screen>
+            <para>
+              Der Befehl erstellt eine neue virtuelle Konsole namens
+              <literal>vc1</literal> der angegebenen Größe und verbindet den &qemu; Monitor damit.
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><literal>Datei</literal></term>
+          <listitem>
+            <para>
+              Protokolliert den gesamten Datenverkehr vom &vmguest; in eine Datei auf dem &vmhost;. Die
+              <literal>Pfad</literal> ist erforderlich und wird automatisch erstellt, falls es nicht existiert.
+            </para>
+<screen>&prompt.sudo;qemu-system-x86_64 [...] \ -chardev file,id=qemu_log1,path=/var/log/qemu/guest1.log</screen>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+      <para>
+        Standardmäßig erstellt &qemu; eine Reihe von Zeichengeräten für serielle und parallele Schnittstellen sowie eine spezielle Konsole für den &qemu; Monitor. Sie können jedoch Ihre eigenen Zeichengeräte erstellen und diese für die genannten Zwecke verwenden. Die folgenden Optionen könnten Ihnen helfen:
+      </para>
+      <variablelist>
+        <varlistentry>
+          <term><literal>-serial <replaceable>CHAR_DEV</replaceable></literal></term>
+          <listitem>
+            <para>
+              Leitet den virtuellen seriellen Port des &vmguest; an ein Zeichengerät um <replaceable>CHAR_DEV</replaceable> auf &vmhost;. Standardmäßig ist dies eine virtuelle Konsole (<literal>vc</literal>) im grafischen Modus und <literal>stdio</literal> im nicht-grafischen Modus. Die <literal>-serial</literal> versteht viele Unteroptionen. Siehe die Manpage <command>man 1 qemu</command>
+              für eine vollständige Liste dieser.
+            </para>
+            <para>
+              Sie können bis zu vier serielle Schnittstellen emulieren. Verwenden Sie <literal>-serial none</literal> um alle seriellen Schnittstellen zu deaktivieren.
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><literal>-parallel <replaceable>GERÄT</replaceable></literal></term>
+          <listitem>
+            <para>
+              Leitet den Parallelport des &vmguest; an ein
+              <replaceable>GERÄT</replaceable>. Diese Option unterstützt dieselben Geräte wie <literal>-serial</literal>.
+            </para>
+            <tip>
+              <para>
+                Mit
+                <phrase os="sles">&sls;</phrase><phrase os="osuse">&opensuse; Leap</phrase> als &vmhost; können Sie die Hardware-Parallelport-Geräte direkt verwenden <filename>/dev/parportN</filename> wo
+                <literal>N</literal> ist die Nummer des Ports.
+              </para>
+            </tip>
+            <para>
+              Sie können bis zu drei parallele Schnittstellen emulieren. Verwenden Sie
+              <literal>-parallel none</literal> um alle parallelen Schnittstellen zu deaktivieren.
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><literal>-monitor <replaceable>CHAR_DEV</replaceable></literal></term>
+          <listitem>
+            <para>
+              Leitet den &qemu; monitor an ein Zeichengerät um
+              <replaceable>CHAR_DEV</replaceable> auf dem &vmhost;. Diese Option unterstützt dieselben Geräte wie <literal>-serial</literal>. Standardmäßig ist dies eine virtuelle Konsole (<literal>vc</literal>) im grafischen Modus und <literal>stdio</literal> im nicht-grafischen Modus.
+            </para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+      <para>
+        Eine vollständige Liste der verfügbaren Zeichen-Geräte-Back-ends finden Sie in der Manpage (<command>man 1 qemu</command>).
+      </para>
+    </section>
+  </section>
+  <section xml:id="qemu-running-networking">
+    <title>Vernetzung in &qemu;</title>
+
+    <para>
+      Verwenden Sie die <literal>-netdev</literal> Option in Kombination mit der
+      <option>-Gerät</option> Option, um einen bestimmten Typ der Vernetzung und eine Netzwerkschnittstellenkarte für Ihr &vmguest; zu definieren. Die Syntax für die
+      <option>-netdev</option> Option lautet:
+    </para>
+
+<screen>-netdev Typ[,Eigenschaft[=Wert][,...]]</screen>
+
+    <para>
+      Derzeit unterstützt &suse; die folgenden Netzwerktypen:
+      <literal>user</literal>, <literal>bridge</literal>und
+      <literal>tap</literal>. Eine vollständige Liste der <literal>-netdev</literal>
+      Unteroptionen finden Sie in der Manpage (<command>man 1 qemu</command>).
+    </para>
+
+    <variablelist>
+      <title>Unterstützte <literal>-netdev</literal> Unteroptionen</title>
+      <varlistentry>
+        <term><literal>bridge</literal></term>
+        <listitem>
+          <para>
+            Verwendet einen angegebenen Netzwerk-Helper, um die TAP-Schnittstelle zu konfigurieren und sie an eine angegebene Bridge anzubinden. Für weitere Informationen siehe
+            <xref linkend="qemu-running-networking-bridge"/>.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><literal>user</literal></term>
+        <listitem>
+          <para>
+            Gibt das Benutzermodus-Netzwerk an. Für weitere Informationen siehe
+            <xref linkend="qemu-running-networking-usermode"/>.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><literal>tap</literal></term>
+        <listitem>
+          <para>
+            Gibt gebridgtes oder geroutetes Netzwerk an. Für weitere Informationen siehe
+            <xref linkend="qemu-running-networking-bridge"/>.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+
+    <section xml:id="qemu-running-networking-nic">
+      <title>Definieren einer Netzwerkschnittstellenkarte</title>
+      <para>
+        Verwenden Sie <literal>-netdev</literal> zusammen mit der zugehörigen
+        <option>-Gerät</option> Option zum Hinzufügen einer neuen emulierten Netzwerkkarte:
+      </para>
+<screen>&prompt.sudo;qemu-system-x86_64 [...] \ -netdev tap<co xml:id="co-qemu-running-networking-nic-tap"/>,id=hostnet0 \ -device virtio-net-pci<co xml:id="co-qemu-running-networking-nic-drv"/>,netdev=hostnet0,\ mac=&wsIVmac;<co xml:id="co-qemu-running-networking-nic-mac"/></screen>
+      <calloutlist>
+        <callout arearefs="co-qemu-running-networking-nic-tap">
+          <para>
+            Gibt den Typ des Netzwerkgeräts an.
+          </para>
+        </callout>
+        <callout arearefs="co-qemu-running-networking-nic-drv">
+          <para>
+            Gibt das Modell der Netzwerkkarte an. Verwenden Sie
+            <command>qemu-system-ARCH -device help</command> und suchen Sie nach dem
+            <literal>Netzwerkgeräte:</literal> Abschnitt, um die Liste aller von &qemu; auf Ihrer Plattform unterstützten Netzwerkkartenmodelle zu erhalten.
+          </para>
+          <remark>cwickert 2017-09-01: noch aktuell?</remark>
+          <para>
+            Derzeit unterstützt &suse; die Modelle <literal>rtl8139</literal>,
+            <literal>e1000</literal> und deren Varianten
+            <literal>e1000-82540em</literal>, <literal>e1000-82544gc</literal>
+            und <literal>e1000-82545em</literal>und
+            <literal>virtio-net-pci</literal>. Um eine Liste der Optionen für einen bestimmten Treiber anzuzeigen, fügen Sie <option>help</option> als Treiberoption hinzu:
+          </para>
+<screen>&prompt.sudo;qemu-system-x86_64 -device e1000,help e1000 Optionen: acpi-index=&lt;uint32> - (Standard: 0) addr=&lt;str> - Slot- und optionale Funktionsnummer, Beispiel: 06.0 oder 06 (Standard: -1) bootindex=&lt;int32> busnr=&lt;busnr> extra_mac_registers=&lt;bool> - on/off (Standard: on) failover_pair_id=&lt;str> init-vet=&lt;bool> - on/off (Standard: on) mac=&lt;str> - Ethernet 6-Byte MAC-Adresse, Beispiel: 52:54:00:12:34:56 migrate_tso_props=&lt;bool> - on/off (Standard: on) multifunction=&lt;bool> - on/off (Standard: off) netdev=&lt;str> - ID eines netdev zur Verwendung als Backend rombar=&lt;int32> - (Standard: -1) romfile=&lt;str> romsize=&lt;uint32> - (Standard: 4294967295) x-max-bounce-buffer-size=&lt;size> - Maximale Puffergröße, die für Bounce-Puffer zugewiesen wird, welche für den zugeordneten Zugriff auf indirekten DMA-Speicher verwendet werden (Standard: 4096) x-pcie-ari-nextfn-1=&lt;bool> - on/off (Standard: off) x-pcie-err-unc-mask=&lt;bool> - on/off (Standard: on) x-pcie-ext-tag=&lt;bool> - on/off (Standard: on) x-pcie-extcap-init=&lt;bool> - on/off (Standard: on) x-pcie-lnksta-dllla=&lt;bool> - on/off (Standard: on)</screen>
+        </callout>
+        <callout arearefs="co-qemu-running-networking-nic-mac">
+          <para>
+            Gibt die Media Access Control (MAC)-Adresse für die Netzwerkkarte an. Es handelt sich um eine eindeutige Kennung, und es wird empfohlen, diese immer anzugeben. Falls nicht, stellt &qemu; eine eigene Standard-MAC-Adresse bereit, was zu einem MAC-Adresskonflikt mit einer anderen VM im selben Netzwerk führen kann.
+          </para>
+        </callout>
+      </calloutlist>
+    </section>
+
+    <section xml:id="qemu-running-networking-usermode">
+      <title>Benutzermodus-Netzwerkbetrieb</title>
+      <para>
+        Die <literal>-netdev user</literal> Die Option weist &qemu; an, den Benutzermodus-Netzwerkbetrieb zu verwenden. Dies ist die Standardeinstellung, wenn kein Netzwerkmodus ausgewählt ist. Daher sind diese Befehlszeilen äquivalent:
+      </para>
+<screen>&prompt.sudo;qemu-system-x86_64 -hda /images/sles_base.raw</screen>
+<screen>&prompt.sudo;qemu-system-x86_64 -hda /images/sles_base.raw -netdev user,id=hostnet0</screen>
+      <para>
+        Dieser Modus ist nützlich, um dem &vmguest; den Zugriff auf externe Netzwerkressourcen, wie zum Beispiel das Internet, zu ermöglichen. Standardmäßig ist kein eingehender Datenverkehr zulässig, weshalb das &vmguest; für andere Maschinen im Netzwerk nicht sichtbar ist. In diesem Netzwerkmodus sind keine Administratorrechte erforderlich. Der User-Mode ist auch nützlich, um einen Netzwerk-Boot auf Ihrem &vmguest; von einem lokalen Verzeichnis auf dem &vmhost; durchzuführen.
+      </para>
+      <para>
+        Das &vmguest; weist eine IP-Adresse von einem virtuellen DHCP-Server zu. &vmhost; (der DHCP-Server) ist unter 10.0.2.2 erreichbar, während der IP-Adressbereich für die Zuweisung bei 10.0.2.15 beginnt. Sie können
+        <command>ssh</command> verwenden, um eine Verbindung zum &vmhost; unter 10.0.2.2 herzustellen, und
+        <command>scp</command> , um Dateien hin und her zu kopieren.
+      </para>
+      <section xml:id="qemu-running-networking-usermode-examples">
+        <title>Beispiele für die Befehlszeile</title>
+        <para>
+          Dieser Abschnitt zeigt verschiedene Beispiele für die Einrichtung von User-Mode-Netzwerken mit &qemu;.
+        </para>
+        <example xml:id="ex-qemu-net-usermode-resctrict">
+          <title>Eingeschränktes User-Mode-Netzwerk</title>
+<screen>&prompt.sudo;qemu-system-x86_64 [...] \ -netdev user<co xml:id="co-usermode-user"/>,id=hostnet0<co xml:id="co-usermode-name"/>,restrict=yes<co xml:id="co-usermode-restrict"/> \ -device virtio-net-pci,netdev=hostnet0</screen>
+          <calloutlist>
+            <callout arearefs="co-usermode-user">
+              <para>
+                Gibt das Benutzermodus-Netzwerk an.
+              </para>
+            </callout>
+            <callout arearefs="co-usermode-name">
+              <para>
+                Weist dem Netzwerk-Backend einen symbolischen Namen zu. Verwenden Sie diesen Namen, um es im &qemu;-Monitor zu identifizieren.
+              </para>
+            </callout>
+            <callout arearefs="co-usermode-restrict">
+              <para>
+                Isoliert &vmguest;. Es kann dann nicht mit dem &vmhost; kommunizieren und es werden keine Netzwerkpakete an das externe Netzwerk weitergeleitet.
+              </para>
+            </callout>
+          </calloutlist>
+        </example>
+        <example xml:id="ex-qemu-net-usermode-iprange">
+          <title>Benutzermodus-Netzwerk mit einem benutzerdefinierten IP-Bereich</title>
+<screen>&prompt.sudo;qemu-system-x86_64 [...] \ -netdev user,id=hostnet0,net=10.2.0.0/8<co xml:id="co-usermode-net"/>,host=10.2.0.6<co xml:id="co-usermode-host"/>,\ dhcpstart=10.2.0.20<co xml:id="co-usermode-dhcpstart"/>,hostname=tux_kvm_guest<co xml:id="co-usermode-hostname"/> \ -device virtio-net-pci,netdev=hostnet0</screen>
+          <calloutlist>
+            <callout arearefs="co-usermode-net">
+              <para>
+                Gibt die IP-Adresse des Netzwerks an, das das &vmguest; sieht, sowie optional die Netzmaske. Die Standardeinstellung ist 10.0.2.0/8.
+              </para>
+            </callout>
+            <callout arearefs="co-usermode-host">
+              <para>
+                Gibt die &vmhost;-IP-Adresse an, die das &vmguest; sieht. Die Standardeinstellung ist 10.0.2.2.
+              </para>
+            </callout>
+            <callout arearefs="co-usermode-dhcpstart">
+              <para>
+                Gibt die erste der 16 IP-Adressen an, die der integrierte DHCP-Server einem &vmguest; zuweisen kann. Die Standardeinstellung ist 10.0.2.15.
+              </para>
+            </callout>
+            <callout arearefs="co-usermode-hostname">
+              <para>
+                Gibt den Hostnamen an, den der integrierte DHCP-Server dem &vmguest; zuweist.
+              </para>
+            </callout>
+          </calloutlist>
+        </example>
+        <example xml:id="ex-qemu-net-usermode-netboot-tftp">
+          <title>Benutzermodus-Netzwerk mit Netzwerk-Boot und TFTP</title>
+<screen>&prompt.sudo;qemu-system-x86_64 [...] \ -netdev user,id=hostnet0,tftp=/images/tftp_dir<co xml:id="co-usermode-tftp"/>,\ bootfile=/images/boot/pxelinux.0<co xml:id="co-usermode-bootfile"/> \ -device virtio-net-pci,netdev=hostnet0</screen>
+          <calloutlist>
+            <callout arearefs="co-usermode-tftp">
+              <para>
+                Aktiviert einen integrierten TFTP-Server (ein Dateiübertragungsprotokoll mit der Funktionalität eines einfachen FTP). Die Dateien im angegebenen Verzeichnis sind für ein &vmguest; als Stammverzeichnis eines TFTP-Servers sichtbar.
+              </para>
+            </callout>
+            <callout arearefs="co-usermode-bootfile">
+              <para>
+                Überträgt die angegebene Datei als BOOTP-Datei (ein Netzwerkprotokoll, das eine IP-Adresse und den Netzwerkspeicherort eines Boot-Images bereitstellt, oft verwendet bei diskless Workstations). Bei Verwendung zusammen mit <literal>tftp</literal>kann das &vmguest; über das Netzwerk vom lokalen Verzeichnis auf dem Host booten.
+              </para>
+            </callout>
+          </calloutlist>
+        </example>
+        <example xml:id="ex-qemu-net-usermode-hostfwd">
+          <title>Benutzermodus-Netzwerk mit Host-Port-Weiterleitung</title>
+<screen>&prompt.sudo;qemu-system-x86_64 [...] \ -netdev user,id=hostnet0,hostfwd=tcp::2222-:22 \ -device virtio-net-pci,netdev=hostnet0</screen>
+          <para>
+            Leitet eingehende TCP-Verbindungen an Port 2222 auf dem Host an Port 22 weiter (<systemitem class="service">SSH</systemitem>) auf dem &vmguest;. Wenn der <systemitem class="daemon">sshd</systemitem> auf dem &vmguest; ausgeführt wird, geben Sie ein
+          </para>
+<screen>&prompt.user;ssh qemu_host -p 2222</screen>
+          <para>
+            wo <literal>qemu_host</literal> ist der Hostname oder die IP-Adresse des Hostsystems, um eine
+            <systemitem class="daemon">SSH</systemitem> Eingabeaufforderung von &vmguest; zu erhalten.
+          </para>
+        </example>
+      </section>
+    </section>
+
+    <section xml:id="qemu-running-networking-bridge">
+      <title>Bridged Networking</title>
+      <para>
+        Mit der <literal>-netdev tap</literal> Option erstellt &qemu; eine Netzwerkbrücke, indem das TAP-Netzwerkgerät des Hosts mit einem angegebenen VLAN des &vmguest; verbunden wird. Die Netzwerkschnittstelle ist dann für den Rest des Netzwerks sichtbar. Diese Methode funktioniert standardmäßig nicht und muss explizit angegeben werden.
+      </para>
+      <para>
+        Erstellen Sie zuerst eine Netzwerkbrücke und fügen Sie ihr eine physische &vmhost;-Netzwerkschnittstelle hinzu, wie zum Beispiel <literal>eth0</literal>:
+      </para>
+      <procedure>
+        <step>
+          <para>
+            Starten Sie &yastcc; und wählen Sie
+            <menuchoice><guimenu>System</guimenu><guimenu>Netzwerkeinstellungen</guimenu></menuchoice>.
+          </para>
+        </step>
+        <step>
+          <para>
+            Klicken Sie auf <guimenu>Hinzufügen</guimenu> und wählen Sie <guimenu>Bridge</guimenu>
+            aus dem <guimenu>Gerätetyp</guimenu> Drop-down-Feld im
+            <guimenu>Hardware-Dialog</guimenu> -Fenster. Klicken Sie auf
+            <guimenu>Weiter</guimenu>.
+          </para>
+        </step>
+        <step>
+          <para>
+            Wählen Sie, ob Sie eine dynamisch oder statisch zugewiesene IP-Adresse benötigen, und geben Sie gegebenenfalls die zugehörigen Netzwerkeinstellungen ein.
+          </para>
+        </step>
+        <step>
+          <para>
+            Wählen Sie im <guimenu>Bridged Devices</guimenu> -Bereich das Ethernet-Gerät aus, das der Bridge hinzugefügt werden soll.
+          </para>
+          <para>
+            Klicken Sie auf <guimenu>Weiter</guimenu>. Wenn Sie gefragt werden, ob ein bereits konfiguriertes Gerät angepasst werden soll, klicken Sie auf <guimenu>Weiter</guimenu>.
+          </para>
+        </step>
+        <step>
+          <para>
+            Klicken Sie auf <guimenu>OK</guimenu> , um die Änderungen anzuwenden. Überprüfen Sie, ob die Bridge erstellt wurde:
+          </para>
+<screen>&prompt.user;bridge link 2: eth0 state UP : &lt;BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 master br0 \ state forwarding priority 32 cost 100
+</screen>
+        </step>
+      </procedure>
+      <section xml:id="qemu-running-networking-bridge-manually">
+        <title>Manuelles Verbinden mit einer Bridge</title>
+        <para>
+          Verwenden Sie das folgende Beispielskript, um die &vmguest; mit der neu erstellten Bridge-Schnittstelle zu verbinden <literal>br0</literal>. Mehrere Befehle im Skript werden über den <command>sudo</command> -Mechanismus ausgeführt, da sie &rootuser;-Rechte erfordern.
+        </para>
+        <tip>
+          <title>Erforderliche Software</title>
+          <para>
+            Um eine Netzwerkbrücke zu verwalten, müssen Sie über die
+            <package>tunctl</package> Paket installiert.
+          </para>
+        </tip>
+<screen>
+#!/bin/bash bridge=br0<co xml:id="co-qemu-net-bridge-br"/>
+tap=$(sudo tunctl -u $(whoami) -b)<co xml:id="co-qemu-net-bridge-tap"/>
+sudo ip link set $tap up<co xml:id="co-qemu-net-bridge-up"/>
+1s schlafen<co xml:id="co-qemu-net-bridge-sleep"/>
+sudo ip link add name $bridge type bridge sudo ip link set $bridge up sudo ip link set $tap master $bridge<co xml:id="co-qemu-net-bridge-br3"/>
+qemu-system-x86_64 -machine accel=kvm -m 512 -hda /images/sles_base.raw \ -netdev tap,id=hostnet0,ifname=$tap<co xml:id="co-qemu-net-bridge-ifname"/>,script=no<co xml:id="co-qemu-net-bridge-script"/>,downscript=no \ -device virtio-net-pci,netdev=hostnet0,mac=&wsIVmac; sudo ip link set $tap nomaster<co xml:id="co-qemu-net-bridge-delif"/>
+sudo ip link set $tap down<co xml:id="co-qemu-net-bridge-linkdown"/>
+sudo tunctl -d $tap<co xml:id="co-qemu-net-bridge-deltap"/></screen>
+        <calloutlist>
+          <callout arearefs="co-qemu-net-bridge-br">
+            <para>
+              Name des Bridge-Geräts.
+            </para>
+          </callout>
+          <callout arearefs="co-qemu-net-bridge-tap">
+            <para>
+              Bereiten Sie ein neues TAP-Gerät vor und weisen Sie es dem Benutzer zu, der das Skript ausführt. TAP-Geräte sind virtuelle Netzwerkgeräte, die häufig für Virtualisierungs- und Emulationsumgebungen verwendet werden.
+            </para>
+          </callout>
+          <callout arearefs="co-qemu-net-bridge-up">
+            <para>
+              Aktivieren Sie die neu erstellte TAP-Netzwerkschnittstelle.
+            </para>
+          </callout>
+          <callout arearefs="co-qemu-net-bridge-sleep">
+            <para>
+              Legen Sie eine 1-sekündige Pause ein, um sicherzustellen, dass die neue TAP-Netzwerkschnittstelle wirklich aktiv ist.
+            </para>
+          </callout>
+          <callout arearefs="co-qemu-net-bridge-br3">
+            <para>
+              Fügen Sie das neue hinzu <literal>TAP</literal> Gerät mit der Netzwerkbrücke
+              <literal>br0</literal>.
+            </para>
+          </callout>
+          <callout arearefs="co-qemu-net-bridge-ifname">
+            <para>
+              Die <literal>ifname=</literal> Die Unteroption gibt den Namen der TAP-Netzwerkschnittstelle an, die für das Bridging verwendet wird.
+            </para>
+          </callout>
+          <callout arearefs="co-qemu-net-bridge-script">
+            <para>
+              Vorher: <command>qemu-system-ARCH</command> eine Verbindung zu einer Netzwerkbrücke herstellt, prüft es die <literal>Skript</literal> und
+              <literal>downscript</literal> Werte. Wenn es die angegebenen Skripte auf dem &vmhost; Dateisystem findet, führt es das
+              <literal>Skript</literal> aus, bevor es eine Verbindung zur Netzwerkbrücke herstellt, und das <literal>downscript</literal> nachdem es die Netzwerkumgebung verlässt. Sie können diese Skripte verwenden, um die gebrückten Schnittstellen einzurichten und abzubauen. Standardmäßig werden
+              <filename>/etc/qemu-ifup</filename> und
+              <filename>/etc/qemu-ifdown</filename> untersucht. Wenn der
+              <literal>script=no</literal> und <literal>downscript=no</literal>
+              angegeben, ist die Skriptausführung deaktiviert und Sie müssen sich manuell darum kümmern.
+            </para>
+          </callout>
+          <callout arearefs="co-qemu-net-bridge-delif">
+            <para>
+              Löscht die TAP-Schnittstelle aus der Netzwerkbrücke
+              <literal>br0</literal>.
+            </para>
+          </callout>
+          <callout arearefs="co-qemu-net-bridge-linkdown">
+            <para>
+              Setzt den Status des TAP-Geräts auf <literal>down</literal>.
+            </para>
+          </callout>
+          <callout arearefs="co-qemu-net-bridge-deltap">
+            <para>
+              TAP-Gerät abbauen.
+            </para>
+          </callout>
+        </calloutlist>
+      </section>
+      <section xml:id="qemu-bridge-helper">
+        <title>Verbindung zu einer Brücke mit qemu-bridge-helper herstellen</title>
+        <para>
+          Eine weitere Möglichkeit, eine &vmguest; über eine Netzwerkbrücke mit einem Netzwerk zu verbinden, ist über das <filename>qemu-bridge-helper</filename> Hilfsprogramm. Es konfiguriert die TAP-Schnittstelle für Sie und verbindet sie mit der angegebenen Brücke. Die standardmäßige Helper-Programmdatei ist
+          <filename>/usr/lib/qemu-bridge-helper</filename>. Die Helper-Programmdatei ist setuid root, was nur von Mitgliedern der Virtualisierungsgruppe ausführbar ist (<literal>kvm</literal>). Daher muss der
+          <command>qemu-system-ARCH</command> Befehl selbst muss nicht mit &rootuser;-Rechten ausgeführt werden.
+        </para>
+        <para>
+          Der Helper wird automatisch aufgerufen, wenn Sie eine Netzwerkbrücke angeben:
+        </para>
+<screen>qemu-system-x86_64 [...] \ -netdev bridge,id=hostnet0,br=br0 \ -device virtio-net-pci,netdev=hostnet0</screen>
+        <para>
+          Sie können Ihr eigenes benutzerdefiniertes Helper-Skript angeben, das die (De-)Konfiguration des TAP-Geräts übernimmt, mit der
+          <option>helper=/path/to/your/helper</option> Option:
+        </para>
+<screen>qemu-system-x86_64 [...] \ -netdev bridge,id=hostnet0,br=br0,helper=/path/to/bridge-helper \ -device virtio-net-pci,netdev=hostnet0</screen>
+        <tip>
+          <para>
+            Um Zugriffsberechtigungen für zu definieren
+            <literal>qemu-bridge-helper</literal>, überprüfen Sie die
+            <filename>/etc/qemu/bridge.conf</filename> Datei. Zum Beispiel die folgende Anweisung
+          </para>
+<screen>allow br0</screen>
+          <para>
+            erlaubt dem <command>qemu-system-ARCH</command> Befehl, sein &vmguest; mit der Netzwerkbrücke zu verbinden <literal>br0</literal>.
+          </para>
+        </tip>
+      </section>
+    </section>
+  </section>
+  <section xml:id="qemu-running-vnc">
+    <title>Anzeigen einer &vmguest; mit&nbsp;VNC</title>
+
+    <para>
+      Standardmäßig verwendet &qemu; ein GTK-Fenster (eine plattformübergreifende Toolkit-Bibliothek), um die grafische Ausgabe einer &vmguest; anzuzeigen.
+      <remark condition="clarity">
+    2014-08-06 - fs: Feedback von brogers: Wir sollten die Befehlszeilensyntax „display xxx“ erklären, um die verschiedenen Anzeigeoptionen vorzustellen, bevor wir uns den VNC-Details widmen.
+   </remark>
+      Mit der <literal>-vnc</literal> Option angegeben, können Sie &qemu; anweisen, auf einem bestimmten VNC-Display zu lauschen und dessen grafische Ausgabe an die VNC-Sitzung umzuleiten.
+    </para>
+
+    <tip>
+      <para>
+        Wenn Sie über eine VNC-Sitzung mit der virtuellen Maschine von &qemu; arbeiten, ist es nützlich, mit dem <literal>-usbdevice tablet</literal> option.
+      </para>
+      <para>
+        Wenn Sie zudem ein anderes Tastaturlayout als das Standard-Layout
+        <literal>en-us</literal>verwenden müssen, geben Sie dies mit dem <literal>-k</literal>
+        option.
+      </para>
+    </tip>
+
+    <para>
+      Die erste Unteroption von <literal>-vnc</literal> muss ein
+      <emphasis>display</emphasis> Wert sein. Die <literal>-vnc</literal> Option versteht die folgenden Anzeigespezifikationen:
+    </para>
+
+    <variablelist>
+      <varlistentry>
+        <term><literal>host:display</literal></term>
+        <listitem>
+          <para>
+            Nur Verbindungen vom <literal>Gastgeber</literal> auf der Anzeigennummer
+            <literal>Anzeige</literal> werden akzeptiert. Der TCP-Port, auf dem die VNC-Sitzung dann läuft, ist normalerweise eine 5900 +
+            <literal>Anzeige</literal> Nummer. Wenn Sie keinen angeben, <literal>Gastgeber</literal>werden Verbindungen von jedem Gastgeber akzeptiert.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><literal>unix:Pfad</literal></term>
+        <listitem>
+          <para>
+            Der VNC-Server wartet auf Verbindungen über Unix-Domain-Sockets. Die
+            <literal>Pfad</literal> Option gibt den Speicherort des zugehörigen Unix-Sockets an.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><literal>Keine</literal></term>
+        <listitem>
+          <para>
+            Die VNC-Server-Funktionalität wird initialisiert, aber der Server selbst wird nicht gestartet. Sie können den VNC-Server später mit dem &qemu; Monitor starten. Für weitere Informationen siehe
+            <xref linkend="qemu-monitor"/>.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+
+    <para>
+      Nach dem Anzeigewert können eine oder mehrere durch Kommas getrennte Options-Flags folgen. Gültige Optionen sind:
+    </para>
+
+    <variablelist>
+      <varlistentry>
+        <term><literal>reverse</literal></term>
+        <listitem>
+          <para>
+            Verbindung zu einem lauschenden VNC-Client über eine
+            <emphasis>reverse</emphasis> Verbindung.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><literal>websocket</literal></term>
+        <listitem>
+          <para>
+            Öffnet einen zusätzlichen TCP-Lauschport, der für VNC-WebSocket-Verbindungen reserviert ist. Definitionsgemäß ist der WebSocket-Port 5700+Anzeige.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><literal>Kennwort:</literal></term>
+        <listitem>
+          <para>
+            Erfordert, dass eine passwortbasierte Authentifizierung für Client-Verbindungen verwendet wird.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><literal>tls</literal></term>
+        <listitem>
+          <para>
+            Erfordert, dass Clients TLS bei der Kommunikation mit dem VNC-Server verwenden.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><literal>x509=/pfad/zum/zertifikats/verzeichnis</literal></term>
+        <listitem>
+          <para>
+            Gültig, wenn TLS angegeben ist. Erfordert, dass x509-Anmeldeinformationen für die Aushandlung der TLS-Sitzung verwendet werden.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><literal>x509verify=/path/to/certificate/dir</literal></term>
+        <listitem>
+          <para>
+            Gültig, wenn TLS angegeben ist. Erfordert, dass x509-Anmeldeinformationen für die Aushandlung der TLS-Sitzung verwendet werden.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><literal>sasl</literal></term>
+        <listitem>
+          <para>
+            Erfordert, dass der Client SASL zur Authentifizierung am VNC-Server verwendet.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><literal>acl</literal></term>
+        <listitem>
+          <para>
+            Aktiviert Zugriffskontrolllisten zur Überprüfung des x509-Client-Zertifikats und der SASL-Partei.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><literal>verlustbehaftet</literal></term>
+        <listitem>
+          <para>
+            Aktivieren Sie verlustbehaftete Komprimierungsmethoden (Gradient, JPEG, ...).
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><literal>non-adaptive</literal></term>
+        <listitem>
+          <para>
+            Deaktivieren Sie adaptive Kodierungen. Adaptive Kodierungen sind standardmäßig aktiviert.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><literal>share=[allow-exclusive|force-shared|ignore]</literal></term>
+        <listitem>
+          <para>
+            Legen Sie die Richtlinie für die Bildschirmfreigabe fest.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+
+    <note>
+      <para>
+        Weitere Details zu den Anzeigeoptionen finden Sie in der
+        <emphasis>qemu-doc</emphasis> Manpage.
+      </para>
+    </note>
+
+    <para>
+      Ein Beispiel für die VNC-Nutzung:
+    </para>
+<screen>&prompt.sudo;qemu-system-x86_64 [...] -vnc :5 # (auf dem Client:) &prompt.user;vncviewer &wsII;:5 &amp;</screen>
+
+    <figure>
+      <title>&qemu; VNC-Sitzung</title>
+      <mediaobject>
+        <imageobject role="fo">
+          <imagedata fileref="qemu_sles_vnc.png" width="70%"/>
+        </imageobject>
+        <imageobject role="html">
+          <imagedata fileref="qemu_sles_vnc.png" width="70%"/>
+        </imageobject>
+      </mediaobject>
+    </figure>
+
+    <section xml:id="qemu-running-vnc-secure">
+      <title>Sichere VNC-Verbindungen</title>
+      <para>
+        Die standardmäßige VNC-Server-Einrichtung verwendet keinerlei Authentifizierung. Im vorherigen Beispiel kann jeder Benutzer eine Verbindung herstellen und die &qemu; VNC-Sitzung von jedem Host im Netzwerk aus ansehen.
+      </para>
+      <para>
+        Es gibt verschiedene Sicherheitsstufen, die Sie auf Ihre VNC-Client/Server-Verbindung anwenden können. Sie können Ihre Verbindung entweder mit einem Passwort schützen, x509-Zertifikate verwenden, SASL-Authentifizierung nutzen oder sogar mehrere Authentifizierungsmethoden in einem &qemu; Befehl kombinieren.
+      </para>
+      <para>
+        Weitere Informationen zur Konfiguration von x509-Zertifikaten auf einem &vmhost; finden Sie unter <link xlink:href="https://documentation.suse.com/sles/&productnumber;/html/SLES-virtualization-libvirt/index.html#sec-libvirt-connect-remote-tls">Remote-TLS/SSL-Verbindung mit x509-Zertifikat</link>. Für die Client-Seite siehe <link xlink:href="https://documentation.suse.com/sles/&productnumber;/html/SLES-virtualization-libvirt/index.html#sec-libvirt-connect-remote-tls-client">Konfigurieren des Clients und Testen der Einrichtung</link>.
+      </para>
+      <remark>ssarkar: Beide Anker oben entsprechen der tatsächlichen xml:id/dem Titel ihrer Zielabschnitte in references/libvirt_connect.xml, aber ich konnte noch nicht bestätigen, dass einer davon auf der aktuell live geschalteten Seite documentation.suse.com/sles/16.0 SLES-virtualization-libvirt aufgelöst wird. Bitte überprüfen Sie dies erneut, sobald dieser Inhalt veröffentlicht ist.</remark>
+      <para>
+        Der Remmina VNC-Viewer unterstützt erweiterte Authentifizierungsmechanismen. Nehmen wir für dieses Beispiel an, dass sich die x509-Serverzertifikate
+        <filename>ca-cert.pem</filename>, <filename>server-cert.pem</filename>, und <filename>server-key.pem</filename> im Verzeichnis
+        <filename>/etc/pki/qemu</filename> auf dem Host befinden. Die Client-Zertifikate können in einem beliebigen benutzerdefinierten Verzeichnis abgelegt werden, da Remmina beim Verbindungsstart nach deren Pfad fragt.
+      </para>
+      <example xml:id="ex-running-vnc-secure-pwd">
+        <title>Passwortauthentifizierung</title>
+<screen>qemu-system-x86_64 [...] -vnc :5,password -monitor stdio</screen>
+        <para>
+          Startet die &vmguest; grafische Ausgabe auf VNC-Display Nummer 5, was dem Port 5905 entspricht. Die <literal>Kennwort:</literal> Unteroption initialisiert eine einfache passwortbasierte Authentifizierungsmethode. Es ist standardmäßig kein Passwort festgelegt und Sie müssen eines mit dem Befehl
+          <command>change vnc password</command> im &qemu; Monitor festlegen:
+        </para>
+<screen>&qemu; 2.3.1 monitor - type 'help' for more information (qemu) change vnc password Password: ****
+</screen>
+        <para>
+          Sie benötigen hier die Option <literal>-monitor stdio</literal> , da Sie den &qemu; Monitor ohne Umleitung seiner Ein-/Ausgabe nicht verwalten könnten.
+        </para>
+      </example>
+      <figure>
+        <title>Authentifizierungsdialog in Remmina</title>
+        <mediaobject>
+          <imageobject role="fo">
+            <imagedata fileref="qemu_vnc_pwd.png" width="70%"/>
+          </imageobject>
+          <imageobject role="html">
+            <imagedata fileref="qemu_vnc_pwd.png" width="70%"/>
+          </imageobject>
+        </mediaobject>
+      </figure>
+      <example xml:id="ex-running-vnc-secure-x509">
+        <title>x509-Zertifikatsauthentifizierung</title>
+        <para>
+          Der &qemu; VNC-Server kann TLS-Verschlüsselung für die Sitzung und x509-Zertifikate zur Authentifizierung verwenden. Der Server fragt den Client nach einem Zertifikat und validiert es anhand des CA-Zertifikats. Verwenden Sie diesen Authentifizierungstyp, wenn Ihr Unternehmen eine interne Zertifizierungsstelle bereitstellt.
+        </para>
+<screen>qemu-system-x86_64 [...] -vnc :5,tls,x509verify=/etc/pki/qemu</screen>
+      </example>
+      <example xml:id="ex-running-vnc-secure-pwd-x509">
+        <title>x509-Zertifikat und Passwort-Authentifizierung</title>
+        <para>
+          Sie können die Passwort-Authentifizierung mit TLS-Verschlüsselung und x509-Zertifikatsauthentifizierung kombinieren, um ein zweistufiges Authentifizierungsmodell für Clients zu erstellen. Denken Sie daran, das Passwort im &qemu;-Monitor festzulegen, nachdem Sie den folgenden Befehl ausgeführt haben:
+        </para>
+<screen>qemu-system-x86_64 [...] -vnc :5,password,tls,x509verify=/etc/pki/qemu \ -monitor stdio</screen>
+      </example>
+      <example xml:id="ex-running-vnc-secure-sasl">
+        <title>SASL-Authentifizierung</title>
+        <para>
+          Simple Authentication and Security Layer (SASL) ist ein Framework für Authentifizierung und Datensicherheit in Internetprotokollen. Es integriert verschiedene Authentifizierungsmechanismen wie PAM, Kerberos, LDAP und mehr. SASL verwaltet eine eigene Benutzerdatenbank, sodass die verbindenden Benutzerkonten nicht auf &vmhost; existieren müssen.
+        </para>
+        <para>
+          Aus Sicherheitsgründen wird empfohlen, die SASL-Authentifizierung mit TLS-Verschlüsselung und x509-Zertifikaten zu kombinieren:
+        </para>
+<screen>qemu-system-x86_64 [...] -vnc :5,tls,x509,sasl -monitor stdio</screen>
+      </example>
+    </section>
+  </section>
+</topic>

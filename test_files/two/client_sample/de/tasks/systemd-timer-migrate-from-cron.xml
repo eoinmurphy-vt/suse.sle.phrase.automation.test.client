@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic
+[
+  <!ENTITY % entities SYSTEM "../common/generic-entities.ent">
+    %entities;
+]>
+<topic xml:id="systemd-timer-catchup"
+       role="task" xml:lang="de"
+       xmlns="http://docbook.org/ns/docbook" version="5.2"
+       xmlns:its="http://www.w3.org/2005/11/its"
+       xmlns:xi="http://www.w3.org/2001/XInclude"
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       xmlns:trans="http://docbook.org/ns/transclusion">
+  <info>
+    <title>&systemd;-Timer: Migration von cron zu &systemd;-Timern</title>
+    <meta name="maintainer" content="fs@suse.com" its:translate="no"/>
+    <abstract>
+      <para>
+        Alle cron-Jobs können zu &systemd;-Timern migriert werden. Anleitungen und ein Beispiel finden Sie hier.
+      </para>
+    </abstract>
+  </info>
+  <procedure>
+    <step>
+      <para>
+        Erstellen Sie eine Service-Datei, die das Skript ausführt. Siehe
+        <xref linkend="systemd-timer-example-service"/> für Details.
+      </para>
+    </step>
+    <step>
+      <para>
+        Erstellen Sie eine Timer-Datei, die die Service-Datei ausführt. Siehe
+        <xref linkend="systemd-timer-example-timer"/> für allgemeine Anleitungen.
+      </para>
+      <substeps>
+        <step>
+          <para>
+            Kalendereinträge konvertieren. Die Zeit wird in cron und &systemd; unterschiedlich angegeben. Verwenden Sie die folgenden Muster als Konvertierungsvorlage:
+          </para>
+<screen>Cron: Minute Stunde Tag Monat Wochentag systemd: OnCalendar=Wochentag Jahr-Monat-Tag Stunde:Minute:Sekunde</screen>
+          <para>
+            Um den konvertierten Kalendereintrag zu testen, folgen Sie den Anweisungen in
+            <xref linkend="systemd-timer-test"/>.
+          </para>
+        </step>
+        <step>
+          <para>
+            Cron-Spitznamen konvertieren (<literal>@<replaceable>NICK</replaceable></literal>):
+          </para>
+<screen>Cron : &systemd;-Timer -------- : ---------------------------- @reboot : OnBootSec=1s @yearly : OnCalendar=*-01-01 00:00:00 @annually: OnCalendar=*-01-01 00:00:00 @monthly : OnCalendar=*-*-01 00:00:00 @weekly : OnCalendar=Sun *-*-* 00:00:00 @daily : OnCalendar=*-*-* 00:00:00 @hourly : OnCalendar=*-*-* *:00:00</screen>
+        </step>
+        <step>
+          <para>
+            Variabel-Zuweisungen konvertieren. Die &systemd; Variabel-Zuweisung muss in den
+            <literal>[Service]</literal> Abschnitt. Sie können nicht konvertieren
+            <envar>MAILTO</envar> auf diese Weise&mdash;lesen Sie dazu den nächsten Schritt.
+          </para>
+<screen>cron: <replaceable>VARIABEL</replaceable>=<replaceable>WERT</replaceable>
+systemd: Environment="<replaceable>VARIABEL</replaceable>=<replaceable>WERT</replaceable>"</screen>
+        </step>
+        <step>
+          <para>
+            Richten Sie E-Mail-Benachrichtigungen ein, um die MAILTO-Funktion von cron zu ersetzen, indem Sie den Anweisungen in folgen <xref linkend="systemd-mailto"/>.
+          </para>
+        </step>
+      </substeps>
+    </step>
+  </procedure>
+  <example>
+    <title>Migration von cron zu &systemd; timer</title>
+    <para>
+      Hier sind die Crontab-Einträge, die das Skript aufrufen <literal>helloworld.sh</literal> 5 Minuten nach dem Booten und um 10 Uhr von Montag bis Freitag:
+    </para>
+<screen>@reboot sleep 300 &amp;&amp; /usr/local/bin/helloworld.sh 0 10 * * * 1-5 /usr/local/bin/helloworld.sh</screen>
+    <para>
+      Die &systemd; Dienstdatei (<filename>helloworld.service</filename>) der Aufruf des Skripts sieht wie folgt aus:
+    </para>
+<screen>[Unit] Description="Hello World-Skript" [Service] ExecStart=/usr/local/bin/helloworld.sh</screen>
+    <para>
+      Die Timer-Datei (<filename>helloworld.timer</filename>) sieht so aus:
+    </para>
+<screen>[Unit] Description="Führe helloworld.service 5min nach dem Systemstart und jeden Mo-Fr um 10 Uhr aus" [Timer] OnBootSec=5min OnCalendar=Mon..Fri *-*-* 10:00:00 Unit=helloworld.service [Install] WantedBy=multi-user.target</screen>
+  </example>
+</topic>

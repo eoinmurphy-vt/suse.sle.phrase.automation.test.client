@@ -1,0 +1,495 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic
+[
+  <!ENTITY % entities SYSTEM "../common/generic-entities.ent">
+    %entities;
+]>
+
+<!-- refers to legacy doc: https://github.com/SUSE/doc-sleha/blob/main/xml/ha_glossary.xml -->
+
+<!--
+Add like this:
+<module resourceref="_ha-glossary" renderas="glossary"/>
+-->
+
+<topic xml:id="ha-glossary"
+ role="reference" xml:lang="de"
+ xmlns="http://docbook.org/ns/docbook" version="5.2"
+ xmlns:its="http://www.w3.org/2005/11/its"
+ xmlns:xi="http://www.w3.org/2001/XInclude"
+ xmlns:xlink="http://www.w3.org/1999/xlink"
+ xmlns:trans="http://docbook.org/ns/transclusion">
+  <info>
+   <title>HA-Glossar</title>
+    <meta name="maintainer" content="tahlia.richardson@suse.com" its:translate="no"/>
+  </info>
+  <glossentry><glossterm>ACL (Zugangskontrollliste)</glossterm>
+    <glossdef>
+    <para>
+      <emphasis>Zugangskontrolllisten</emphasis> können verwendet werden, um den Zugriff eines Benutzers auf die CIB zu begrenzen oder fein abzustimmen. Eine ACL besteht aus einer geordneten Menge von Zugangsregeln. Jede Regel erlaubt oder verweigert Lese- oder Schreibzugriff auf einen Teil der CIB. Regeln können zu spezifischen Rollen kombiniert werden, und Benutzern kann eine Rolle zugewiesen werden, die ihren Aufgaben entspricht.
+    </para>
+    </glossdef>
+  </glossentry>
+  <glossentry><glossterm>aktiv/aktiv, aktiv/passiv</glossterm>
+    <glossdef>
+    <para>
+      Wie Ressourcen auf den Knoten ausgeführt werden. Aktiv/passiv bedeutet, dass Ressourcen nur auf dem aktiven Knoten ausgeführt werden, aber auf den passiven Knoten verschoben werden können, falls der aktive Knoten ausfällt. Aktiv/aktiv bedeutet, dass alle Knoten gleichzeitig aktiv sind und Ressourcen auf jedem Knoten im Cluster ausgeführt werden (und dorthin verschoben werden können).
+    </para>
+    </glossdef>
+  </glossentry>
+  <glossentry xml:id="gloss-arbitrator"><glossterm>Arbitrator</glossterm>
+    <glossdef>
+    <para>
+      Ein <emphasis>Arbitrator</emphasis> ist eine Maschine, die außerhalb des Clusters läuft, um eine zusätzliche Instanz für Cluster-Berechnungen bereitzustellen. Zum Beispiel, <xref linkend="gloss-qnetd"/>
+      stellt eine Stimme bereit, um zu helfen, <xref linkend="gloss-qdevice"/> an ... teilzunehmen
+      <xref linkend="gloss-quorum"/> Entscheidungen.
+    </para>
+    </glossdef>
+  </glossentry>
+  <glossentry><glossterm>CIB (Cluster Information Base)</glossterm>
+    <glossdef>
+    <para>
+      Eine XML-Darstellung der gesamten Cluster-Konfiguration und des Status (Cluster-Optionen, Knoten, Ressourcen, Constraints usw.). Der CIB-Manager (<systemitem>Pacemaker-basiert</systemitem>) hält die CIB über die Cluster-Knoten hinweg synchron und verarbeitet Anfragen zu deren Änderung.
+    </para>
+    </glossdef>
+  </glossentry>
+  <glossentry xml:id="gloss-clone"><glossterm>Klon</glossterm>
+    <glossdef>
+    <para>
+      Im Kontext eines Clusters <xref linkend="gloss-resource"/>ist ein Klon eine Ressource, die auf mehreren Knoten aktiv sein kann. Jede Ressource kann geklont werden, wenn ihr Ressourcen-Agent dies unterstützt.
+    </para>
+    </glossdef>
+  </glossentry>
+  <glossentry><glossterm>Cluster</glossterm>
+    <glossdef>
+    <para>
+      A <emphasis>Hochverfügbarkeit</emphasis> Cluster ist eine Gruppe von Servern (physisch oder virtuell), die in erster Linie dazu dient, die höchstmögliche Verfügbarkeit von Daten, Anwendungen und Diensten zu gewährleisten. Nicht zu verwechseln mit einem <emphasis>Hochleistungs-</emphasis> cluster, der die Anwendungslast verteilt, um schnellere Ergebnisse zu erzielen.
+    </para>
+    </glossdef>
+  </glossentry>
+  <glossentry><glossterm>&clvm; (Cluster Logical Volume Manager)</glossterm>
+    <glossdef>
+    <para>
+      Der Begriff <emphasis>&clvm;</emphasis> gibt an, dass LVM in einer Cluster-Umgebung verwendet wird. Dies erfordert Konfigurationsanpassungen, um die LVM-Metadaten auf gemeinsam genutztem Speicher zu schützen.
+    </para>
+    </glossdef>
+  </glossentry>
+  <glossentry xml:id="gloss-offline-up"><glossterm>Cluster-Offline-Upgrade</glossterm>
+    <glossdef>
+    <para>
+      Wenn eine neue Produktversion wesentliche Änderungen enthält, die nicht abwärtskompatibel sind, erfordert der Cluster ein Cluster-Offline-Upgrade. Sie müssen die Cluster-Dienste auf allen Knoten stoppen und den gesamten Cluster aktualisieren, bevor Sie die Knoten wieder online nehmen.
+    </para>
+    <para>
+      Für Upgrades auf Nebenversionen siehe <xref linkend="gloss-rolling-up"/>.
+    </para>
+    </glossdef>
+  </glossentry>
+  <glossentry xml:id="gloss-clus-part"><glossterm>Cluster-Partitionierung</glossterm>
+    <glossdef>
+    <para>
+      Eine Cluster-Partitionierung tritt auf, wenn die Kommunikation zwischen einem oder mehreren Knoten und dem Rest des Clusters fehlschlägt. Die Knoten sind in Partitionen aufgeteilt, aber weiterhin aktiv. Sie können nur mit Knoten in derselben Partition kommunizieren und wissen nichts von den getrennten Knoten. Dies wird als ein bezeichnet. <xref linkend="gloss-splitbrain"/> scenario.
+    </para>
+    </glossdef>
+  </glossentry>
+  <glossentry xml:id="gloss-rolling-up"><glossterm>Rolling-Upgrade des Clusters</glossterm>
+    <glossdef>
+    <para>
+      Bei einem Rolling-Upgrade des Clusters wird jeweils ein Cluster-Knoten aktualisiert, während der Rest des Clusters weiterläuft. Stoppen Sie die Cluster-Dienste auf einem Knoten, aktualisieren Sie ihn und nehmen Sie ihn dann wieder online, damit er dem Cluster beitritt. Fahren Sie nacheinander fort, bis alle Cluster-Knoten aktualisiert sind.
+    </para>
+    <para>
+      Für Upgrades auf eine Hauptversion siehe <xref linkend="gloss-offline-up"/>.
+    </para>
+    </glossdef>
+  </glossentry>
+  <glossentry>
+    <glossterm>Cluster-Dienste</glossterm>
+    <glossdef>
+    <para>
+      Die Dienste, die den Cluster ausführen. Dies bezieht sich typischerweise auf &pace; und &corosync;, kann aber auch &sbd; und &qdevice; umfassen, falls diese Dienste verwendet werden.
+    </para>
+    </glossdef>
+  </glossentry>
+  <glossentry>
+    <glossterm>Cluster-Stack</glossterm>
+    <glossdef>
+    <para>
+      Die Gesamtheit der Softwaretechnologien und Komponenten, aus denen ein Cluster besteht.
+    </para>
+    </glossdef>
+  </glossentry>
+  <glossentry xml:id="gloss-col-con">
+    <glossterm>Colocation-Constraint</glossterm>
+    <glossdef>
+    <para>
+      Eine Art von <xref linkend="gloss-resource-con"/> die festlegt, welche Ressourcen zusammen auf einem Knoten ausgeführt werden können oder nicht.
+    </para>
+    </glossdef>
+  </glossentry>
+  <glossentry><glossterm>Nebenläufigkeitsverletzung</glossterm>
+    <glossdef>
+    <para>
+      Eine Ressource, die nur auf einem Knoten im Cluster laufen sollte, läuft auf mehreren Knoten.
+    </para>
+    </glossdef>
+  </glossentry>
+  <glossentry xml:id="gloss-corosync"><glossterm>&corosync;</glossterm>
+    <glossdef>
+    <para>
+      &corosync; bietet zuverlässige Messaging-, Mitgliedschafts- und Quorum-Informationen über den Cluster. Dies wird vom &cce; gehandhabt, einem Gruppenkommunikationssystem.
+    </para>
+    </glossdef>
+  </glossentry>
+  <glossentry xml:id="gloss-crm"><glossterm>CRM (Cluster Resource Manager)</glossterm>
+    <glossdef>
+    <para>
+      Die Verwaltungseinheit, die für die Koordinierung aller nicht-lokalen Interaktionen in einem &ha; Cluster verantwortlich ist. &sleha; verwendet <xref linkend="gloss-pacemaker"/> als CRM. Es interagiert mit mehreren Komponenten: lokalen Executoren auf dem eigenen Knoten und auf den anderen Knoten, nicht-lokalen CRMs, administrativen Befehlen, der Fencing-Funktionalität und der Mitgliedschaftsschicht.
+    </para>
+    </glossdef>
+  </glossentry>
+  <glossentry><glossterm>&crmsh; (&crmshell;)</glossterm>
+    <glossdef>
+    <para>
+      Das Kommandozeilenprogramm <emphasis>&crmsh;</emphasis> verwaltet den Cluster, die Knoten und die Ressourcen.
+    </para>
+    </glossdef>
+  </glossentry>
+  <glossentry><glossterm>&csync;</glossterm>
+    <glossdef>
+    <para>
+      Ein Synchronisierungswerkzeug zur Replikation von Konfigurationsdateien auf alle Knoten im Cluster.
+    </para>
+    </glossdef>
+  </glossentry>
+  <glossentry xml:id="gloss-dc"><glossterm>DC (Designated Coordinator)</glossterm>
+    <glossdef>
+    <para>
+      Der <systemitem>pacemaker-controld</systemitem> -Daemon ist der Cluster-Controller, der alle Aktionen koordiniert. Dieser Daemon hat eine Instanz auf jedem Cluster-Knoten, aber nur eine Instanz wird gewählt, um als DC zu fungieren. Der DC wird gewählt, wenn die Cluster-Dienste starten oder wenn der aktuelle DC ausfällt oder den Cluster verlässt. Der DC entscheidet, ob eine clusterweite Änderung durchgeführt werden muss, wie zum Beispiel das Fencing eines Knotens oder das Verschieben von Ressourcen.
+    </para>
+    </glossdef>
+  </glossentry>
+  <glossentry><glossterm>disaster</glossterm>
+    <glossdef>
+    <para>
+      Eine unerwartete Unterbrechung der kritischen Infrastruktur, verursacht durch Naturereignisse, Menschen, Hardwarefehler oder Softwarefehler.
+    </para>
+    </glossdef>
+  </glossentry>
+  <glossentry xml:id="gloss-dis-rec"><glossterm>Notfallwiederherstellung</glossterm>
+    <glossdef>
+    <para>
+      Der Prozess, durch den eine Funktion nach einer Katastrophe wieder in den normalen, stabilen Zustand versetzt wird.
+    </para>
+    </glossdef>
+  </glossentry>
+  <glossentry><glossterm>Disaster-Recovery-Plan</glossterm>
+    <glossdef>
+    <para>
+      Eine Strategie zur Wiederherstellung nach einer Katastrophe mit minimalen Auswirkungen auf die IT-Infrastruktur.
+    </para>
+    </glossdef>
+  </glossentry>
+  <glossentry><glossterm>&dlm; (&dlm.long;)</glossterm>
+    <glossdef>
+    <para>
+      &dlm; koordiniert Zugriffe auf gemeinsam genutzte Ressourcen in einem Cluster, zum Beispiel durch die Verwaltung von Dateisperren in Cluster-Dateisystemen, um Leistung und Verfügbarkeit zu erhöhen.
+    </para>
+    </glossdef>
+  </glossentry>
+  <glossentry xml:id="gloss-drbd"><glossterm>&drbd;</glossterm>
+    <glossdef>
+    <para>
+      <trademark class="registered">&drbd;</trademark> ist ein Blockgerät, das für den Aufbau von &ha;-Clustern entwickelt wurde. Es repliziert Daten auf einem primären Gerät auf sekundäre Geräte auf eine Weise, die sicherstellt, dass alle Kopien der Daten identisch bleiben.
+    </para>
+    </glossdef>
+  </glossentry>
+  <glossentry><glossterm>bestehender Cluster</glossterm>
+    <glossdef>
+    <para>
+      Der Begriff <emphasis>bestehender Cluster</emphasis> wird verwendet, um sich auf jeden Cluster zu beziehen, der aus mindestens einem Knoten besteht. Ein bestehender Cluster hat eine grundlegende <xref linkend="gloss-corosync"/>
+      Konfiguration, die die Kommunikationskanäle definiert, aber nicht unbedingt bereits eine Ressourcenkonfiguration aufweist.
+    </para>
+    </glossdef>
+  </glossentry>
+  <glossentry xml:id="glo-failover"><glossterm>Failover</glossterm>
+    <glossdef>
+    <para>
+      Tritt auf, wenn eine Ressource oder ein Knoten auf einer Maschine ausfällt und die betroffenen Ressourcen auf einen anderen Knoten verschoben werden.
+    </para>
+    </glossdef>
+  </glossentry>
+  <glossentry><glossterm>Failover-Domäne</glossterm>
+    <glossdef>
+    <para>
+      Eine benannte Teilmenge von Clusterknoten, die berechtigt sind, eine Ressource auszuführen, falls ein Knoten ausfällt.
+    </para>
+    </glossdef>
+  </glossentry>
+  <glossentry xml:id="gloss-fencing"><glossterm>Fencing</glossterm>
+    <glossdef>
+    <para>
+      Verhindert den Zugriff auf eine gemeinsam genutzte Ressource durch isolierte oder ausfallende Clustermitglieder. Es gibt zwei Klassen von Fencing: <emphasis>Ressourcen-Level-</emphasis> Fencing und <emphasis>Knoten-Level-</emphasis>
+      Fencing. Ressourcen-Fencing stellt den exklusiven Zugriff auf eine Ressource sicher. Node-Fencing verhindert, dass ein ausgefallener Knoten auf gemeinsam genutzte Ressourcen zugreift, und verhindert, dass Ressourcen auf einem Knoten mit unsicherem Status ausgeführt werden. Dies geschieht normalerweise durch Zurücksetzen oder Ausschalten des Knotens. In einem <xref linkend="gloss-pacemaker"/> Cluster wird das Node-Fencing vom Fencing-Subsystem verwaltet <systemitem>pacemaker-fenced</systemitem>.
+    </para>
+    </glossdef>
+  </glossentry>
+  <glossentry><glossterm>&gfs;</glossterm>
+    <glossdef>
+    <para>
+      Global File System 2 (&gfs;) ist ein Shared-Disk-Dateisystem für Linux-Computercluster. &gfs; ermöglicht allen Knoten einen direkten, gleichzeitigen Zugriff auf denselben gemeinsam genutzten Blockspeicher. &gfs; verfügt über keinen getrennten Betriebsmodus und keine Client- oder Serverrollen. Alle Knoten in einem &gfs;-Cluster fungieren als Peers. &gfs; unterstützt bis zu 32 Cluster-Knoten. Die Verwendung von &gfs; in einem Cluster erfordert Hardware, die den Zugriff auf den gemeinsam genutzten Speicher ermöglicht, sowie einen Lock-Manager zur Steuerung des Speicherzugriffs.
+    </para>
+    </glossdef>
+  </glossentry>
+  <glossentry><glossterm>Gruppe</glossterm>
+    <glossdef>
+    <para>
+      Ressourcengruppen enthalten mehrere Ressourcen, die zusammen lokalisiert, nacheinander gestartet und in umgekehrter Reihenfolge gestoppt werden müssen.
+    </para>
+    </glossdef>
+  </glossentry>
+  <glossentry><glossterm>&hawk; (&haweb;)</glossterm>
+    <glossdef>
+    <para>
+      Eine benutzerfreundliche webbasierte Schnittstelle zur Überwachung und Verwaltung eines &ha;-Clusters von Linux- oder Nicht-Linux-Rechnern aus. &hawk; kann von jedem Rechner aus aufgerufen werden, der eine Verbindung zu den Cluster-Knoten herstellen kann, wobei ein grafischer Webbrowser verwendet wird.
+    </para>
+    </glossdef>
+  </glossentry>
+  <glossentry xml:id="gloss-heuristics"><glossterm>Heuristiken</glossterm>
+    <glossdef>
+    <para>
+      <xref linkend="gloss-qdevice"/> unterstützt die Verwendung einer Reihe von Befehlen (<emphasis>Heuristiken</emphasis>), die lokal beim Starten von Cluster-Diensten, bei einer Änderung der Cluster-Mitgliedschaft oder bei einer erfolgreichen Verbindung zum  <xref linkend="gloss-qnetd"/> Server oder optional in regelmäßigen Abständen ausgeführt werden. Das Ergebnis wird in Berechnungen verwendet, um zu bestimmen, welche Partition  <xref linkend="gloss-quorum"/>.
+    </para>
+    </glossdef>
+  </glossentry>
+  <glossentry><glossterm>knet (kronosnet)</glossterm>
+    <glossdef>
+    <para>
+      Eine Netzwerk-Abstraktionsschicht, die Redundanz, Sicherheit, Fehlertoleranz und schnelles Failover von Netzwerkverbindungen unterstützt. In &sleha; 16, <emphasis>knet</emphasis> ist das Standardtransportprotokoll für die <xref linkend="gloss-corosync"/> Kommunikationskanäle.
+    </para>
+    </glossdef>
+  </glossentry>
+  <glossentry><glossterm>lokaler Cluster</glossterm>
+    <glossdef>
+    <para>
+      Ein einzelner Cluster an einem Standort (zum Beispiel befinden sich alle Knoten in einem Rechenzentrum). Die Netzwerklatenz ist minimal. Auf den Speicher wird typischerweise von allen Knoten synchron zugegriffen.
+    </para>
+    </glossdef>
+  </glossentry>
+  <glossentry><glossterm>lokaler Executor</glossterm>
+    <glossdef>
+    <para>
+      Der lokale Executor befindet sich zwischen <xref linkend="gloss-pacemaker"/> und den Ressourcen auf jedem Knoten. Durch den <systemitem class="daemon">pacemaker-execd</systemitem> Daemon kann &pace; Ressourcen starten, stoppen und überwachen.
+    </para>
+    </glossdef>
+  </glossentry>
+  <glossentry><glossterm>Standort</glossterm>
+    <glossdef>
+    <para>
+      Im Kontext eines gesamten Clusters <emphasis>Standort</emphasis> kann sich auf den physischen Standort von Knoten beziehen (zum Beispiel könnten sich alle Knoten im selben Rechenzentrum befinden). Im Kontext eines <xref linkend="gloss-loc-con"/>, <emphasis>Standort</emphasis> bezieht sich auf die Knoten, auf denen eine Ressource ausgeführt werden kann oder nicht.
+    </para>
+    </glossdef>
+  </glossentry>
+  <glossentry xml:id="gloss-loc-con"><glossterm>Standortbeschränkung</glossterm>
+    <glossdef>
+    <para>
+      Eine Art von <xref linkend="gloss-resource-con"/> das die Knotenpunkte definiert, auf denen eine Ressource ausgeführt werden kann oder nicht.
+    </para>
+    </glossdef>
+  </glossentry>
+  <glossentry xml:id="gloss-meta-att"><glossterm>Meta-Attribut</glossterm>
+    <glossdef>
+    <para>
+      Parameter, die dem <xref linkend="gloss-crm"/> mitteilen, wie ein bestimmtes
+      <xref linkend="gloss-resource"/>. Sie könnten beispielsweise die Priorität oder die Zielrolle einer Ressource definieren.
+    </para>
+    </glossdef>
+  </glossentry>
+  <glossentry><glossterm>Metro-Cluster</glossterm>
+    <glossdef>
+    <para>
+      Ein einzelner Cluster, der sich über mehrere Gebäude oder Rechenzentren erstrecken kann, wobei alle Standorte über Fibre Channel verbunden sind. Die Netzwerklatenz ist normalerweise gering. Speicher wird häufig mithilfe von Spiegelung oder synchroner Replikation repliziert.
+    </para>
+    </glossdef>
+  </glossentry>
+  <glossentry><glossterm>Netzwerkgeräte-Bonding</glossterm>
+    <glossdef>
+    <para>
+      Netzwerkgeräte-Bonding kombiniert zwei oder mehr Netzwerkschnittstellen zu einem einzigen gebündelten Gerät, um die Bandbreite zu erhöhen und/oder Redundanz bereitzustellen. Bei der Verwendung von <xref linkend="gloss-corosync"/>wird das gebündelte Gerät nicht von der Cluster-Software verwaltet. Daher muss das gebündelte Gerät auf jedem Cluster-Knotenpunkt konfiguriert werden, der möglicherweise darauf zugreifen muss.
+    </para>
+    </glossdef>
+  </glossentry>
+  <glossentry><glossterm>Knotenpunkt</glossterm>
+    <glossdef>
+    <para>
+      Jeder Server (physisch oder virtuell), der Mitglied eines Clusters ist.
+    </para>
+    </glossdef>
+  </glossentry>
+  <glossentry xml:id="gloss-ord-con"><glossterm>Reihenfolge-Constraint</glossterm>
+    <glossdef>
+    <para>
+      Eine Art von <xref linkend="gloss-resource-con"/> das die Reihenfolge von Aktionen definiert.
+    </para>
+    </glossdef>
+  </glossentry>
+  <glossentry xml:id="gloss-pacemaker"><glossterm>&pace;</glossterm>
+    <glossdef>
+    <para>
+      &pace; ist der <xref linkend="gloss-crm"/> in &sleha;, oder der <quote>Gehirn</quote>
+      das auf Ereignisse reagiert, die im Cluster auftreten. Ereignisse können beispielsweise Knoten sein, die dem Cluster beitreten oder ihn verlassen, der Ausfall von Ressourcen oder geplante Aktivitäten wie Wartungsarbeiten. Der <systemitem>pacemakerd</systemitem> Daemon startet und überwacht alle anderen zugehörigen Daemons.
+    </para>
+    </glossdef>
+  </glossentry>
+  <glossentry><glossterm>Parameter (Instanzattribute)</glossterm>
+    <glossdef>
+    <para>
+      Parameter bestimmen, welche Instanz eines Dienstes der <xref linkend="gloss-resource"/> steuert.
+    </para>
+    </glossdef>
+  </glossentry>
+  <glossentry><glossterm>Planer</glossterm>
+    <glossdef>
+    <para>
+      Der Planer ist implementiert als <systemitem class="daemon">pacemaker-schedulerd</systemitem>. Wenn ein Cluster-Übergang erforderlich ist, <systemitem class="daemon">pacemaker-schedulerd</systemitem>
+      berechnet er den erwarteten nächsten Zustand des Clusters und bestimmt, welche Aktionen geplant werden müssen, um den nächsten Zustand zu erreichen.
+    </para>
+    </glossdef>
+  </glossentry>
+  <glossentry><glossterm>primitiv</glossterm>
+    <glossdef>
+    <para>
+      Eine primitive Ressource ist die grundlegendste Art von Cluster-Ressource.
+    </para>
+    </glossdef>
+  </glossentry>
+  <glossentry xml:id="gloss-prom-clone"><glossterm>promotable clone</glossterm>
+    <glossdef>
+    <para>
+      Promotable Clones sind eine spezielle Art von <xref linkend="gloss-clone"/> Ressource, die hochgestuft werden kann. Aktive Instanzen dieser Ressourcen werden in zwei Zustände unterteilt: hochgestuft und nicht hochgestuft (auch bekannt als <quote>aktiv und passiv</quote> oder <quote>primär und sekundär</quote>).
+    </para>
+    </glossdef>
+  </glossentry>
+  <glossentry xml:id="gloss-qdevice"><glossterm>&qdevice;</glossterm>
+    <glossdef>
+    <para>
+      &qdevice; und <xref linkend="gloss-qnetd"/> an ... teilzunehmen <xref linkend="gloss-quorum"/>
+      Entscheidungen. Der <systemitem>corosync-qdevice</systemitem> Der Daemon läuft auf jedem Cluster-Knoten und kommuniziert mit &qnet;, um eine konfigurierbare Anzahl an Stimmen bereitzustellen, wodurch ein Cluster mehr Knoten-Ausfälle verkraften kann, als es die Standard-Quorum-Regeln erlauben.
+    </para>
+    </glossdef>
+  </glossentry>
+  <glossentry xml:id="gloss-qnetd"><glossterm>&qnet;</glossterm>
+    <glossdef>
+    <para>
+      &qnet; ist ein <xref linkend="gloss-arbitrator"/> der außerhalb des Clusters läuft. Der <systemitem>corosync-qnetd</systemitem> Der Daemon stellt eine Stimme für den
+      <systemitem>corosync-qdevice</systemitem> Daemon auf jedem Knoten bereit, um ihm bei der Teilnahme an Quorum-Entscheidungen zu helfen.
+    </para>
+    </glossdef>
+  </glossentry>
+  <glossentry xml:id="gloss-quorum"><glossterm>Quorum</glossterm>
+    <glossdef>
+    <para>
+      A <xref linkend="gloss-clus-part"/> ist definiert als quorate (sei <emphasis>quorate</emphasis>), wenn es die Mehrheit der Knoten (oder <quote>Stimmen</quote>). Quorum unterscheidet genau eine Partition. Dies ist Teil des Algorithmus, um zu verhindern, dass mehrere getrennte Partitionen oder Knoten (<quote>Split-Brain</quote>) fortfahren und Daten- sowie Dienstbeschädigungen verursachen. Quorum ist eine Voraussetzung für Fencing, das dann sicherstellt, dass das Quorum eindeutig ist.
+    </para>
+    </glossdef>
+  </glossentry>
+  <glossentry><glossterm>RA (Ressourcen-Agent)</glossterm>
+    <glossdef>
+    <para>
+      Ein Skript, das als Proxy fungiert, um eine <xref linkend="gloss-resource"/> (zum Beispiel, um eine Ressource zu starten, zu stoppen oder zu überwachen). &sleha; unterstützt verschiedene Arten von Ressourcen-Agenten.
+    </para>
+    </glossdef>
+  </glossentry>
+  <glossentry><glossterm>&rear; (Relax and Recover)</glossterm>
+    <glossdef>
+    <para>
+      Ein Administrator-Toolset zum Erstellen von <xref linkend="gloss-dis-rec"/> images.
+    </para>
+    </glossdef>
+  </glossentry>
+  <glossentry xml:id="gloss-resource"><glossterm>Ressource</glossterm>
+    <glossdef>
+    <para>
+      Jede Art von Dienst oder Anwendung, die  bekannt ist, <xref linkend="gloss-pacemaker"/>, zum Beispiel eine IP-Adresse, ein Dateisystem oder eine Datenbank. Der Begriff <emphasis>Ressource</emphasis>
+      wird auch für  verwendet, <xref linkend="gloss-drbd"/>, wo es eine Menge von Blockgeräten benennt, die eine gemeinsame Verbindung für die Replikation nutzen.
+    </para>
+    </glossdef>
+  </glossentry>
+  <glossentry xml:id="gloss-resource-con"><glossterm>Ressourcenbeschränkung</glossterm>
+    <glossdef>
+    <para>
+      Ressourcenbeschränkungen legen fest, auf welchen Cluster-Knoten eine Ressource ausgeführt werden kann, in welcher Reihenfolge die Ressourcen gestartet werden sollen und von welchen anderen Ressourcen eine bestimmte Ressource abhängig ist.
+    </para>
+    <para>
+      Siehe auch <xref linkend="gloss-col-con"/>, <xref linkend="gloss-loc-con"/> und
+      <xref linkend="gloss-ord-con"/>.
+    </para>
+    </glossdef>
+  </glossentry>
+  <glossentry><glossterm>Ressourcensatz</glossterm>
+    <glossdef>
+    <para>
+      Als alternatives Format für die Definition von Standort-, Kolokations- oder Reihenfolgebeschränkungen können Sie  verwenden
+      <emphasis>Ressourcensätze</emphasis>, bei denen Primitiven in einem Satz gruppiert werden. Beim Erstellen einer Beschränkung können Sie mehrere Ressourcen angeben, für die die Beschränkung gelten soll.
+    </para>
+    </glossdef>
+  </glossentry>
+  <glossentry><glossterm>Ressourcenvorlage</glossterm>
+    <glossdef>
+    <para>
+      Um die Erstellung vieler Ressourcen mit ähnlichen Konfigurationen zu erleichtern, können Sie eine Ressourcenvorlage definieren. Nachdem sie definiert wurde, kann sie in Primitiven oder in bestimmten Arten von Beschränkungen referenziert werden. Wenn eine Vorlage in einer Primitiven referenziert wird, erbt die Primitive alle in der Vorlage definierten Operationen, Instanzattribute (Parameter), Meta-Attribute und Auslastungsattribute.
+    </para>
+    </glossdef>
+  </glossentry>
+  <glossentry xml:id="gloss-sbd"><glossterm>&sbd; (&sbd.long;)</glossterm>
+    <glossdef>
+    <para>
+      &sbd; stellt einen Knoten bereit <xref linkend="gloss-fencing"/> Mechanismus durch den Austausch von Nachrichten über gemeinsamen Blockspeicher. Alternativ kann es im diskless-Modus verwendet werden. In beiden Fällen benötigt es eine Hardware oder Software <xref linkend="gloss-watchdog"/> auf jedem Knoten, um sicherzustellen, dass fehlerhaft arbeitende Knoten wirklich gestoppt werden.
+    </para>
+    </glossdef>
+  </glossentry>
+  <glossentry xml:id="gloss-splitbrain"><glossterm>Split-Brain</glossterm>
+    <glossdef>
+    <para>
+      Ein Szenario, in dem die Cluster-Knoten in zwei oder mehr Gruppen unterteilt sind, die nichts voneinander wissen (entweder durch einen Software- oder Hardwarefehler). Auch bekannt als ein
+      <emphasis>partitionierter Cluster</emphasis> scenario.
+    </para>
+    <para>
+      Der Begriff <emphasis>Split-Brain</emphasis> wird auch verwendet in <xref linkend="gloss-drbd"/> bedeutet jedoch, dass die Knoten unterschiedliche Daten enthalten.
+    </para>
+    </glossdef>
+  </glossentry>
+  <glossentry><glossterm>SPOF (Single Point of Failure)</glossterm>
+    <glossdef>
+    <para>
+      Jede Komponente eines Clusters, deren Ausfall zum Ausfall des gesamten Clusters führt.
+    </para>
+    </glossdef>
+  </glossentry>
+  <glossentry><glossterm>Stickiness (Klebrigkeit)</glossterm>
+    <glossdef>
+    <para>
+      Ressourcen-Stickiness ist ein <xref linkend="gloss-meta-att"/> Wert, der bestimmt, wie sehr eine Ressource bevorzugt auf ihrem aktuellen Knoten bleibt.
+    </para>
+    </glossdef>
+  </glossentry>
+  <glossentry><glossterm>Switchover (Umschaltung)</glossterm>
+    <glossdef>
+    <para>
+      Das geplante Verschieben von Ressourcen auf andere Knoten in einem Cluster. Siehe auch <xref linkend="glo-failover"/>.
+    </para>
+    </glossdef>
+  </glossentry>
+  <glossentry><glossterm>Auslastung</glossterm>
+    <glossdef>
+    <para>
+      Teilt dem CRM mit, welche Kapazität eine bestimmte <xref linkend="gloss-resource"/> von einem Knoten benötigt.
+    </para>
+    </glossdef>
+  </glossentry>
+  <glossentry xml:id="gloss-watchdog"><glossterm>Watchdog</glossterm>
+    <glossdef>
+    <para>
+      <xref linkend="gloss-sbd"/> benötigt einen Watchdog auf jedem Knoten, um sicherzustellen, dass fehlerhaft arbeitende Knoten tatsächlich gestoppt werden. &sbd; <quote>speist</quote> den Watchdog durch regelmäßiges Schreiben eines Service-Impulses an ihn. Wenn &sbd; aufhört, den Watchdog zu speisen, erzwingt die Hardware einen Systemneustart. Dies schützt vor Ausfällen des &sbd;-Prozesses selbst, wie zum Beispiel dem Hängenbleiben bei einem E/A-Fehler.
+    </para>
+    </glossdef>
+  </glossentry>
+</topic>
