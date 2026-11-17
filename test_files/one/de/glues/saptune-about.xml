@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- This file originates from the project https://github.com/openSUSE/doc-kit -->
+<!-- This file can be edited downstream. -->
+<!DOCTYPE topic
+[
+  <!ENTITY % entities SYSTEM "../common/generic-entities.ent">
+    %entities;
+]>
+<topic xml:id="about-saptune"
+ role="glue" xml:lang="de"
+ xmlns="http://docbook.org/ns/docbook" version="5.2"
+ xmlns:its="http://www.w3.org/2005/11/its"
+ xmlns:xi="http://www.w3.org/2001/XInclude"
+ xmlns:xlink="http://www.w3.org/1999/xlink"
+ xmlns:trans="http://docbook.org/ns/transclusion">
+  <info>
+    <title>Über &saptune;</title>
+    <!--add author's e-mail address-->
+    <meta name="maintainer" content="eliska.romanova@suse.com" its:translate="no"/>
+    <!-- add an abstract/para here, if you need one --> <!-- can be changed via merge in the assembly -->
+  </info>
+  <para>
+    &saptune; ist ein Tool, das für die Optimierung des Betriebssystems für die Ausführung von &sap;-Workloads entwickelt wurde. Das Tool vereinfacht die obligatorische Systemoptimierung, wie sie in vielen &sapnote;s beschrieben ist. Alle erforderlichen Optimierungsparameter werden zu &saptune;-Hinweisen hinzugefügt. Diese Hinweise sind in Lösungen gruppiert, die &sap;-Workloads darstellen. Dies stellt sicher, dass kein Parameter übersehen wird, während der &saptune;-Dienst nach jedem Systemneustart alle Hinweise und Lösungen anwendet und das System somit jederzeit zuverlässig optimiert hält.
+  </para>
+  <important>
+  <para>
+  &saptune; wird ausschließlich für die Optimierung des Systems für &sap;-Workloads verwendet und nicht für die &sap;-Workloads selbst. &saptune; nimmt keine Änderungen an &sap;-Konfigurationsdateien vor.
+  </para>
+  </important>
+</topic>

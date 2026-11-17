@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic
+[
+  <!ENTITY % entities SYSTEM "../common/generic-entities.ent">
+    %entities;
+]>
+
+<!-- refers to legacy doc: https://github.com/SUSE/doc-sleha/blob/main/xml/article_installation.xml -->
+
+<topic xml:id="ha-testing-cluster-failures"
+ role="task" xml:lang="de"
+ xmlns="http://docbook.org/ns/docbook" version="5.2"
+ xmlns:its="http://www.w3.org/2005/11/its"
+ xmlns:xi="http://www.w3.org/2001/XInclude"
+ xmlns:xlink="http://www.w3.org/1999/xlink"
+ xmlns:trans="http://docbook.org/ns/transclusion">
+  <info>
+    <title>Testen von Cluster-Ausfällen</title>
+    <meta name="maintainer" content="tahlia.richardson@suse.com" its:translate="no"/>
+    <abstract>
+      <para>
+        Die <command>crm cluster crash_test</command> Befehl simuliert Cluster-Ausfälle und meldet die Ergebnisse.
+      </para>
+    </abstract>
+  </info>
+  <para>
+    Der Befehl unterstützt die folgenden Prüfungen:
+  </para>
+  <variablelist>
+    <varlistentry>
+      <term><option>--fence-node <replaceable>KNOTENPUNKT</replaceable></option></term>
+      <listitem>
+        <para>
+          Zäunt einen bestimmten Knoten ein, der über die Befehlszeile übergeben wird.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><option>--kill-sbd</option>/<option>--kill-corosync</option>/
+       <option>--kill-pacemakerd</option></term>
+      <listitem>
+        <para>
+          Beendet die Daemons für &sbd;, &corosync; oder &pace;. Nach dem Ausführen eines dieser Tests finden Sie einen Bericht im Verzeichnis <filename>/var/lib/crmsh/crash_test/</filename>. Der Bericht enthält eine Beschreibung des Testfalls, eine Protokollierung der Aktionen und eine Erläuterung möglicher Ergebnisse.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><option>--split-brain-iptables</option></term>
+      <listitem>
+        <para>
+          Simuliert ein Split-Brain-Szenario durch Blockieren des &corosync;-Ports und prüft, ob ein Knoten wie erwartet eingezäunt werden kann. Sie müssen <package>Iptables</package> installieren, bevor Sie diesen Test ausführen können.
+        </para>
+      </listitem>
+    </varlistentry>
+  </variablelist>
+  <para>
+    Für weitere Informationen führen Sie den <command>crm cluster crash_test --help</command> Befehl aus.
+  </para>
+  <para>
+    Dieses Beispiel verwendet Knoten namens <systemitem>&node1;</systemitem> und
+    <systemitem>&node2;</systemitem>, und testet Fencing <systemitem>&node2;</systemitem>. Um den
+    <systemitem>&node2;</systemitem> Status während des Tests zu beobachten, können Sie sich bei &hawk; anmelden und zu <menuchoice><guimenu>Status</guimenu><guimenu>Knotenpunkte</guimenu></menuchoice>navigieren oder führen Sie <command>crm status</command> von einem anderen Knoten aus.
+  </para>
+  <example>
+    <title>Manuelles Auslösen des Knoten-Fencings</title>
+<screen><prompt>admin@alice></prompt> <command>sudo crm cluster crash_test --fence-node &node2;</command>
+
+============================================== Testcase: Knoten &node2; zäunen Aktion: Neustart Timeout für Fencing: 95 !!! WARNUNG WARNUNG WARNUNG !!! DIESER FALL KANN DAZU FÜHREN, DASS DER KNOTEN GEZÄUNT WIRD. GEBEN SIE Yes EIN, UM FORTZUFAHREN, ANDERE EINGABEN BRECHEN DIESEN FALL AB [Yes/No](No): <command>Ja</command>
+INFO: Versuche, Knoten „&node2;“ zu zäunen INFO: Warte 95s auf Neustart von Knoten „&node2;“... INFO: Knoten „&node2;“ wird von „&node1;“ gezäunt! INFO: Knoten „&node2;“ wurde von „&node1;“ gezäunt um <replaceable>DATUM</replaceable> <replaceable>ZEIT</replaceable></screen>
+  </example>
+</topic>
