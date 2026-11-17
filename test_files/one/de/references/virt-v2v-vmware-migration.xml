@@ -1,0 +1,466 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- This file originates from the project https://github.com/openSUSE/doc-kit -->
+<!-- This file can be edited downstream. -->
+<!DOCTYPE topic
+[
+  <!ENTITY % entities SYSTEM "../common/generic-entities.ent">
+    %entities;
+]>
+<topic xml:id="virt-v2v-vmware-migration"
+  role="reference" xml:lang="de"
+  xmlns="http://docbook.org/ns/docbook" version="5.2"
+  xmlns:its="http://www.w3.org/2005/11/its"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  xmlns:trans="http://docbook.org/ns/transclusion">
+  <info>
+    <title>Konvertieren von VMware-virtuellen Maschinen zu KVM mit <command>virt-v2v</command></title>
+    <meta name="maintainer" content="souvik.sarkar@suse.com" its:translate="no"/>
+    <abstract>
+      <para>
+        <command>virt-v2v</command> konvertiert virtuelle Maschinen von &vmware; und anderen Hypervisoren für die Ausführung auf &kvm;. Dieser Leitfaden behandelt die Voraussetzungen, die Vorbereitung und den Konvertierungsprozess mit einem Schwerpunkt auf der Konvertierung von Windows Server 2022-Gästen.
+      </para>
+    </abstract>
+  </info>
+
+  <section xml:id="sec-virt-v2v-overview">
+    <title>Übersicht</title>
+    <para>
+      <command>virt-v2v</command> ist ein Befehlszeilentool zum Konvertieren von virtuellen Maschinen von Drittanbietern in ein Format, das auf &qemu;/&kvm; ausgeführt wird. Es ist Teil des <command>virt-v2v</command> Pakets und verwendet libguestfs im Hintergrund.
+    </para>
+    <para>
+      &svirtualization; verwendet <command>virt-v2v</command> über das Forklift-Migrationstool zur Konvertierung von VMware-virtuellen Maschinen. Dasselbe Tool kann direkt über die Befehlszeile für einzelne Konvertierungen verwendet werden.
+    </para>
+    <note>
+      <title>Unterstützte Quellformate</title>
+      <para>
+        <command>virt-v2v</command> unterstützt die Konvertierung von VMware (VMX/VMDK), Xen, libvirt und physischen Maschinen. Dieser Abschnitt behandelt die Konvertierung von VMware zu &kvm;.
+      </para>
+    </note>
+  </section>
+
+  <section xml:id="sec-virt-v2v-prerequisites">
+    <title>Voraussetzungen</title>
+    <para>
+      Stellen Sie vor der Konvertierung einer virtuellen Maschine sicher, dass die folgenden Anforderungen auf dem &kvm;-Host erfüllt sind:
+    </para>
+    <itemizedlist mark="bullet" spacing="normal">
+      <listitem>
+        <para>
+          <literal>virt-v2v</literal> Paket installiert:
+        </para>
+        <screen>&prompt.sudo;<command>zypper install virt-v2v</command></screen>
+      </listitem>
+      <listitem>
+        <para>
+          <literal>guestfs-winsupport</literal> Paket installiert (erforderlich für Windows-Gäste):
+        </para>
+        <screen>&prompt.sudo;<command>zypper install guestfs-winsupport</command></screen>
+      </listitem>
+      <listitem>
+        <para>
+          &vmdp; ISO-Abbild. Laden Sie die neueste &vmdpa; ISO von der &scc; oder dem SUSE-Downloadportal herunter.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Quell-VMware-VM-Dateien (VMX und VMDK), die auf dem &kvm; Host zugänglich sind, entweder lokal oder über NFS.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Ausreichend Speicherplatz auf dem Ziel-Host zum Speichern der konvertierten VM-Disk-Images.
+        </para>
+      </listitem>
+    </itemizedlist>
+  </section>
+
+  <section xml:id="sec-virt-v2v-preparation">
+    <title>Vorbereiten der VMDP-Treiber</title>
+    <para>
+      Für Windows-Gäste, <command>virt-v2v</command> erfordert, dass virtio-Treiber und Windows-Tools auf dem Host verfügbar sind. Die &vmdpa; ISO stellt ein Hilfsskript bereit, das die korrekte Verzeichnisstruktur einrichtet.
+    </para>
+
+    <section xml:id="pro-virt-v2v-prepare-vmdp">
+      <title>Einrichten der VMDP-Treiber</title>
+      <para>
+        Mounten Sie die &vmdpa; ISO und führen Sie das <command>virt-v2v-vmdp.sh</command> Skript aus dem <filename>v2v_scripts</filename> Verzeichnis:
+      </para>
+      <procedure>
+       <step>
+        <para>
+         Mounten Sie die &vmdpa; ISO:
+        </para>
+        <screen>&prompt.sudo;<command>mount -o loop /path/to/vmdp-<replaceable>VERSION</replaceable>.iso /mnt</command></screen>
+       </step>
+       <step>
+        <para>
+         Führen Sie das Setup-Skript aus:
+        </para>
+        <screen>&prompt.sudo;<command>/mnt/v2v_scripts/virt-v2v-vmdp.sh /mnt/vmdp-<replaceable>VERSION</replaceable></command></screen>
+       </step>
+       <step>
+        <para>
+         Unmounten Sie die ISO:
+        </para>
+        <screen>&prompt.sudo;<command>umount /mnt</command></screen>
+       </step>
+      </procedure>
+      <para>
+        Das Skript führt die folgenden Aktionen aus:
+      </para>
+      <itemizedlist mark="bullet" spacing="normal">
+        <listitem>
+          <para>
+            Installiert virtio-Treiber für <filename>/usr/share/virtio-win/</filename> im Verzeichnislayout, das von <command>virt-v2v</command>.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            Platziert <filename>pvxsvc.exe</filename> und andere erforderliche Windows-Tools in <filename>/usr/share/virt-tools/</filename>.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            Erstellt Platzhalterdateien für den QEMU Guest Agent MSI und den Balloon Server, um nicht kritische Warnungen zu unterdrücken.
+          </para>
+        </listitem>
+      </itemizedlist>
+      <important>
+        <title>Kopieren Sie Treiberdateien nicht manuell</title>
+        <para>
+          Extrahieren und kopieren Sie VMDP-Dateien nicht manuell nach <filename>/usr/share/virt-tools/</filename> oder <filename>/usr/share/virtio-win/</filename>. Die Verzeichnisstruktur, die von <command>virt-v2v</command> auf &productnameshort; &productnumber; erwartet wird, unterscheidet sich von früheren Versionen. Verwenden Sie immer das <command>virt-v2v-vmdp.sh</command> Skript, um das korrekte Layout sicherzustellen.
+        </para>
+      </important>
+    </section>
+  </section>
+
+  <section xml:id="sec-virt-v2v-conversion">
+    <title>Konvertieren einer VMware-VM</title>
+    <para>
+      Verwenden Sie den <command>virt-v2v</command> Befehl, um die VMware-VM zu konvertieren. Das folgende Beispiel konvertiert eine Windows Server 2022-VM:
+    </para>
+    <screen>&prompt.sudo;<command>virt-v2v -i vmx /path/to/windows2022.vmx \ -o local -of qcow2 -os /path/to/output/dir \ --network vmware-network-name:target-bridge-name</command></screen>
+    <para>
+      Wichtige Befehlsoptionen:
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term><option>-i vmx</option></term>
+        <listitem>
+          <para>
+            Eingabemodus: VMware VMX-Konfigurationsdatei lesen.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>-o local</option></term>
+        <listitem>
+          <para>
+            Ausgabemodus: Schreiben Sie das Festplatten-Image und die XML-Konfiguration in das lokale Dateisystem. Verwendung <option>-o libvirt</option> um die VM direkt in libvirt zu definieren (erfordert vorkonfigurierte Speicherpools).
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>-of qcow2</option></term>
+        <listitem>
+          <para>
+            Ausgabefestplattenformat. <literal>qcow2</literal> wird für Platzeffizienz empfohlen.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>-os</option> <replaceable>output-storage</replaceable></term>
+        <listitem>
+          <para>
+            Ausgabepfad für Speicher. Für <option>-o local</option>ist dies ein Verzeichnispfad. Für <option>-o libvirt</option>ist dies ein Name für einen libvirt-Speicherpool.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>--network</option> <replaceable>Quelle:Ziel</replaceable></term>
+        <listitem>
+          <para>
+            Ordnen Sie einen VMware-Netzwerknamen einem Ziel-Bridge- oder libvirt-Netzwerknamen zu. Falls weggelassen, erfordert die Netzwerkgerätezuordnung möglicherweise eine manuelle Anpassung im generierten XML.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+
+    <section xml:id="sec-virt-v2v-conversion-libvirt">
+      <title>Verwendung des libvirt-Ausgabemodus</title>
+      <para>
+        Um die konvertierte VM direkt in libvirt zu definieren, verwenden Sie <option>-o libvirt</option>:
+      </para>
+      <screen>&prompt.sudo;<command>virt-v2v -i vmx /path/to/windows2022.vmx \ -o libvirt -of qcow2 -os default \ --network vm-network:default</command></screen>
+      <para>
+        Die <option>-os</option> Parameter gibt einen Namen für den libvirt-Speicherpool an. Stellen Sie sicher, dass der Pool existiert und über ausreichend freien Speicherplatz verfügt, bevor Sie die Konvertierung ausführen.
+      </para>
+    </section>
+  </section>
+
+  <section xml:id="sec-virt-v2v-post-conversion">
+    <title>Schritte nach der Konvertierung</title>
+    <para>
+      Führen Sie nach einer erfolgreichen Konvertierung die folgenden Schritte aus, um die Migration abzuschließen:
+    </para>
+    <orderedlist numeration="arabic" spacing="normal">
+      <listitem>
+        <para>
+          Starten Sie die konvertierte VM. Beim ersten Start installiert die VM virtio-Treiber. Die VM kann während dieses Vorgangs ein- oder zweimal neu starten.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Nachdem sich die VM stabilisiert hat, schalten Sie sie aus und ändern Sie den Videoadapter für eine optimale Grafikleistung auf virtio (viogpudo). Dies kann erfolgen über <command>virsh edit</command> oder die &vmm; GUI.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Starten Sie die VM erneut. Sie wird die Treiberinstallation abschließen und normal starten.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Überprüfen Sie im Windows-Geräte-Manager, ob die virtio-Treiber für Festplatte, Netzwerk und Grafik aktiv sind.
+        </para>
+      </listitem>
+    </orderedlist>
+    <note>
+      <title>UEFI-Boot-Anforderung</title>
+      <para>
+        Windows Server 2022 und andere moderne Windows-Gastsysteme erfordern möglicherweise eine UEFI-Boot-Firmware auf dem Ziel. <command>virt-v2v</command> erkennt dies automatisch und legt den entsprechenden Firmware-Typ fest. Wenn die VM nicht startet, überprüfen Sie die Firmware-Einstellung in der VM-Konfiguration.
+      </para>
+    </note>
+  </section>
+
+  <section xml:id="sec-virt-v2v-warnings">
+    <title>Erwartete Warnungen während der Konvertierung</title>
+    <para>
+      Die folgenden Warnungen sind informativ und können bedenkenlos ignoriert werden:
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>QEMU Guest Agent MSI nicht gefunden</term>
+        <listitem>
+          <para>
+            <literal>virt-v2v: Warnung: QEMU Guest Agent MSI nicht auf Tools-ISO/Verzeichnis gefunden.</literal>
+          </para>
+          <para>
+            &vmdpa; stellt kein eigenständiges QEMU Guest Agent MSI-Paket bereit. Der Gast-Agent ist im VMDP enthalten <filename>setup.exe</filename> und wird während des ersten Systemstarts der konvertierten VM automatisch installiert.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>Balloon Server nicht gefunden</term>
+        <listitem>
+          <para>
+            <literal>virt-v2v: Warnung: Balloon Server (blnsvr.exe) nicht auf Tools-ISO/Verzeichnis gefunden.</literal>
+          </para>
+          <para>
+            &vmdpa; verwendet <filename>pvxsvc.exe</filename> anstelle von <filename>blnsvr.exe</filename> um Balloon-Funktionalität bereitzustellen. Der Dienst wird während des ersten Systemstarts der konvertierten VM installiert.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>Zufallsstartwert konnte nicht gesetzt werden</term>
+        <listitem>
+          <para>
+            <literal>virt-v2v: Warnung: Zufallsstartwert konnte für diesen Gasttyp nicht gesetzt werden</literal>
+          </para>
+          <para>
+            Diese Warnung weist darauf hin, dass <command>virt-v2v</command> nicht in der Lage war, einen Zufallsstartwert für den Gast zu setzen. Dies beeinträchtigt das Konvertierungsergebnis nicht.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </section>
+
+  <section xml:id="sec-virt-v2v-troubleshooting">
+    <title>Fehlersuche</title>
+
+    <section xml:id="sec-virt-v2v-trouble-hivex">
+      <title><literal>Hivex.Error</literal> während der Inspektion</title>
+      <para>
+        Falls <command>virt-v2v</command> fehlschlägt mit:
+      </para>
+      <screen>virt-v2v: error: libguestfs error: inspect_os: internal error: inspect_os: unhandled exception thrown: Hivex.Error</screen>
+      <para>
+        Dieser Fehler tritt auf, wenn libguestfs die Windows-Registrierungs-Hive-Dateien nicht parsen kann. Mögliche Ursachen und Lösungen:
+      </para>
+      <itemizedlist mark="bullet" spacing="normal">
+        <listitem>
+          <para>
+            Stellen Sie sicher, dass Sie die neueste Version von ausführen <literal>virt-v2v</literal> und <literal>guestfs-winsupport</literal>.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            Setzen Sie die Umgebungsvariable <envar>LIBGUESTFS_BACKEND=direct</envar> vor dem Ausführen der Konvertierung:
+          </para>
+          <screen>&prompt.user;<command>export LIBGUESTFS_BACKEND=direct</command></screen>
+        </listitem>
+        <listitem>
+          <para>
+            Stellen Sie sicher, dass die Quell-VMDK-Festplatte nicht beschädigt ist, indem Sie vor der Konvertierung eine Datenträgerüberprüfung auf der VMware-VM durchführen.
+          </para>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+    <section xml:id="sec-virt-v2v-trouble-drivers-missing">
+      <title>Virtio-Treiber nicht gefunden</title>
+      <para>
+        Wenn Sie die Warnung sehen:
+      </para>
+      <screen>virt-v2v: warning: there are no virtio drivers available for this version of Windows (10.0 x86_64 Server win2k22). virt-v2v looks for drivers in /usr/share/virtio-win</screen>
+      <para>
+        Dies bedeutet: <command>virt-v2v</command> konnte die Virtio-Treiber für die erkannte Windows-Version nicht finden. Der Gast wird mit langsameren emulierten Geräten anstelle von Virtio konfiguriert.
+      </para>
+      <para>
+        Lösung: Führen Sie das Skript <command>virt-v2v-vmdp.sh</command> Skript von der &vmdpa; ISO. Das Skript installiert Treiber im korrekten Verzeichnislayout. Unter SLES 16 lautet der erwartete Treiberpfad für Windows Server 2022: <filename>/usr/share/virtio-win/drivers/amd64/2k22/</filename>.
+      </para>
+      <important>
+        <title>Erstellen Sie keine symbolischen Links manuell als Workaround</title>
+        <para>
+          Während das Erstellen einer symbolischen Verknüpfung von <filename>2k22</filename> zu einem anderen Treiberverzeichnis (z. B. <filename>win11</filename>) die Warnung unterdrücken kann, ist dies keine unterstützte Konfiguration. Verwenden Sie immer das <command>virt-v2v-vmdp.sh</command> Skript mit einem aktuellen &vmdpa; ISO.
+        </para>
+      </important>
+    </section>
+
+    <section xml:id="sec-virt-v2v-trouble-boot-fail">
+      <title>VM startet nach der Konvertierung nicht (Windows Server 2019/2022/2025)</title>
+      <para>
+        Nach der Konvertierung von Windows Server 2019, 2022 oder 2025 startet die VM möglicherweise nicht und zeigt einen <quote>Inaccessible Boot Device</quote> -Fehler oder einen Bluescreen aufgrund eines Seitenfehlers an.
+      </para>
+      <para>
+        Dieses Problem wird durch den Installationspfad des Virtio-Blocktreibers verursacht. Bei diesen Windows-Versionen installiert das VMDP-Setup den aktualisierten Virtio-Blocktreiber im Treiber-Speicherverzeichnis (<filename>\windows\system32\driverstore\filerepository</filename>) unter Verwendung von DIRID 13, während der Treiber aus <filename>\windows\system32\drivers</filename> (DIRID 12). Windows findet den Blocktreiber beim nächsten Start nicht.
+      </para>
+      <para>
+        Lösung: Stellen Sie sicher, dass Sie eine aktuelle &vmdpa; ISO-Version (2.5 oder höher) verwenden, die den Fix enthält. Das aktualisierte VMDP <filename>setup.exe</filename> kopiert den Treiber an beide Speicherorte, wodurch die VM korrekt booten kann.
+      </para>
+      <para>
+        Wenn die VM mit einer älteren VMDP-Version nicht bootet, können Sie den virtio-Blocktreiber manuell aus dem Treiberspeicher nach <filename>\windows\system32\drivers</filename> kopieren, um die Boot-Fähigkeit wiederherzustellen.
+      </para>
+    </section>
+
+    <section xml:id="sec-virt-v2v-trouble-network">
+      <title>Probleme bei der Netzwerkzuordnung</title>
+      <para>
+        Wenn die <option>--network</option> Zuordnung fehlschlägt, verfügt die konvertierte VM möglicherweise nicht über eine korrekt konfigurierte Netzwerkschnittstelle. Zur Lösung:
+      </para>
+      <itemizedlist mark="bullet" spacing="normal">
+        <listitem>
+          <para>
+            Überprüfen Sie, ob der Quellnetzwerkname mit dem im VMware VMX-File definierten Netzwerknamen übereinstimmt.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            Stellen Sie sicher, dass die Ziel-Bridge oder das libvirt-Netzwerk vor der Konvertierung auf dem Host vorhanden ist.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            Falls Sie <option>-o libvirt</option>verwenden, erstellen Sie ein libvirt-Netzwerk mit einem übereinstimmenden Namen unter Verwendung von <command>virsh net-create</command>.
+          </para>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+    <section xml:id="sec-virt-v2v-trouble-debug">
+      <title>Fehlersuche <command>virt-v2v</command></title>
+      <para>
+        Um ausführliche Ausgaben zur Fehlersuche zu aktivieren, führen Sie <command>virt-v2v</command> mit der <option>-v</option> Option aus:
+      </para>
+      <screen>&prompt.sudo;<command>virt-v2v -v -i vmx /path/to/vm.vmx -o local -of qcow2 -os /output/dir</command></screen>
+      <para>
+        Für zusätzliche libguestfs-Fehlersuche setzen Sie:
+      </para>
+      <screen>&prompt.user;<command>export LIBGUESTFS_DEBUG=1</command></screen>
+      <screen>&prompt.user;<command>export LIBGUESTFS_TRACE=1</command></screen>
+    </section>
+  </section>
+
+  <section xml:id="sec-vmdp-iso-contents">
+    <title>VMDP ISO-Inhalte und andere Verwendungszwecke</title>
+
+    <section xml:id="sec-vmdp-iso-install-drivers">
+      <title>Installieren von Treibern bei der VM-Erstellung</title>
+      <para>
+        Die VMDP-ISO kann als virtuelle CD in eine KVM-VM geladen werden, um während der Windows-Installation VirtIO Block- oder SCSI-Treiber bereitzustellen. Auf dem <guimenu>Wo möchten Sie Windows installieren</guimenu> Bildschirm, wählen Sie <guimenu>Treiber laden</guimenu> und folgen Sie den Anweisungen, um den entsprechenden Treiber auszuwählen.
+      </para>
+    </section>
+
+    <section xml:id="sec-vmdp-iso-full-content">
+      <title>Vollständiger VMDP-Inhalt für Xen und KVM</title>
+      <para>
+        Die ISO enthält auch das vollständige VMDP <filename>setup.exe</filename> zusammen mit erweiterten Inhalten für Installationsflexibilität. Diese können sowohl für Xen- als auch für KVM-gehostete Windows-VMs verwendet werden.
+      </para>
+    </section>
+  </section>
+
+  <section xml:id="sec-virt-v2v-example-w2k22">
+    <title>Vollständiges Beispiel: Windows Server 2022</title>
+    <para>
+      Das folgende Beispiel demonstriert eine vollständige Konvertierung einer Windows Server 2022 VM von VMware zu &kvm;:
+    </para>
+    <procedure>
+     <step>
+      <para>
+       Mounten Sie die &vmdpa; ISO:
+      </para>
+      <screen>&prompt.sudo;<command>mount -o loop /data/isos/vmdp/vmdp-VERSION.iso /mnt</command></screen>
+     </step>
+     <step>
+      <para>
+       Führen Sie das Setup-Skript aus:
+      </para>
+      <screen>&prompt.sudo;<command>/mnt/v2v_scripts/virt-v2v-vmdp.sh /mnt/vmdp-VERSION</command></screen>
+     </step>
+     <step>
+      <para>
+       Unmounten Sie die ISO:
+      </para>
+      <screen>&prompt.sudo;<command>umount /mnt</command></screen>
+     </step>
+     <step>
+      <para>
+       Umgehung des <literal>Hivex.Error</literal> Problem durch Verwendung des direkten Backends:
+      </para>
+      <screen>&prompt.user;<command>export LIBGUESTFS_BACKEND=direct</command></screen>
+     </step>
+     <step>
+      <para>
+       Konvertieren Sie die VM und definieren Sie sie direkt in libvirt:
+      </para>
+      <screen>&prompt.sudo;<command>virt-v2v -i vmx /srv/vmware/windows2022/windows2022.vmx \ -o libvirt -of qcow2 -os default \ --network "VM Network":default</command></screen>
+     </step>
+    </procedure>
+    <para>
+      Nach Abschluss der Konvertierung:
+    </para>
+    <orderedlist numeration="arabic" spacing="normal">
+      <listitem>
+        <para>
+          Starten Sie die VM: <command>virsh start windows2022</command>
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Lassen Sie die VM neu starten (Installation der virtio-Treiber)
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Sobald stabil, schalten Sie sie aus und stellen Sie das Video auf virtio um
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Starten Sie neu und überprüfen Sie, ob alle virtio-Treiber aktiv sind
+        </para>
+      </listitem>
+    </orderedlist>
+  </section>
+</topic>
