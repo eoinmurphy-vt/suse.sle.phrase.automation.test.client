@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic
+[
+  <!ENTITY % entities SYSTEM "../common/generic-entities.ent">
+    %entities;
+]>
+<!-- refers to legacy doc: <add github link to legacy doc piece, if applicable> -->
+<!-- point back to this document with a similar comment added to your legacy doc piece -->
+<!-- refer to README.md for file and id naming conventions -->
+<!-- metadata is dealt with on the assembly level -->
+<topic xml:id="cockpit-configuring-servers"
+ role="task" xml:lang="en"
+ xmlns="http://docbook.org/ns/docbook" version="5.2"
+ xmlns:its="http://www.w3.org/2005/11/its"
+ xmlns:xi="http://www.w3.org/2001/XInclude"
+ xmlns:xlink="http://www.w3.org/1999/xlink"
+ xmlns:trans="http://docbook.org/ns/transclusion">
+  <info>
+    <title>Configuring servers using &cockpit;</title>
+    <meta name="maintainer" content="shalaka.harne@suse.com" its:translate="no"/>
+    <abstract>
+      <para>
+        Using &cockpit;, you can change the host name, set or synchronize the system time or change a time zone.</para>
+    </abstract>
+  </info>
+  <section os="sles;sles4sap" xml:id="cockpit-health">
+    
+    <title>Viewing system health</title>
+  <para>To view the system health, click <guilabel>Overview</guilabel> on the left pane. You can view the following details in the <guimenu>Health</guimenu> section.</para>
+<para>If a service fails, you can click the <guilabel>1 service failed</guilabel> to view the details of the service failure.</para>
+<para>Click <guilabel>View login history</guilabel> to view your login history. You can modify the user credentials in the user page.</para>
+  </section>
+  <section os="sles;sles4sap" xml:id="cockpit-cockpit-metrics">
+    <title>Viewing metrics and history</title>
+    <para>
+      You can view the PCP metrics and usage history under the <guimenu>Usage</guimenu> section in the <guimenu>Overview</guimenu> page.</para>
+      <itemizedlist>
+      <listitem><para>Click <guilabel>Overview</guilabel> on the left pane.</para>
+  
+      <para>The following details appear in the <guilabel>Metrics and History</guilabel> page.</para>
+    </listitem>
+      <listitem><para><guimenu>CPU</guimenu>: The number of CPUs, the CPU load and a list of services that use the CPU.</para></listitem>
+    <listitem><para><guimenu>Memory</guimenu>: The RAM and Swap memory usage, and the related services. </para>
+    <para>&cockpit; reads memory usage data from the <literal>virtio-balloon</literal> driver inside the VM to estimate the memory VM uses. The specific value <literal>currentMemory</literal> shows how much memory the host has currently assigned to that VM. This number can change dynamically when the balloon inflates or deflates. If the VM does not use <literal>virtio-balloon</literal>, then &cockpit; does not know the actual memory being used inside the VM. Hence the memory displayed could be different. The memory displayed is an approximation and not the actual memory usage inside the VM.</para>
+    </listitem>
+    <listitem><para><guimenu>Disks</guimenu>: A list of used disks and partitions. Click <guimenu>View per-disk throughput</guimenu> to display a table showing the data transfer rates for each disk.</para></listitem>
+    <listitem><para><guimenu>Network</guimenu> - Displays the list of networks.</para></listitem>
+    <listitem><para><guimenu>Metrics history</guimenu>: When present, &cockpit; integrates with the Performance Co-Pilot (PCP) framework to collect and manage system performance metrics. These metrics are used to render historical data visualizations on the <guimenu>Metrics and History</guimenu> interface. &cockpit; can also use the archive logging subsystem of PCP to retrieve and display time-shifted historical data. In environments where PCP is not installed, &cockpit; falls back to its own metrics collection mechanism; however, this mode does not support data archival or retrieval of historical metrics.</para>
+    <para>Archival of metrics depends on whether the <filename>pmlogger.service</filename> systemd unit is running or not. You can enable the <guilabel>Collect metrics</guilabel> option to enable and start the service.</para>
+      </listitem>
+  </itemizedlist>  
+  </section>
+  <section xml:id="cockpit-configuring-hostname">
+    <title>Changing the server host name</title>
+    <para>
+      To change the host name, proceed as follows:
+    </para>
+    <procedure>
+      <title>Changing the host name</title>
+      <step>
+        <para>
+          Navigate to the <guimenu>Overview</guimenu> page.
+        </para>
+      </step>
+      <step>
+        <para>
+          In the <guimenu>Configuration</guimenu> section, click
+          <guimenu>edit</guimenu> under <guilabel>Hostname</guilabel>.
+        </para>
+      </step>
+      <step>
+        <para>
+          Fill in the following:
+        </para>
+        <itemizedlist>
+          <listitem>
+            <para>
+              <guimenu>Pretty host name</guimenu>&mdash;a user-defined free-form
+              host name
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              <guimenu>Real host name</guimenu>&mdash;the name of the device
+              in the network
+            </para>
+          </listitem>
+        </itemizedlist>
+      </step>
+    </procedure>
+  </section>
+  <section xml:id="cockpit-configuring-timezone">
+    <title>Changing the system time or time zone</title>
+    <para>
+      To change the system time or time zone, proceed as follows:
+    </para>
+    <procedure>
+      <title>Changing system time or time zone</title>
+      <step>
+        <para>
+          Navigate to the <guimenu>Overview</guimenu> page.
+        </para>
+      </step>
+      <step>
+        <para>
+          In the <guimenu>Configuration</guimenu> section, click the current time value under <guimenu>System time</guimenu>.
+        </para>
+      </step>
+      <step>
+        <para>
+          In the pop-up window you can change the following:
+        </para>
+        <itemizedlist>
+          <listitem>
+            <para>
+              <guimenu>Time zone</guimenu>&mdash;the value set during the
+              manual installation or, in case of raw images, set to UTC.
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              <guimenu>Set time</guimenu>&mdash;by default, NTP is used for time
+              synchronization. You can set the time manually or, if you defined
+              alternative NTP servers, you can use those NTP servers for time
+              synchronization.
+            </para>
+          </listitem>
+          <listitem><para>Click <guimenu>Change</guimenu>.</para></listitem>
+        </itemizedlist>
+      </step>
+    </procedure>
+  </section>
+  <section os="slemicro;slmicro" condition="5.5;6.0" xml:id="cockpit-configuring-cryptography">
+    <title>Changing the cryptographic policy</title>
+    <para>
+      To change the cryptographic policy, proceed as follows:
+    </para>
+    <procedure>
+      <step>
+        <para>
+          Navigate to the <guimenu>Overview</guimenu> page.
+        </para>
+      </step>
+      <step>
+        <para>
+          Click <guimenu>Default</guimenu> next to <guimenu>Cryptographic policy</guimenu>.
+        </para>
+      </step>
+      <step>
+        <para>
+          In the pop-up window, click on one of the following policy types:
+        </para>
+        <variablelist>
+          <varlistentry>
+            <term>Default</term>
+            <listitem>
+              <para>
+It allows the TLS 1.2 and TLS 1.3 protocols, as well as IKEv2 and SSH2. The
+            Diffie-Hellman parameters are accepted if they are at least 2048
+            bits long. The level provides at least 112-bit security with the
+            exception of allowing SHA-1 signatures in DNSSEC, where they are
+            still prevalent.
+              </para>
+            </listitem>
+          </varlistentry>
+           <varlistentry>
+            <term>DEFAULT:SHA1</term>
+            <listitem>
+              <para>
+                Is a subpolicy of the <literal>default</literal> that enables using the SHA-1 algorithm.
+              </para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>LEGACY</term>
+            <listitem>
+              <para>
+                This policy ensures maximum compatibility with legacy systems. It
+            is less secure and includes support for TLS 1.0, TLS 1.1 and
+            SSH2 protocols or later. The algorithms DSA, 3DES and RC4 are
+            allowed, while RSA and Diffie-Hellman parameters are accepted if
+            larger than 1023 bits. The level provides at least 64-bit security.
+              </para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>LEGACY:AD-SUPPORT</term>
+            <listitem>
+              <para>
+                Is a subpolicy of <literal>LEGACY</literal> with Active Directory interoperability.
+              </para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>FIPS</term>
+            <listitem>
+              <para>
+                A level that conforms to the FIPS 140-2 requirements. This policy
+            is used internally by the <command>fips-mode-setup</command> tool
+            that can switch the system into the FIPS 140-2 compliance mode. The
+            level provides at least 112-bit security.
+              </para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>FIPS:OSPP</term>
+            <listitem>
+              <para>
+                A subpolicy of FIPS with further Common Criteria restrictions.
+              </para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>FUTURE</term>
+            <listitem>
+              <para>
+                A conservative security level that is believed to withstand any
+            near-term future attacks. This level does not allow the use of
+            SHA-1 in signature algorithms. The level also provides some (not
+            complete) preparation for post-quantum encryption support
+            as a 256-bit symmetric encryption requirement. The RSA and
+            Diffie-Hellman parameters are accepted if larger than 3071 bits.
+            This level provides at least 128-bit security.
+              </para>
+            </listitem>
+          </varlistentry>
+        </variablelist>
+      </step>
+      <step>
+        <para>
+          To apply the changes, click <guimenu>Apply and reboot</guimenu>.
+        </para>
+      </step>
+    </procedure>
+  </section>
+</topic>
