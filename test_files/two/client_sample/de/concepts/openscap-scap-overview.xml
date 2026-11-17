@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- This file originates from the project https://github.com/openSUSE/doc-kit -->
+<!-- This file can be edited downstream. -->
+<!DOCTYPE topic
+[
+  <!ENTITY % entities SYSTEM "../common/generic-entities.ent">
+    %entities;
+]>
+<!-- refers to legacy doc: https://github.com/SUSE/doc-unversioned/blob/main/openscap/xml/article_openscap.xml -->
+<!-- point back to this document with a similar comment added to your legacy doc piece -->
+<topic xml:id="openscap-scap-overview"
+ role="concept" xml:lang="de"
+ xmlns="http://docbook.org/ns/docbook" version="5.2"
+ xmlns:its="http://www.w3.org/2005/11/its"
+ xmlns:xi="http://www.w3.org/2001/XInclude"
+ xmlns:xlink="http://www.w3.org/1999/xlink"
+ xmlns:trans="http://docbook.org/ns/transclusion">
+  <info>
+    <title>SCAP und &openscap;</title>
+    <meta name="maintainer" content="souvik.sarkar@suse.com" its:translate="no"/>
+    <abstract>
+      <para>
+        SCAP ist ein Rahmenwerk von Spezifikationen zur Automatisierung der Sicherheits-Compliance. &openscap; implementiert dieses Rahmenwerk für Linux und ermöglicht zusammen mit dem &ssg; die automatisierte Prüfung und Absicherung von &suselinux;.
+      </para>
+    </abstract>
+  </info>
+  <section xml:id="openscap-scap-overview-what-is-scap">
+    <title>Was ist SCAP?</title>
+    <para>
+      SCAP steht für <emphasis>Security Content Automation Protocol</emphasis>. Es ist ein Rahmenwerk von Spezifikationen, das vom National Institute of Standards and Technology (NIST) entwickelt und gepflegt wird und die automatisierte Konfiguration, Schwachstellenprüfung und Bewertung der Richtlinien-Compliance von Systemen in einer Organisation unterstützt. SCAP standardisiert auch, wie Schwachstellen und Sicherheitskonfigurationen kommuniziert werden, sowohl an Maschinen als auch an Menschen.
+    </para>
+  </section>
+  <section xml:id="openscap-scap-overview-what-is-openscap">
+    <title>Was ist &openscap;?</title>
+    <para>
+      &openscap; ist eine Sammlung von Open-Source-Tools, die das SCAP-Rahmenwerk für Linux implementieren. Es erhielt 2014 die SCAP 1.2-Zertifizierung vom NIST. &openscap; arbeitet zusammen mit dem
+      <literal>&ssg;</literal> (SSG), das von angesehenen Behörden empfohlene Sicherheitsrichtlinien in einem maschinenlesbaren Format implementiert. Dies ermöglicht es &openscap;, Ihr &suselinux;-System automatisch anhand anerkannter Sicherheitsgrundlagen zu prüfen und abzusichern.
+    </para>
+  </section>
+  <section xml:id="openscap-scap-overview-components">
+    <title>Wichtige SCAP-Komponenten</title>
+    <para>
+      SCAP besteht aus den folgenden Komponenten, die zusammenwirken, um den Sicherheitszustand eines Systems zu beschreiben, zu bewerten und darüber zu berichten.
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>Open Vulnerability and Assessment Language (OVAL)</term>
+        <listitem>
+          <para>
+            Ein XML-Format zum Testen des Vorhandenseins eines bestimmten Zustands auf einem System.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>Extensible Configuration Checklist Description Format (XCCDF)</term>
+        <listitem>
+          <para>
+            Ein XML-Format, das Sicherheitschecklisten, Benchmarks und Konfigurationsdokumentationen spezifiziert. Eine XCCDF-Datei enthält einen Benchmark, der aus verschiedenen Profilen besteht, wobei jedes Profil eine Menge von Regeln mit OVAL-Definitionen ist. Profile entsprechen Sicherheitspraktiken wie HIPAA, PCI-DSS und ANSSI-BP-028.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>Common Platform Enumeration (CPE)</term>
+        <listitem>
+          <para>
+            Ein strukturiertes Benennungsschema, das von NIST zur Identifizierung von IT-Systemen, Plattformen und Softwarepaketen gepflegt wird. Ein CPE-Name hat das folgende Format:
+            <literal>cpe:/<replaceable>Teil</replaceable>:<replaceable>Anbieter</replaceable>:<replaceable>Produkt</replaceable>:<replaceable>version</replaceable>:<replaceable>Update</replaceable>:<replaceable>Ausgabe</replaceable>:<replaceable>Sprache</replaceable></literal>
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>DataStream (DS)</term>
+        <listitem>
+          <para>
+            Ein XML-Format, das mehrere SCAP-Komponenten (CPE, XCCDF, OVAL) für die Verteilung über ein Netzwerk in einer einzigen Datei bündelt. DataStream-Dateien sind das primäre Eingabeformat für &openscap;, wenn ein &suselinux;-System gehärtet und geprüft wird.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>Common Configuration Enumeration (CCE)</term>
+        <listitem>
+          <para>
+            Eindeutige Kennungen, die sicherheitsrelevanten Systemkonfigurationsproblemen zugewiesen werden und dazu dienen, einzelne Regeln über Profile und Tools hinweg zu verfolgen.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </section>
+  <section xml:id="scap-security-guide-whatis">
+    <title>Was ist die &ssg;?</title>
+    <para>
+      Die <literal>&ssg;</literal> ist ein Open-Source-Projekt, das maschinenlesbare Sicherheitsrichtlinien für Linux-Systeme bereitstellt. Es übersetzt etablierte Sicherheits-Benchmarks, wie zum Beispiel
+      <orgname>Defense Information Systems Agency (DISA)</orgname>
+      STIGs und
+      <orgname>Center for Internet Security (CIS)</orgname>
+      Benchmarks in SCAP-Inhalte, die automatisch angewendet und überprüft werden können. Die
+      <literal>&ssg;</literal> liefert XCCDF-Checklisten, OVAL-Prüfungen und gebrauchsfertige Bereinigungsskripte in Form von Ansible-Playbooks und Bash-Skripten.
+    </para>
+  </section>
+  <section xml:id="openscap-scap-overview-benefits">
+    <title>Vorteile der Verwendung von &openscap; mit dem &ssg;</title>
+    <para>
+      Die Verwendung von &openscap; zusammen mit dem &ssg; bietet die folgenden Vorteile:
+    </para>
+    <itemizedlist>
+      <listitem>
+        <para>
+          Sicherheitsrichtlinien anerkannter Behörden werden in ein maschinenlesbares Format umgewandelt, wodurch eine manuelle Interpretation entfällt.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Scannen und Bereinigung können automatisiert und wiederholt ausgeführt werden, was eine konsistente Durchsetzung der Richtlinien über alle Systeme in Ihrer Infrastruktur hinweg sicherstellt.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Die Ergebnisse werden in standardisierten XML-Formaten gespeichert und können für Audit- und Compliance-Zwecke als menschenlesbare HTML-Berichte ausgegeben werden.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Mehrere Sicherheitsprofile sind sofort einsatzbereit und decken Vorschriften wie HIPAA, PCI-DSS v4 und ANSSI-BP-028 ab, wodurch der Aufwand für das Erreichen und den Nachweis der Compliance reduziert wird.
+        </para>
+      </listitem>
+    </itemizedlist>
+  </section>
+</topic>

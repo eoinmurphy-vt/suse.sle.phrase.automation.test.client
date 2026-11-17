@@ -1,0 +1,14 @@
+<!DOCTYPE important [
+  <!ENTITY % entities SYSTEM "../common/generic-entities.ent">
+  %entities;
+]>
+<note  xmlns="http://docbook.org/ns/docbook"  version="5.2"
+xmlns:xi="http://www.w3.org/2001/XInclude" 
+xmlns:xlink="http://www.w3.org/1999/xlink">
+  <title>&opensuse; Registry und &docker; Hub sind standardmäßig nicht aktiviert</title>
+  <para>
+    Die &osuse; Registry und der &docker; Hub sind in der Standardinstallation nicht konfiguriert. Um Container-Images von diesen Registries herunterzuladen, müssen Sie die Registries zur Datei
+    <filename>/etc/containers/registries.conf</filename> wie folgt hinzufügen:
+  </para>
+  <screen>unqualified-search-registries = ["registry.suse.com", "registry.opensuse.org", "docker.io"]</screen>
+</note>

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- This file originates from the project https://github.com/openSUSE/doc-kit -->
+<!-- This file can be edited downstream. -->
+<!DOCTYPE topic
+[
+  <!ENTITY % entities SYSTEM "../common/generic-entities.ent">
+    %entities;
+]>
+<!-- refers to legacy doc: <add github link to legacy doc piece, if applicable> -->
+<!-- point back to this document with a similar comment added to your legacy doc piece -->
+<!-- refer to README.md for file and id naming conventions -->
+<!-- metadata is dealt with on the assembly level -->
+<topic xml:id="rt-applications-docker-shielding"
+ role="task" xml:lang="de"
+ xmlns="http://docbook.org/ns/docbook" version="5.2"
+ xmlns:its="http://www.w3.org/2005/11/its"
+ xmlns:xi="http://www.w3.org/2001/XInclude"
+ xmlns:xlink="http://www.w3.org/1999/xlink"
+ xmlns:trans="http://docbook.org/ns/transclusion">
+  <info>
+    <title>Abschirmungscontainer</title><!-- can be changed via merge
+in the assembly --> <!-- add author's e-mail -->
+    <meta name="maintainer" content="jsindelarova@suse.com" its:translate="no"/>
+    <abstract><!-- can be changed via merge in the assembly -->
+      <para>
+       Derzeit bieten &docker; oder &podman; keinen integrierten Mechanismus, um einen Container direkt in einem stark isolierten CPU-Set (cpuset) zu starten. Um eine wirklich deterministische Leistung für Echtzeit-Workloads zu erzielen, müssen Sie diese Isolierung manuell durchführen.
+      </para>
+    </abstract>
+  </info>
+  <para>
+  Der Prozess umfasst zwei Hauptphasen:
+  </para>
+  <itemizedlist>
+  <listitem>
+  <para>
+  <emphasis role="bold">Einrichten der Abschirmung:</emphasis> Erstellen einer isolierten Cgroup-Partition und Verschieben aller Host-Systemprozesse (unter Verwendung von &systemd;) weg von Ihren dedizierten Echtzeit-CPUs.
+  </para>
+  </listitem>
+  <listitem>
+  <para>
+  <emphasis role="bold">Migrieren des Containers:</emphasis> Starten des Containers und anschließendes manuelles Migrieren seiner Prozesse in die neu isolierte Cgroup.
+  </para>
+  </listitem>
+  </itemizedlist>
+<section xml:id="rt-applications-docker-shielding-creating">
+<title>Einrichten der Abschirmung</title>
+<para>
+Das folgende Shell-Skript aktiviert oder deaktiviert eine isolierte Abschirmung. Es beschränkt Standard-Systemdienste auf die CPUs 0-3, leitet Interrupts von den Echtzeit-Kernen weg und erstellt eine isolierte Partition (<filename>/sys/fs/cgroup/rtcpus</filename>) für die CPUs 4-63.
+</para>
+<screen><![CDATA[
+]]><![CDATA[#!/bin/sh # ------------------------------------------------------------------ # Toggle-Skript zum Einrichten einer cgroups v2 Echtzeit-Abschirmung # ------------------------------------------------------------------ let START_CPU=4 let END_CPU=63 let ONLINE=1 let SHIELD_UP=0 GOVERNOR="performance" # Masken für das Routing von Interrupts DEFAULT_MASK=ffffffff,ffffffff SHIELD_MASK=00000000,0000000f # CPUs 0-3 CGROUP2_ROOT="/sys/fs/cgroup" SHIELD_CG="${CGROUP2_ROOT}/rtcpus" # Kernel-Einstellungen erfassen if [ -f /proc/sys/kernel/sched_rt_runtime_us ]; then RT_RUNTIME=$(cat /proc/sys/kernel/sched_rt_runtime_us) fi if [ -f /proc/sys/kernel/nmi_watchdog ]; then NMI_WATCHDOG=$(cat /proc/sys/kernel/nmi_watchdog) fi # Erkennen, ob die Abschirmung bereits aktiv ist if [ -d "$SHIELD_CG" ]; then let SHIELD_UP=1 fi if [ $SHIELD_UP -eq 1 ]; then echo "Cgroup v2 Abschirmung wird abgebaut..." # 1.]]><![CDATA[ ]]><![CDATA[Die isolierte Partition abbauen if [ -f "${SHIELD_CG}/cpuset.cpus.partition" ]; then echo "member" > "${SHIELD_CG}/cpuset.cpus.partition" 2>/dev/null fi # 2.]]><![CDATA[ ]]><![CDATA[Alle verbleibenden Tasks zurück in die Root-Cgroup verschieben if [ -f "${SHIELD_CG}/cgroup.procs" ]; then for pid in $(cat "${SHIELD_CG}/cgroup.procs" 2>/dev/null); do echo $pid > "${CGROUP2_ROOT}/cgroup.procs" 2>/dev/null done fi # 3.]]><![CDATA[ ]]><![CDATA[Die benutzerdefinierte Cgroup entfernen rmdir "$SHIELD_CG" 2>/dev/null # 4.]]><![CDATA[ ]]><![CDATA[Systemd-Slices wiederherstellen, um alle CPUs zu nutzen systemctl set-property --runtime system.slice AllowedCPUs=0-63 systemctl set-property --runtime user.slice AllowedCPUs=0-63 systemctl set-property --runtime init.scope AllowedCPUs=0-63 # Standard-IRQ-Affinität wiederherstellen echo ${DEFAULT_MASK} > /proc/irq/default_smp_affinity for irqlist in $(ls /proc/irq/*/smp_affinity 2>/dev/null); do echo ${DEFAULT_MASK} >$irqlist 2>/dev/null done # Kernel-Tuning wiederherstellen (Timer, Hugepages, Watchdogs, etc.) [ -f /proc/sys/kernel/timer_migration ] && echo 1 > /proc/sys/kernel/timer_migration [ -f /proc/sys/kernel/sched_rt_runtime_us ] && echo ${RT_RUNTIME} > /proc/sys/kernel/sched_rt_runtime_us [ -f /sys/kernel/debug/tracing/tracing_on ] && echo 1 > /sys/kernel/debug/tracing/tracing_on [ -f /sys/kernel/mm/transparent_hugepage/enabled ] && echo always > /sys/kernel/mm/transparent_hugepage/enabled [ -f /proc/sys/kernel/nmi_watchdog ] && echo ${NMI_WATCHDOG} > /proc/sys/kernel/nmi_watchdog [ -f /sys/devices/system/machinecheck/machinecheck0/check_interval ] && echo 300 > /sys/devices/system/machinecheck/machinecheck0/check_interval [ -f /sys/devices/virtual/workqueue/writeback/cpumask ] && echo ${DEFAULT_MASK} > /sys/devices/virtual/workqueue/writeback/cpumask [ -f /sys/devices/virtual/workqueue/cpumask ] && echo ${DEFAULT_MASK} > /sys/devices/virtual/workqueue/cpumask [ -f /proc/sys/vm/stat_interval ] && echo 1 > /proc/sys/vm/stat_interval [ -f /sys/module/processor/parameters/latency_factor ] && echo 2 > /sys/module/processor/parameters/latency_factor [ -f /sys/module/processor/parameters/ignore_ppc ] && echo 0 > /sys/module/processor/parameters/ignore_ppc [ -f /sys/module/processor/parameters/ignore_tpc ] && echo 0 > /sys/module/processor/parameters/ignore_tpc if [ -f /etc/init.d/sgi_irqbalance ]; then /etc/init.d/sgi_irqbalance start elif systemctl is-active --quiet irqbalance; then systemctl start irqbalance fi else echo "Cgroup v2 Abschirmung wird aufgebaut..." # IRQs von abgeschirmten CPUs wegrouten if [ -f /etc/init.d/sgi_irqbalance ]; then /etc/init.d/sgi_irqbalance stop else systemctl stop irqbalance 2>/dev/null fi echo $SHIELD_MASK > /proc/irq/default_smp_affinity for irqlist in $(ls /proc/irq/*/smp_affinity 2>/dev/null); do echo $SHIELD_MASK >$irqlist 2>/dev/null done # Echtzeit-Kernel-Tuning anwenden (Tracing, THP, Watchdogs etc. deaktivieren) [ -f /proc/sys/kernel/sched_rt_runtime_us ] && echo -1 > /proc/sys/kernel/sched_rt_runtime_us [ -f /sys/kernel/debug/tracing/tracing_on ] && echo 0 > /sys/kernel/debug/tracing/tracing_on [ -f /sys/kernel/mm/transparent_hugepage/enabled ] && echo never > /sys/kernel/mm/transparent_hugepage/enabled [ -f /proc/sys/kernel/nmi_watchdog ] && echo 0 > /proc/sys/kernel/nmi_watchdog [ -f /sys/devices/system/machinecheck/machinecheck0/check_interval ] && echo 0 > /sys/devices/system/machinecheck/machinecheck0/check_interval [ -f /sys/devices/virtual/workqueue/writeback/cpumask ] && echo ${SHIELD_MASK} > /sys/devices/virtual/workqueue/writeback/cpumask [ -f /sys/devices/virtual/workqueue/cpumask ] && echo ${SHIELD_MASK} > /sys/devices/virtual/workqueue/cpumask [ -f /proc/sys/vm/stat_interval ] && echo 999999 > /proc/sys/vm/stat_interval [ -f /sys/module/processor/parameters/latency_factor ] && echo 1 > /sys/module/processor/parameters/latency_factor [ -f /sys/module/processor/parameters/ignore_ppc ] && echo 1 > /sys/module/processor/parameters/ignore_ppc [ -f /sys/module/processor/parameters/ignore_tpc ] && echo 1 > /sys/module/processor/parameters/ignore_tpc # 1.]]><![CDATA[ ]]><![CDATA[Standard-System-Tasks mit systemd auf nicht abgeschirmte CPUs beschränken systemctl set-property --runtime system.slice AllowedCPUs=0-3 systemctl set-property --runtime user.slice AllowedCPUs=0-3 systemctl set-property --runtime init.scope AllowedCPUs=0-3 # 2.]]><![CDATA[ ]]><![CDATA[Die Abschirmung mit nativen Cgroups v2 hochfahren mkdir -p "$SHIELD_CG" # Sicherstellen, dass der cpuset-Controller im Subtree aktiviert ist echo "+cpuset" > "${CGROUP2_ROOT}/cgroup.subtree_control" 2>/dev/null || true # Die Echtzeit-CPUs unserer Abschirmung zuweisen echo "${START_CPU}-${END_CPU}" > "${SHIELD_CG}/cpuset.cpus" # Die Partition auf 'isolated' setzen (deaktiviert den Lastausgleich über diese CPUs) if [ -f "${SHIELD_CG}/cpuset.cpus.partition" ]; then echo "isolated" > "${SHIELD_CG}/cpuset.cpus.partition" fi # Zeit für den Kernel lassen, die sched_domain neu aufzubauen sleep 1 # Offline/Online-Zyklus, um Timer und Kthreads von abgeschirmten Kernen zu migrieren if [ $ONLINE -eq 1 ]; then for i in `seq ${START_CPU} ${END_CPU}`; do echo 0 > /sys/devices/system/cpu/cpu$i/online echo 1 > /sys/devices/system/cpu/cpu$i/online done # Priorisierung der neu initialisierten Kthreads systemctl restart set_kthread_prio 2>/dev/null || true fi if [ -f /proc/sys/kernel/timer_migration ]; then echo 0 > /proc/sys/kernel/timer_migration fi GOVERNOR="performance" fi # CPUFreq-Skalierungs-Governor setzen if [ -f /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor ]; then CURRENT_GOVERNOR=$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor) if ! [ "$GOVERNOR" = "$CURRENT_GOVERNOR" ]; then for i in $(ls /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor 2>/dev/null); do echo $GOVERNOR >$i done fi fi]]>
+</screen>
+</section>
+<section xml:id="rt-applications-docker-shielding-migrating">
+<title>Migrieren des Containers in den Shield</title>
+<para>
+Sobald Ihr <literal>rtcpus</literal> isolierte cgroup aktiv läuft, können Sie Ihre Container-Workload starten. Der folgende Workflow zeigt, wie Sie den Container initialisieren und dessen PID nahtlos in die geschützte Partition übertragen.
+</para>
+<para>
+Die folgenden Skripte verwenden das im vorherigen Abschnitt erstellte Skript namens <literal>shield.sh</literal>. Falls Sie es anders benannt haben, passen Sie den folgenden Code bitte entsprechend an.
+</para>
+<para>
+Führen Sie im Fall von &docker; das folgende Skript aus.
+</para>
+<screen><![CDATA[
+]]><![CDATA[# 1.]]><![CDATA[ ]]><![CDATA[Führen Sie das Shield-Skript aus, um die CPUs 4-63 zu isolieren ./shield.sh # 2.]]><![CDATA[ ]]><![CDATA[Starten Sie Ihren Echtzeit-Container im Hintergrund docker_id=$(docker run -d --privileged=true my_rt_image /usr/bin/chrt -f 1 /path/to/my_app) # 3.]]><![CDATA[ ]]><![CDATA[Extrahieren Sie die Root-Prozess-ID (PID) des laufenden Containers container_pid=$(docker inspect -f '{{.State.Pid}}' ${docker_id}) # 4.]]><![CDATA[ ]]><![CDATA[Migrieren Sie den Container in die isolierte cgroup # Das Verschieben der Root-PID migriert automatisch deren untergeordnete Threads in v2 echo ${container_pid} > /sys/fs/cgroup/rtcpus/cgroup.procs # --- Workload läuft jetzt auf isolierten RT-CPUs --- # 5.]]><![CDATA[ ]]><![CDATA[Aufräumen nach Abschluss:]]><![CDATA[ ]]><![CDATA[Stoppen und entfernen Sie den Container docker stop ${docker_id} docker rm ${docker_id} # 6.]]><![CDATA[ ]]><![CDATA[Bauen Sie den Shield ab und stellen Sie die normale Systemplanung wieder her ./shield.sh]]>
+</screen>
+<para>
+Führen Sie im Fall von &podman; das folgende Skript aus:
+</para>
+<screen><![CDATA[
+]]><![CDATA[# 1.]]><![CDATA[ ]]><![CDATA[Führen Sie das Shield-Skript aus, um die CPUs 4-63 zu isolieren ./shield.sh # 2.]]><![CDATA[ ]]><![CDATA[Starten Sie Ihren Echtzeit-Container im Hintergrund (Muss sudo für Rootful-Modus verwenden) # HINWEIS:]]><![CDATA[ ]]><![CDATA[Das Argument --annotation ist in cgroups v2 erforderlich, um das RT-Laufzeitbudget zuzuweisen. podman_id=$(sudo podman run -d \ --privileged \ --annotation run.oci.cgroup.cpu.rt_runtime=950000 \ my_rt_image /usr/bin/chrt -f 1 /path/to/my_app) # 3.]]><![CDATA[ ]]><![CDATA[Extrahieren Sie die Root-Prozess-ID (PID) des laufenden Podman-Containers container_pid=$(sudo podman inspect -f '{{.State.Pid}}' ${podman_id}) # 4.]]><![CDATA[ ]]><![CDATA[Migrieren Sie den Container in die isolierte cgroup # Das Verschieben der Root-PID migriert automatisch deren untergeordnete Threads in v2 echo ${container_pid} | sudo tee /sys/fs/cgroup/rtcpus/cgroup.procs # --- Die Arbeitslast läuft jetzt auf isolierten RT-CPUs (4-63) --- # 5.]]><![CDATA[ ]]><![CDATA[Aufräumen nach Abschluss:]]><![CDATA[ ]]><![CDATA[Stoppen und entfernen Sie den Container sudo podman stop ${podman_id} sudo podman rm ${podman_id} # 6.]]><![CDATA[ ]]><![CDATA[Bauen Sie den Shield ab und stellen Sie die normale Systemplanung wieder her ./shield.sh]]>
+</screen>
+<note>
+<title>Untergeordnete Prozesse sind standardmäßig abgeschirmt</title>
+<para>
+Durch das Schreiben der Root-PID des Containers in die <filename>cgroup.procs</filename> Datei der abgeschirmten cgroup verfolgt und beschränkt die vereinheitlichte Hierarchie automatisch alle erzeugten untergeordneten Threads auf Ihre zugewiesenen Echtzeit-CPUs.
+</para>
+</note>
+</section>
+</topic>

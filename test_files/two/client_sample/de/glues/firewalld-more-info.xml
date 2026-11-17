@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- This file originates from the project https://github.com/openSUSE/doc-kit -->
+<!-- This file can be edited downstream. -->
+<!DOCTYPE topic
+[
+  <!ENTITY % entities SYSTEM "../common/generic-entities.ent">
+    %entities;
+]>
+<topic xml:id="firewalld-more-info"
+ role="glue" xml:lang="de"
+ xmlns="http://docbook.org/ns/docbook" version="5.2"
+ xmlns:its="http://www.w3.org/2005/11/its"
+ xmlns:xi="http://www.w3.org/2001/XInclude"
+ xmlns:xlink="http://www.w3.org/1999/xlink"
+ xmlns:trans="http://docbook.org/ns/transclusion">
+  <title>Weitere Informationen</title>
+  <info>
+    <meta name="maintainer" content="tbazant@suse.com" its:translate="no"/>
+    <abstract>
+      <para>
+        Um mehr über &firewalld; zu erfahren, lesen Sie die folgenden Ressourcen:
+      </para>
+    </abstract>
+  </info>
+  <itemizedlist>
+    <listitem>
+      <para>
+        <link xlink:href="https://firewalld.org/documentation/">Die offizielle Quelle für Konzepte, Architektur, Anleitungen und Links zu allen Manpages.
+        </link>
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        <link xlink:href="https://firewalld.org/documentation/man-pages/firewall-cmd.html">Manpage, die für das Verständnis der Befehlszeileninteraktion mit &firewalld; unerlässlich ist
+        </link>
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        <link xlink:href="https://wiki.archlinux.org/title/Firewalld">Eine umfassende Ressource mit hervorragenden Erklärungen und praktischen Beispielen, die auch Folgendes abdecken: <literal>nftables</literal>.
+        </link>
+      </para>
+    </listitem>
+      </itemizedlist>
+</topic>

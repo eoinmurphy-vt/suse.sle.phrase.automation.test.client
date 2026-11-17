@@ -1,0 +1,236 @@
+<?xml version="1.0"?><!DOCTYPE topic [
+<!ENTITY % entities SYSTEM "../common/generic-entities.ent">
+%entities;
+]>
+
+<topic xml:id="vt-glossary"
+       role="reference" xml:lang="de"
+       xmlns="http://docbook.org/ns/docbook" version="5.2"
+       xmlns:its="http://www.w3.org/2005/11/its"
+       xmlns:xi="http://www.w3.org/2001/XInclude"
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       xmlns:trans="http://docbook.org/ns/transclusion">
+  <title>Glossar</title>
+  <info>
+    <dm:docmanager xmlns:dm="urn:x-suse:ns:docmanager">
+      <dm:bugtracker/>
+      <dm:translation>Ja</dm:translation>
+    </dm:docmanager>
+  </info>
+  <glossdiv xml:id="gloss-vt-general">
+    <title>Allgemein</title>
+    <glossentry xml:id="gloss-vt-createvm"><glossterm>Assistent zum Erstellen virtueller Maschinen</glossterm>
+      <glossdef>
+        <para>
+          Der Virtual Machine Manager bietet eine grafische Benutzeroberfläche, die Sie durch die Schritte zum Erstellen virtueller Maschinen führt. Er kann auch im Textmodus ausgeführt werden, indem Sie
+          <command>virt-install</command> an einer Eingabeaufforderung in der Host-Umgebung: eingeben.
+        </para>
+      </glossdef>
+    </glossentry> 
+    <glossentry xml:id="gloss-vt-hwassisted"><glossterm>Hardwareunterstützt</glossterm>
+      <glossdef>
+        <para>
+          Intel* und AMD* bieten hardwareunterstützte Virtualisierungstechnologie. Dies reduziert die Häufigkeit von VM-IN/OUT (weniger VM-Traps), da Software eine Hauptquelle für Overhead ist, und erhöht die Effizienz (die Ausführung erfolgt durch die Hardware). Darüber hinaus reduziert dies den Speicherbedarf, bietet eine bessere Ressourcensteuerung und ermöglicht die sichere Zuweisung spezifischer E/A-Geräte.
+        </para>
+      </glossdef>
+    </glossentry>
+    
+    <glossentry xml:id="gloss-vt-hostenv"><glossterm>Host-Umgebung</glossterm>
+      <glossdef>
+        <para>
+          Die Desktop- oder Befehlszeilenumgebung, die die Interaktion mit der Umgebung des Host-Computers ermöglicht. Sie bietet eine Befehlszeilenumgebung und kann auch einen grafischen Desktop wie &gnome; oder IceWM umfassen. Die Host-Umgebung läuft als eine spezielle Art von virtueller Maschine, die über Berechtigungen zur Steuerung und Verwaltung anderer virtueller Maschinen verfügt.
+        </para>
+      </glossdef>
+    </glossentry>
+    <glossentry xml:id="gloss-vt-hypervisor"><glossterm>Hypervisor</glossterm>
+      <glossdef>
+        <para>
+          Die Software, die die Interaktion auf niedriger Ebene zwischen virtuellen Maschinen und der zugrunde liegenden physischen Computerhardware koordiniert.
+        </para>
+      </glossdef>
+    </glossentry>
+    <glossentry xml:id="gloss-vt-parafb"><glossterm>Paravirtualisierter Framebuffer</glossterm>
+      <glossdef>
+        <para>
+          Das Videoausgabegerät, das eine Videoanzeige von einem Speicherpuffer aus ansteuert, der einen vollständigen Datenrahmen für Anzeigen virtueller Maschinen im paravirtualisierten Modus enthält.
+        </para>
+      </glossdef>
+    </glossentry>
+    <glossentry xml:id="gloss-vt-vhs"><glossterm>VHS</glossterm>
+      <glossdef>
+        <para>
+          Ein Virtualization Host Server (VHS) ist der physische Computer, auf dem die &suse; Virtualisierungsplattform-Software ausgeführt wird. Die Virtualisierungsumgebung besteht aus dem Hypervisor, der Host-Umgebung, virtuellen Maschinen sowie zugehörigen Tools, Befehlen und Konfigurationsdateien. Andere häufig verwendete Begriffe sind Host, Host-Computer, Host-Maschine (HM), virtueller Server (VS), virtueller Maschinen-Host (VMH) und VM-Host-Server (VHS).
+        </para>
+      </glossdef>
+    </glossentry>
+    <glossentry xml:id="gloss-vt-virtfs"><glossterm>VirtFS</glossterm>
+      <glossdef>
+        <para>
+          VirtFS ist eine neue paravirtualisierte Dateisystemschnittstelle, die zur Verbesserung von Pass-Through-Technologien in der KVM-Umgebung entwickelt wurde. Es basiert auf dem VirtIO-Framework.
+        </para>
+      </glossdef>
+    </glossentry>
+    <glossentry xml:id="gloss-vt-virtualized"><glossterm>Virtualisiert</glossterm>
+      <glossdef>
+        <para>
+          Der Status oder Zustand eines Gastbetriebssystems oder einer Anwendung, die innerhalb einer isolierten virtuellen Maschinenumgebung ausgeführt wird.
+        </para>
+      </glossdef>
+    </glossentry>
+    <glossentry xml:id="gloss-vt-vm"><glossterm>Virtuelle Maschine</glossterm>
+      <glossdef>
+        <para>
+          Eine softwaredefinierte Computerumgebung (VM), die in der Lage ist, ein unabhängiges Gastbetriebssystem und die zugehörigen Anwendungen zu hosten. Auch häufig als &vmguest; bezeichnet.
+        </para>
+      </glossdef>
+    </glossentry>
+    <glossentry xml:id="gloss-vt-vmm"><glossterm>Virtual Machine Manager</glossterm>
+      <glossdef>
+        <para>
+          Ein Softwareprogramm, das eine grafische Benutzeroberfläche zum Erstellen und Verwalten virtueller Maschinen bereitstellt.
+        </para>
+      </glossdef>
+    </glossentry>
+  </glossdiv>
+  
+  <glossdiv xml:id="gloss-vt-cpu">
+    <title>CPU</title>
+    <glossentry xml:id="gloss-vt-cpu-capping"><glossterm>CPU-Capping</glossterm>
+      <glossdef>
+        <para>
+          Der Ressourcenbeschränkungsprozess, der das Zuweisungsfenster einer virtuellen CPU auf einen definierten Prozentsatz (von 1 bis 100 Prozent) der verfügbaren physischen CPU-Kapazität begrenzt.
+        </para>
+      </glossdef>
+    </glossentry>
+    
+    <glossentry xml:id="gloss-vt-cpu-overcommit"><glossterm>CPU-Überbelegung</glossterm>
+      <glossdef>
+        <para>
+          Virtuelle CPU-Überbelegung ist die Fähigkeit, VMs mehr virtuelle CPUs zuzuweisen, als die tatsächliche Anzahl der im physischen System vorhandenen physischen CPUs beträgt. Dieses Verfahren erhöht nicht die Gesamtleistung des Systems, kann aber für Testzwecke nützlich sein.
+        </para>
+      </glossdef>
+    </glossentry>
+    <glossentry xml:id="gloss-vt-cpu-hotplug"><glossterm>CPU-Hotplugging</glossterm>
+      <glossdef>
+        <para>
+          CPU-Hotplugging wird verwendet, um die Funktionen des Ersetzens/Hinzufügens/Entfernens einer CPU zu beschreiben, ohne das System herunterzufahren.
+        </para>
+      </glossdef>
+    </glossentry>
+    <glossentry xml:id="gloss-vt-cpu-pinning"><glossterm>CPU-Pinning</glossterm>
+      <glossdef>
+        <para>
+          Auch als Prozessoraffinität bezeichnet; CPU-Pinning ermöglicht das Binden und Lösen eines Prozesses oder Threads an eine zentrale Verarbeitungseinheit (CPU) oder einen Bereich von CPUs.
+        </para>
+      </glossdef>
+    </glossentry>
+  </glossdiv>
+  
+  <glossdiv xml:id="gloss-vt-network">
+    <title>Netzwerk</title>
+    <glossentry xml:id="gloss-vt-network-bridgenet"><glossterm>Bridged Networking</glossterm>
+      <glossdef>
+        <para>
+          Eine Art von Netzwerkverbindung, die es ermöglicht, eine virtuelle Maschine in einem externen Netzwerk als eindeutige Identität zu identifizieren, die vom Host-Computer getrennt und unabhängig ist.
+        </para>
+      </glossdef>
+    </glossentry>
+    <glossentry xml:id="gloss-vt-network-emptybridge"><glossterm>Leere Brücke</glossterm>
+      <glossdef>
+        <para>
+          Eine Art von Netzwerkbrücke, für die vom Host kein physisches oder virtuelles Netzwerkgerät bereitgestellt wird. Dies ermöglicht es virtuellen Maschinen, mit anderen virtuellen Maschinen auf demselben Host zu kommunizieren, jedoch nicht mit dem Host oder in einem externen Netzwerk.
+        </para>
+      </glossdef>
+    </glossentry>
+    <glossentry xml:id="gloss-vt-network-externalnet"><glossterm>Externes Netzwerk</glossterm>
+      <glossdef>
+        <para>
+          Das Netzwerk außerhalb der internen Netzwerkumgebung eines Hosts.
+        </para>
+      </glossdef>
+    </glossentry>
+    <glossentry xml:id="gloss-vt-network-internalnetwork"><glossterm>Internes Netzwerk</glossterm>
+      <glossdef>
+        <para>
+          Eine Art von Netzwerkkonfiguration, die virtuelle Maschinen auf ihre Host-Umgebung beschränkt.
+        </para>
+      </glossdef>
+    </glossentry>
+    <glossentry xml:id="gloss-vt-network-localbridge"><glossterm>Lokale Brücke</glossterm>
+      <glossdef>
+        <para>
+          Eine Art von Netzwerkbrücke, die über ein virtuelles Netzwerkgerät verfügt, aber kein physisches Netzwerkgerät vom Host bereitgestellt bekommt. Dies ermöglicht es virtuellen Maschinen, mit dem Host und anderen virtuellen Maschinen auf dem Host zu kommunizieren. Virtuelle Maschinen können über den Host in einem externen Netzwerk kommunizieren.
+        </para>
+      </glossdef>
+    </glossentry>
+    <glossentry xml:id="gloss-vt-network-nat"><glossterm>Netzwerkadressübersetzung (NAT)</glossterm>
+      <glossdef>
+        <para>
+          Eine Art von Netzwerkverbindung, die es einer virtuellen Maschine ermöglicht, die IP-Adresse und die MAC-Adresse des Hosts zu verwenden.
+        </para>
+      </glossdef>
+    </glossentry>
+    <glossentry xml:id="gloss-vt-network-nohostbridge"><glossterm>Keine Host-Brücke</glossterm>
+      <glossdef>
+        <para>
+          Eine Art von Netzwerkbrücke, die über ein physisches Netzwerkgerät verfügt, aber kein virtuelles Netzwerkgerät vom Host bereitgestellt bekommt. Dies ermöglicht es virtuellen Maschinen, in einem externen Netzwerk zu kommunizieren, jedoch nicht mit dem Host. Dies ermöglicht es Ihnen, die Netzwerkkommunikation virtueller Maschinen von der Host-Umgebung zu trennen.
+        </para>
+      </glossdef>
+    </glossentry>
+    <glossentry xml:id="gloss-vt-network-traditionalbridge"><glossterm>Traditionelle Brücke</glossterm>
+      <glossdef>
+        <para>
+          Eine Art von Netzwerkbrücke, die sowohl über ein physisches Netzwerkgerät als auch über ein virtuelles Netzwerkgerät verfügt, die vom Host bereitgestellt werden.
+        </para>
+      </glossdef>
+    </glossentry>
+  </glossdiv>
+  
+  <glossdiv xml:id="gloss-vt-storage">
+    <title>Lagerung</title>
+    <glossentry xml:id="gloss-vt-storage-ahci"><glossterm>AHCI</glossterm>
+      <glossdef>
+        <para>
+          Das Advanced Host Controller Interface (AHCI) ist ein von Intel* definierter technischer Standard, der die Funktionsweise von Serial ATA (SATA)-Host-Bus-Adaptern implementierungsunabhängig spezifiziert.
+        </para>
+      </glossdef>
+    </glossentry>
+    <glossentry xml:id="gloss-vt-storage-bd"><glossterm>Blockgerät</glossterm>
+      <glossdef>
+        <para>
+          Datenspeicherkomponenten, wie CD-ROM-Laufwerke oder Festplattenlaufwerke, die Daten in Form von Blöcken übertragen. Partitionen und Volumes werden ebenfalls als Blockgeräte betrachtet.
+        </para>
+      </glossdef>
+    </glossentry>
+    <glossentry xml:id="gloss-vt-storage-fbvd"><glossterm>Datei-basierte virtuelle Festplatte</glossterm>
+      <glossdef>
+        <para>
+          Eine auf einer Datei basierende virtuelle Festplatte, auch Disk-Image-Datei genannt.
+        </para>
+      </glossdef>
+    </glossentry>
+    <glossentry xml:id="gloss-vt-storage-rawdisk"><glossterm>Raw-Disk</glossterm>
+      <glossdef>
+        <para>
+          Eine Methode zum Zugriff auf Daten auf einer Festplatte auf Byte-Ebene anstatt über deren Dateisystem.
+        </para>
+      </glossdef>
+    </glossentry>
+    <glossentry xml:id="gloss-vt-storage-sparse"><glossterm>Sparse-Image-Datei</glossterm>
+      <glossdef>
+        <para>
+          Eine Disk-Image-Datei, die nicht ihren gesamten Speicherplatz reserviert, sondern sich erweitert, wenn Daten darauf geschrieben werden.
+        </para>
+      </glossdef>
+    </glossentry>
+    <glossentry xml:id="gloss-vt-storage-xvda"><glossterm>xvda</glossterm>
+      <glossdef>
+        <para>
+          Die Laufwerksbezeichnung, die der ersten virtuellen Festplatte auf einer paravirtualisierten Maschine zugewiesen wird.
+        </para>
+      </glossdef>
+    </glossentry>
+  </glossdiv>
+  <!-- include acronyms 
+       <xi:include href="vt-acronyms.xml"/> -->
+   </topic>

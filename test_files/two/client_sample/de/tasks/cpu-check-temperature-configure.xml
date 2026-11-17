@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- This file originates from the project https://github.com/openSUSE/doc-kit -->
+<!-- This file can be edited downstream. -->
+<?xml-stylesheet href="urn:x-suse:xslt:profiling:docbook51-profile.xsl"
+ type="text/xml"
+ title="Profiling step"?>
+<!DOCTYPE topic
+[
+  <!ENTITY % entities SYSTEM "../common/generic-entities.ent">
+    %entities;
+]>
+<topic xml:id="cpu-check-temperature-configure" xml:lang="de"
+ role="task"
+ xmlns="http://docbook.org/ns/docbook" version="5.1"
+ xmlns:its="http://www.w3.org/2005/11/its"
+ xmlns:xi="http://www.w3.org/2001/XInclude"
+ xmlns:xlink="http://www.w3.org/1999/xlink">
+  <title>Hardware-Sensoren installieren und konfigurieren</title>
+  <para>
+    Die <command>Sensoren</command> Befehl ist Teil des
+    <package>Sensoren</package> Pakets. Um die Temperatur von den ACPI-Thermalzonen zu lesen, benötigen Sie das Paket nicht. Einzelheiten finden Sie unter
+    <xref linkend="cpu-check-temperature-get-data-acpi"/>.
+  </para>
+  <procedure>
+    <step>
+      <para>
+        Installieren Sie das erforderliche Paket.
+      </para>
+      <stepalternatives>
+        <step>
+          <para>Auf dem veränderlichen System:</para>
+<screen>&prompt.sudo;<command>zypper install sensors</command></screen>
+        </step>
+        <step>
+          <para>Auf dem unveränderlichen System:</para>
+<screen>&prompt.sudo;<command>transactional-update pkg install sensors</command></screen>
+          <para>Starten Sie das System neu, um die Änderung zu aktivieren.</para>
+        </step>
+      </stepalternatives>
+    </step>
+    <step>
+      <para>
+        Überprüfen Sie, welche Sensoren der Kernel bereits bereitstellt:
+      </para>
+<screen>&prompt.user;<command>Sensoren</command></screen>
+      <para>
+        Die Ausgabe listet die Sensoren auf, die der Kernel registriert hat, zum Beispiel ACPI-Thermalzonen und NVMe-Laufwerke. Ein Beispiel und eine Erläuterung finden Sie unter <xref linkend="cpu-check-temperature-get-data-sensors"/>. Wenn der Kernel keinen Sensor registriert hat, meldet der Befehl
+        <literal>No sensors found!</literal>
+      </para>
+    </step>
+    <step>
+      <para>
+        Suchen Sie optional nach zusätzlichen Hardware-Überwachungschips, die der Kernel nicht von selbst registriert, zum Beispiel auf einem I2C- oder SMBus-Adapter. Tun Sie dies nur, wenn ein Sensor, den Sie benötigen, in der Ausgabe von fehlt <command>Sensoren</command>.
+      </para>
+      <warning>
+        <title>Hardware-Probing kann ein System aufhängen oder beschädigen</title>
+        <para>
+          Die <command>sensors-detect</command> Befehl greift auf Hardware zu, um Chips zu identifizieren. Laut der Manpage kann dies den SMBus sperren und in seltenen Fällen Hardware beschädigen. Die Manpage rät davon ab, den Befehl auf Produktionsservern auszuführen.
+        </para>
+      </warning>
+      <para>
+        Wenn Sie dieses Risiko akzeptieren, führen Sie den folgenden Befehl aus:
+      </para>
+<screen>&prompt.sudo;<command>sensors-detect --auto</command></screen>
+      <para>
+        Die <option>--auto</option> Option führt den Befehl ohne Interaktion aus und nimmt die Standardantwort für jede Frage an. Ohne sie stellt der Befehl jede Frage und wartet auf Ihre Antwort.
+      </para>
+      <para>
+        Wenn der Befehl einen Chip findet, gibt er eine Zusammenfassung der gefundenen Chips aus. Aufgrund der Option <option>--auto</option> akzeptiert er die Standardantwort auf die letzte Frage:
+      </para>
+<screen>Nun folgt eine Zusammenfassung der Sonden, die ich gerade durchgeführt habe. Treiber `coretemp': * Chip `Intel digital thermal sensor' (Vertrauen: 9) Treiber `to-be-written': * ISA-Bus, Adresse 0xa40 Chip `ITE IT8686E Super IO Sensors' (Vertrauen: 9) Möchten Sie /etc/sysconfig/lm_sensors generieren? (JA/nein): Symbolischen Link '/etc/systemd/system/multi-user.target.wants/lm_sensors.service' → '/usr/lib/systemd/system/lm_sensors.service' erstellt.</screen>
+      <para>
+        Der Befehl erzeugt die Datei
+        <filename>/etc/sysconfig/lm_sensors</filename> und aktiviert sowie startet den <literal>lm_sensors</literal> Dienst. Die Unit-Datei des Dienstes ist Teil des <package>Sensoren</package> Pakets. Um den Status des Dienstes zu überprüfen, führen Sie aus:
+      </para>
+<screen>&prompt.user;<command>systemctl status lm_sensors</command></screen>
+      <para>
+        Beispielhafte Ausgabe:
+      </para>
+<screen><?dbsuse-fo font-size="0.6em"?>● lm_sensors.service - Initialize hardware monitoring sensors Loaded: loaded (/usr/lib/systemd/system/lm_sensors.service; enabled; preset: disabled) Active: active (exited) since Mon 2026-09-21 07:40:32 CEST; 16ms ago Invocation: e3f984a1d2cf43528b9b753f1d698a65 Process: 1433 ExecStart=/sbin/modprobe -qab $BUS_MODULES $HWMON_MODULES (code=exited, status=0/SUCCESS) Process: 1436 ExecStart=/usr/bin/sensors -s (code=exited, status=0/SUCCESS) Main PID: 1436 (code=exited, status=0/SUCCESS) CPU: 34ms</screen>
+      <para>
+        Wenn der Befehl keinen Chip findet, meldet er
+        <literal>Sorry, no sensors were detected</literal>. Es wird keine Konfigurationsdatei erstellt und der Dienst bleibt deaktiviert. Die Sensoren, die der <command>Sensoren</command> Befehl bereits auflistet, sind nicht betroffen.
+      </para>
+    </step>
+  </procedure>
+  <para>
+    Um die Temperatur auszulesen, fahren Sie fort mit
+    <xref linkend="cpu-check-temperature-get-data"/>.
+  </para>
+</topic>

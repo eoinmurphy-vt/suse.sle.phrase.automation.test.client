@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic
+[
+  <!ENTITY % entities SYSTEM "../common/generic-entities.ent">
+    %entities;
+]>
+<topic xml:id="glue-alp-containers-podman-more-info"
+  role="glue" xml:lang="de"
+  xmlns="http://docbook.org/ns/docbook" version="5.2"
+  xmlns:its="http://www.w3.org/2005/11/its"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  xmlns:trans="http://docbook.org/ns/transclusion">
+  <title>Für weitere Informationen</title>
+  <info>
+    <meta name="maintainer" content="souvik.sarkar@suse.com"/>
+  </info>
+  <para>
+    Für weitere Schritte bei der Virtualisierung siehe die folgenden Quellen:
+  </para>
+  <itemizedlist>
+    <listitem>
+      <para>
+        <link
+        xlink:href="https://documentation.suse.com/smart/virtualization-cloud/html/concept-manage-virtual-machines-libvirt/concept-manage-virtual-machines-libvirt.html">Verwalten virtueller Maschinen mit &libvirt;</link>
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        <link xlink:href="https://documentation.suse.com/smart/virtualization-cloud/html/task-configure-virtual-machine-manager/task-configure-virtual-machine-manager.html">Konfigurieren virtueller Maschinen mit &vmm;</link>
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        <link xlink:href="https://documentation.suse.com/smart/virtualization-cloud/html/vm-assign-pci-device/vm-assign-pci-device.html">Zuweisen von Host-Geräten zu virtuellen Maschinen</link>
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        <link xlink:href="https://documentation.suse.com/smart/virtualization-cloud/html/virtual-disk-cache-mode-configure/virtual-disk-cache-mode-configure.html">Konfigurieren eines virtuellen Festplatten-Cache-Modus</link>
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        <link xlink:href="#virt-v2v-vmware-migration">Konvertieren von VMware-VMs zu KVM mit virt-v2v</link>
+      </para>
+    </listitem>
+  </itemizedlist>
+  <remark>ssarkar: Dieser Glue wird von den Artikeln „Virtualization on SUSE Linux“, „Managing Virtualization Platforms with libvirt“ und „Managing KVM Virtualization“ gemeinsam genutzt. Das neue virt-v2v-Element verweist auf den lokalen Anker „#virt-v2v-vmware-migration“, dieser Abschnitt ist jedoch nur als Modul im Artikel „Virtualization on SUSE Linux“ enthalten (wo der Link redundant zu dem Inhalt ist, auf dem sich der Leser bereits befindet) und nicht in den anderen beiden (wo der Anker nicht aufgelöst wird). Sollte dieser Link wie die anderen Elemente auf eine tatsächlich veröffentlichte URL verweisen oder aus diesem gemeinsamen Glue entfernt werden?</remark>
+</topic>
