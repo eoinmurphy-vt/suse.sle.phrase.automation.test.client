@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic
+[
+  <!ENTITY % entities SYSTEM "../common/generic-entities.ent">
+    %entities;
+]>
+<!-- refers to legacy doc: <add github link to legacy doc piece, if applicable> -->
+<!-- point back to this document with a similar comment added to your legacy doc piece -->
+<!-- refer to README.md for file and id naming conventions -->
+<!-- metadata is dealt with on the assembly level -->
+<topic xml:id="cockpit-configuring-servers"
+ role="task" xml:lang="de"
+ xmlns="http://docbook.org/ns/docbook" version="5.2"
+ xmlns:its="http://www.w3.org/2005/11/its"
+ xmlns:xi="http://www.w3.org/2001/XInclude"
+ xmlns:xlink="http://www.w3.org/1999/xlink"
+ xmlns:trans="http://docbook.org/ns/transclusion">
+  <info>
+    <title>Konfigurieren von Servern mit &cockpit;</title>
+    <meta name="maintainer" content="shalaka.harne@suse.com" its:translate="no"/>
+    <abstract>
+      <para>
+        Mit &cockpit; können Sie den Hostnamen ändern, die Systemzeit einstellen oder synchronisieren oder eine Zeitzone ändern.</para>
+    </abstract>
+  </info>
+  <section os="sles;sles4sap" xml:id="cockpit-health">
+    
+    <title>Systemzustand anzeigen</title>
+  <para>Um den Systemzustand anzuzeigen, klicken Sie auf <guilabel>Übersicht</guilabel> im linken Bereich. Sie können die folgenden Details im Abschnitt <guimenu>Gesundheit</guimenu> anzeigen.</para>
+<para>Wenn ein Dienst fehlschlägt, können Sie auf <guilabel>1 Dienst fehlgeschlagen</guilabel> , um die Details des Dienstfehlers anzuzeigen.</para>
+<para>Klicken Sie auf <guilabel>Anmeldeverlauf anzeigen</guilabel> , um Ihren Anmeldeverlauf anzuzeigen. Sie können die Benutzeranmeldeinformationen auf der Benutzerseite ändern.</para>
+  </section>
+  <section os="sles;sles4sap" xml:id="cockpit-cockpit-metrics">
+    <title>Anzeigen von Metriken und Verlauf</title>
+    <para>
+      Sie können die PCP-Metriken und den Nutzungsverlauf unter dem Abschnitt <guimenu>Verwendung</guimenu> im Bereich <guimenu>Übersicht</guimenu> anzeigen.</para>
+      <itemizedlist>
+      <listitem><para>Klicken Sie auf <guilabel>Übersicht</guilabel> im linken Bereich.</para>
+  
+      <para>Die folgenden Details erscheinen im Abschnitt <guilabel>Metriken und Verlauf</guilabel> anzeigen.</para>
+    </listitem>
+      <listitem><para><guimenu>CPU</guimenu>: Die Anzahl der CPUs, die CPU-Auslastung und eine Liste der Dienste, die die CPU nutzen.</para></listitem>
+    <listitem><para><guimenu>Speicher</guimenu>: Die RAM- und Swap-Speicherauslastung sowie die zugehörigen Dienste. </para>
+    <para>&cockpit; liest Speicherauslastungsdaten vom <literal>virtio-balloon</literal> Treiber innerhalb der VM, um den von der VM genutzten Speicher zu schätzen. Der spezifische Wert <literal>currentMemory</literal> zeigt an, wie viel Arbeitsspeicher der Host dieser VM aktuell zugewiesen hat. Diese Zahl kann sich dynamisch ändern, wenn sich der Balloon aufbläht oder zusammenzieht. Wenn die VM nicht verwendet wird, <literal>virtio-balloon</literal>dann weiß &cockpit; nicht, wie viel Arbeitsspeicher tatsächlich innerhalb der VM genutzt wird. Daher kann der angezeigte Arbeitsspeicher abweichen. Der angezeigte Arbeitsspeicher ist eine Annäherung und nicht die tatsächliche Speicherauslastung innerhalb der VM.</para>
+    </listitem>
+    <listitem><para><guimenu>Festplatten</guimenu>: Eine Liste der verwendeten Festplatten und Partitionen. Klicken Sie auf <guimenu>Durchsatz pro Festplatte anzeigen</guimenu> um eine Tabelle mit den Datenübertragungsraten für jede Festplatte anzuzeigen.</para></listitem>
+    <listitem><para><guimenu>Netzwerk</guimenu> - Zeigt die Liste der Netzwerke an.</para></listitem>
+    <listitem><para><guimenu>Metrikverlauf</guimenu>: Wenn vorhanden, integriert sich &cockpit; in das Performance Co-Pilot (PCP)-Framework, um Systemleistungsmetriken zu erfassen und zu verwalten. Diese Metriken werden verwendet, um Visualisierungen historischer Daten auf der <guimenu>Metriken und Verlauf</guimenu> Schnittstelle. &cockpit; kann auch das Archiv-Logging-Subsystem von PCP verwenden, um zeitversetzte historische Daten abzurufen und anzuzeigen. In Umgebungen, in denen PCP nicht installiert ist, greift &cockpit; auf seinen eigenen Metrikerfassungsmechanismus zurück; dieser Modus unterstützt jedoch keine Datenarchivierung oder den Abruf historischer Metriken.</para>
+    <para>Die Archivierung von Metriken hängt davon ab, ob die <filename>pmlogger.service</filename> systemd-Einheit ausgeführt wird oder nicht. Sie können die Option <guilabel>Metriken erfassen</guilabel> aktivieren, um den Dienst zu aktivieren und zu starten.</para>
+      </listitem>
+  </itemizedlist>  
+  </section>
+  <section xml:id="cockpit-configuring-hostname">
+    <title>Ändern des Server-Hostnamens</title>
+    <para>
+      Um den Hostnamen zu ändern, gehen Sie wie folgt vor:
+    </para>
+    <procedure>
+      <title>Ändern des Hostnamens</title>
+      <step>
+        <para>
+          Navigieren Sie zu <guimenu>Übersicht</guimenu> anzeigen.
+        </para>
+      </step>
+      <step>
+        <para>
+          Im Bereich <guimenu>Konfiguration</guimenu> klicken Sie auf
+          <guimenu>bearbeiten</guimenu> unter <guilabel>Hostname</guilabel>.
+        </para>
+      </step>
+      <step>
+        <para>
+          Geben Sie Folgendes ein:
+        </para>
+        <itemizedlist>
+          <listitem>
+            <para>
+              <guimenu>Anzeigename des Hosts</guimenu>&mdash;ein benutzerdefinierter, frei wählbarer Hostname
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              <guimenu>Echter Hostname</guimenu>&mdash;der Name des Geräts im Netzwerk
+            </para>
+          </listitem>
+        </itemizedlist>
+      </step>
+    </procedure>
+  </section>
+  <section xml:id="cockpit-configuring-timezone">
+    <title>Ändern der Systemzeit oder Zeitzone</title>
+    <para>
+      Um die Systemzeit oder Zeitzone zu ändern, gehen Sie wie folgt vor:
+    </para>
+    <procedure>
+      <title>Ändern von Systemzeit oder Zeitzone</title>
+      <step>
+        <para>
+          Navigieren Sie zu <guimenu>Übersicht</guimenu> anzeigen.
+        </para>
+      </step>
+      <step>
+        <para>
+          Im Bereich <guimenu>Konfiguration</guimenu> Abschnitt, klicken Sie auf den aktuellen Zeitwert unter <guimenu>Systemzeit</guimenu>.
+        </para>
+      </step>
+      <step>
+        <para>
+          Im Pop-up-Fenster können Sie Folgendes ändern:
+        </para>
+        <itemizedlist>
+          <listitem>
+            <para>
+              <guimenu>Zeitzone</guimenu>&mdash;der während der manuellen Installation eingestellte Wert oder, bei Raw-Images, auf UTC gesetzt.
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              <guimenu>Zeit einstellen</guimenu>&mdash;standardmäßig wird NTP für die Zeitsynchronisierung verwendet. Sie können die Zeit manuell einstellen oder, falls Sie alternative NTP-Server definiert haben, diese NTP-Server für die Zeitsynchronisierung verwenden.
+            </para>
+          </listitem>
+          <listitem><para>Klicken Sie auf <guimenu>Ändern</guimenu>.</para></listitem>
+        </itemizedlist>
+      </step>
+    </procedure>
+  </section>
+  <section os="slemicro;slmicro" condition="5.5;6.0" xml:id="cockpit-configuring-cryptography">
+    <title>Ändern der kryptografischen Richtlinie</title>
+    <para>
+      Um die kryptografische Richtlinie zu ändern, gehen Sie wie folgt vor:
+    </para>
+    <procedure>
+      <step>
+        <para>
+          Navigieren Sie zu <guimenu>Übersicht</guimenu> anzeigen.
+        </para>
+      </step>
+      <step>
+        <para>
+          Klicken Sie auf <guimenu>Standard</guimenu> neben <guimenu>Kryptografische Richtlinie</guimenu>.
+        </para>
+      </step>
+      <step>
+        <para>
+          Klicken Sie im Pop-up-Fenster auf einen der folgenden Richtlinientypen:
+        </para>
+        <variablelist>
+          <varlistentry>
+            <term>Standard</term>
+            <listitem>
+              <para>
+Sie erlaubt die Protokolle TLS 1.2 und TLS 1.3 sowie IKEv2 und SSH2. Die Diffie-Hellman-Parameter werden akzeptiert, wenn sie mindestens 2048 Bit lang sind. Die Stufe bietet mindestens 112-Bit-Sicherheit, mit der Ausnahme, dass SHA-1-Signaturen in DNSSEC zugelassen sind, wo sie noch weit verbreitet sind.
+              </para>
+            </listitem>
+          </varlistentry>
+           <varlistentry>
+            <term>DEFAULT:SHA1</term>
+            <listitem>
+              <para>
+                Ist eine Unterrichtlinie von der <literal>Standard</literal> die die Verwendung des SHA-1-Algorithmus ermöglicht.
+              </para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>LEGACY</term>
+            <listitem>
+              <para>
+                Diese Richtlinie gewährleistet maximale Kompatibilität mit Altsystemen. Sie ist weniger sicher und beinhaltet Unterstützung für TLS 1.0-, TLS 1.1- und SSH2-Protokolle oder neuer. Die Algorithmen DSA, 3DES und RC4 sind zulässig, während RSA- und Diffie-Hellman-Parameter akzeptiert werden, wenn sie größer als 1023 Bit sind. Die Stufe bietet mindestens 64-Bit-Sicherheit.
+              </para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>LEGACY:AD-SUPPORT</term>
+            <listitem>
+              <para>
+                Ist eine Unterrichtlinie von <literal>LEGACY</literal> mit Active Directory-Interoperabilität.
+              </para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>FIPS</term>
+            <listitem>
+              <para>
+                Eine Stufe, die den Anforderungen von FIPS 140-2 entspricht. Diese Richtlinie wird intern von dem <command>fips-mode-setup</command> Tool verwendet, das das System in den FIPS 140-2-Konformitätsmodus versetzen kann. Die Stufe bietet mindestens 112-Bit-Sicherheit.
+              </para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>FIPS:OSPP</term>
+            <listitem>
+              <para>
+                Eine Unterrichtlinie von FIPS mit weiteren Common Criteria-Beschränkungen.
+              </para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>FUTURE</term>
+            <listitem>
+              <para>
+                Ein konservatives Sicherheitsniveau, von dem angenommen wird, dass es allen zukünftigen Angriffen in naher Zukunft standhält. Dieses Niveau erlaubt nicht die Verwendung von SHA-1 in Signaturalgorithmen. Das Niveau bietet zudem eine gewisse (nicht vollständige) Vorbereitung auf die Unterstützung von Post-Quanten-Verschlüsselung als 256-Bit-Anforderung für symmetrische Verschlüsselung. Die RSA- und Diffie-Hellman-Parameter werden akzeptiert, wenn sie größer als 3071 Bit sind. Dieses Niveau bietet mindestens 128-Bit-Sicherheit.
+              </para>
+            </listitem>
+          </varlistentry>
+        </variablelist>
+      </step>
+      <step>
+        <para>
+          Um die Änderungen anzuwenden, klicken Sie auf <guimenu>Anwenden und neu starten</guimenu>.
+        </para>
+      </step>
+    </procedure>
+  </section>
+</topic>

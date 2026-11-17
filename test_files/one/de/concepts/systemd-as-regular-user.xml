@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic
+[
+  <!ENTITY % entities SYSTEM "../common/generic-entities.ent">
+    %entities;
+]>
+<topic xml:id="systemd-as-a-regular-user"
+ role="concept" xml:lang="de"
+ xmlns="http://docbook.org/ns/docbook" version="5.2"
+ xmlns:its="http://www.w3.org/2005/11/its"
+ xmlns:xi="http://www.w3.org/2001/XInclude"
+ xmlns:xlink="http://www.w3.org/1999/xlink"
+ xmlns:trans="http://docbook.org/ns/transclusion">
+  <info>
+    <title>Verwendung von &systemd; als normaler Benutzer</title>
+    <meta name="maintainer" content="amrita.sakthivel@suse.com" its:translate="no"/>
+<abstract><para> Sie können &systemd; als normaler Benutzer aus Sicherheitsgründen oder dann verwenden, wenn Sie nicht über &rootuser; Benutzerrechte verfügen. Ein nicht privilegierter Dienst kann durch Erstellen eines <literal>Benutzer-</literal>
+  Dienstes ausgeführt werden.</para></abstract>
+  </info>
+  <para>Berücksichtigen Sie beim Erstellen und Verwenden eines Benutzerdienstes Folgendes: </para>
+    <itemizedlist>
+      <listitem>
+        <para>
+         Benutzerdienstsitzungen werden beendet, wenn die Sitzung des Benutzers endet. Dies kann durch Verwendung des folgenden Befehls außer Kraft gesetzt werden: <command>loginctl enable-linger <replaceable>BENUTZERNAME</replaceable></command> Befehl.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Benutzer-Dienstdateien befinden sich in <filename>/etc/systemd/user</filename> oder <filename>$HOME/.config/systemd/user/</filename>.
+         </para>
+        </listitem>
+         <listitem>
+          <para>
+           Sie können Benutzerdienste mit dem <command>systemctl --user</command> Befehl.
+          </para>
+        </listitem>
+      </itemizedlist>
+          </topic>
