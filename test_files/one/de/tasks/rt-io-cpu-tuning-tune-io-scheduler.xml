@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- This file originates from the project https://github.com/openSUSE/doc-kit -->
+<!-- This file can be edited downstream. -->
+<?xml-stylesheet href="urn:x-suse:xslt:profiling:docbook51-profile.xsl"
+    type="text/xml"
+    title="Profiling step"?>
+<!DOCTYPE article
+[
+<!ENTITY % entities SYSTEM "../common/generic-entities.ent">
+%entities;
+]>
+<topic xml:id="rt-io-cpu-tuning-tune-io-scheduler" xml:lang="de"
+       role="task"
+       xmlns="http://docbook.org/ns/docbook" version="5.1"
+       xmlns:its="http://www.w3.org/2005/11/its"
+       xmlns:xi="http://www.w3.org/2001/XInclude"
+       xmlns:xlink="http://www.w3.org/1999/xlink">
+    <info>
+        <meta name="maintainer" content="daria.vladykina@suse.com" its:translate="no"/>
+        <title>Optimieren der Parameter des Block-Gerät-E/A-Planers</title>
+        <abstract>
+            <para>Feinabstimmung der Betriebsparameter aktiver Block-Gerät-Planer in 
+                <literal>sysfs</literal> zur Optimierung der Lese- und Schreiblatenz für Echtzeitanwendungen.</para>
+        </abstract>
+    </info>
+    <para>
+        Alle Planer, mit Ausnahme des <literal>Keine</literal> Planers, verfügen über mehrere gemeinsame Parameter, die für jedes Block-Gerät angepasst werden können. Sie können auf diese Parameter zugreifen mit <systemitem class="resource">sysfs</systemitem>
+        im <filename>/sys/block/<replaceable>GERÄT</replaceable>/queue/iosched/</filename>
+        Verzeichnis. Die folgenden Parameter sind für den jeweiligen Planer einstellbar:
+    </para>
+    <variablelist>
+        <title>Die <literal>mq-deadline</literal> Planer</title>
+        <varlistentry>
+            <term><literal>read_expire</literal></term>
+            <listitem>
+                <para>
+                    Das Hauptaugenmerk dieses Planers liegt darauf, die Startlatenz für eine Anforderung auf eine bestimmte Zeit zu begrenzen. Daher wird für jede Anforderung eine Frist aus der aktuellen Zeit plus dem Wert von berechnet
+                    <literal>read_expire</literal> in Millisekunden.
+                </para>
+            </listitem>
+        </varlistentry>
+        <varlistentry>
+            <term><literal>write_expire</literal></term>
+            <listitem>
+                <para>
+                    Ähnlich wie <literal>read_expire</literal> für Schreibanforderungen.
+                </para>
+            </listitem>
+        </varlistentry>
+        <varlistentry>
+            <term><literal>fifo_batch</literal></term>
+            <listitem>
+                <para>
+                    Wenn eine Anforderung ihre Frist erreicht, ist es erforderlich, die Anforderung von der sortierten E/A-Planerliste in die Dispatch-Warteschlange zu verschieben. Die Variable
+                    <literal>fifo_batch</literal> steuert, wie viele Anforderungen verschoben werden, abhängig von den Kosten jeder Anforderung.
+                </para>
+            </listitem>
+        </varlistentry>
+        <varlistentry>
+            <term><literal>front_merges</literal></term>
+            <listitem>
+                <para>
+                    Der Scheduler versucht normalerweise, zusammenhängende E/A-Anforderungen zu finden und diese zusammenzuführen. Es gibt zwei Arten von Zusammenführungen: Die neue E/A-Anforderung kann vor der bestehenden E/A-Anforderung liegen (Front-Merge), oder sie kann der bestehenden Anforderung folgen (Back-Merge). Die meisten Zusammenführungen sind Back-Merges. Daher können Sie die Front-Merge-Funktionalität deaktivieren, indem Sie
+                    <literal>front_merges</literal> zu <literal>0</literal>.
+                </para>
+            </listitem>
+        </varlistentry>
+        <varlistentry>
+            <term><literal>writes_starved</literal></term>
+            <listitem>
+                <para>
+                    Wenn bestimmte Lese- oder Schreibanforderungen ihre Frist erreichen, bevorzugt der Scheduler standardmäßig die Leseanforderungen. Um zu verhindern, dass Schreibanforderungen für immer zurückgestellt werden, steuert die Variable
+                    <literal>writes_starved</literal> , wie oft Leseanforderungen bevorzugt werden, bis Schreibanforderungen gegenüber Leseanforderungen bevorzugt werden.
+                </para>
+            </listitem>
+        </varlistentry>
+    </variablelist>
+    <variablelist>
+        <title>Die <literal>bfq</literal> Planer</title>
+        <!-- TODO: engineering to verify the parameter list and wording for BFQ -->
+        <varlistentry>
+            <term><literal>back_seek_max</literal> und <literal>back_seek_penalty</literal></term>
+            <listitem>
+                <para>
+                    Der Scheduler versendet Anforderungen normalerweise in einer strikt aufsteigenden Reihenfolge. Bei Bedarf erlaubt er auch kleine Rückwärtssuchvorgänge, wendet jedoch eine Strafe auf diese an. Die maximale Rückwärtssuchdistanz in Sektoren wird definiert mit
+                    <literal>back_seek_max</literal>, und der Multiplikator für die Strafe wird festgelegt durch <literal>back_seek_penalty</literal>.
+                </para>
+            </listitem>
+        </varlistentry>
+        <varlistentry>
+            <term><literal>fifo_expire_async</literal> und <literal>fifo_expire_sync</literal></term>
+            <listitem>
+                <para>
+                    Die <literal>fifo_expire_*</literal> Variablen definieren das Zeitlimit in Millisekunden für asynchrone und synchrone E/A-Anforderungen. Setzen Sie <literal>fifo_expire_sync</literal> niedriger als <literal>fifo_expire_async</literal>
+                    synchrone Anfragen gegenüber asynchronen Operationen zu priorisieren.
+                </para>
+            </listitem>
+        </varlistentry>
+        <varlistentry>
+            <term><literal>slice_idle</literal> und <literal>slice_idle_us</literal></term>
+            <listitem>
+                <para>
+                    Definiert, wie lange der E/A-Scheduler im Leerlauf bleibt, bevor er den nächsten Thread bedient, um die sequentielle E/A-Lokalität aufrechtzuerhalten. <literal>slice_idle</literal> 
+                gibt diese Zeit in Millisekunden an, während <literal>slice_idle_us</literal> 
+                sie in Mikrosekunden angibt.
+                </para>
+            </listitem>
+        </varlistentry>
+    </variablelist>
+</topic>
