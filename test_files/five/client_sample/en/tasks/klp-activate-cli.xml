@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic
+[
+  <!ENTITY % entities SYSTEM "../common/generic-entities.ent">
+    %entities;
+]>
+<topic xml:id="klp-activate-cli"
+ role="concept" xml:lang="en"
+ xmlns="http://docbook.org/ns/docbook" version="5.2"
+ xmlns:its="http://www.w3.org/2005/11/its"
+ xmlns:xi="http://www.w3.org/2001/XInclude"
+ xmlns:xlink="http://www.w3.org/1999/xlink"
+ xmlns:trans="http://docbook.org/ns/transclusion">
+  <info>
+    <title>Activating &klp; from the command line</title>
+    <meta name="maintainer" content="dpopov@suse.com" its:translate="yes"/>
+  </info>
+  <para>
+    &klp; is included in the standard &productnameshort; subscription. To use it, you need to
+    install the following pattern:
+  </para>
+  
+  <screen>&prompt.root;<command>zypper install -t pattern kernel_livepatching</command></screen>
+     
+    
+  <para>
+    At this point, the system has already been live-patched.
+  </para>
+  <para>
+    Here is how the process works behind the scenes: when the package
+    installation system detects that there is an installed kernel that can be
+    live-patched, and that there is a live patch for it in the software
+    channel, the system selects the live patch for installation. The kernel
+    then receives the live patch fixes <emphasis>as part of the package
+    installation</emphasis>. The kernel gets live-patched even before the
+    product installation is complete.
+  </para>
+</topic>
