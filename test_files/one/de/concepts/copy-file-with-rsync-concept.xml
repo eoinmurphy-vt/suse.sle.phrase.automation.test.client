@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic
+[
+<!ENTITY % entities SYSTEM "../common/generic-entities.ent">
+%entities;
+]>
+<!-- refers to https://github.com/SUSE/doc-sle/blob/main/xml/systemd.xml [sec-boot-systemd-timer-units] -->
+<topic xml:id="copy-file-with-rsync-concept"
+       role="concept" xml:lang="de"
+       xmlns="http://docbook.org/ns/docbook" version="5.2"
+       xmlns:its="http://www.w3.org/2005/11/its"
+       xmlns:xi="http://www.w3.org/2001/XInclude"
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       xmlns:trans="http://docbook.org/ns/transclusion">
+  <info>
+    <title>Das rsync-Konzept</title>
+    <meta name="maintainer" content="shalaka.harne@suse.com" its:translate="no"/>
+    <abstract>
+      <para>
+        Sie können das <literal>rsync</literal> -Tool zum lokalen und entfernten Übertragen oder Kopieren von Dateien verwenden. <literal>rsync</literal> ist unidirektional. Es kopiert Dateien in eine einzige Richtung und synchronisiert keine Daten. Anstatt den gesamten Inhalt der Datei zu übertragen, <literal>rsync</literal> minimiert die Menge der kopierten Daten, indem nur die Änderungen innerhalb der Datei übertragen werden. Daher unterstützt dies die Datenübertragung über eine langsame Netzwerkverbindung.</para>
+    </abstract>
+  </info>
+  <para>Zum Kopieren großer Dateien mit <literal>rsync</literal>erfordert das Erkennen von Änderungen eine gewisse Rechenleistung. Stellen Sie daher sicher, dass die Maschinen sowohl an der Quelle als auch am Ziel über genügend Ressourcen verfügen, einschließlich RAM. </para>
+<para>Verwenden Sie rsync, wenn regelmäßig eine große Datenmenge übertragen werden muss, die nur geringfügige Änderungen enthält. Dies ist nützlich bei der Arbeit mit Backups. <literal>rsync</literal> kann auch nützlich sein, um Staging-Server zu spiegeln, die vollständige Verzeichnisbäume von Webservern auf einem Webserver in einer DMZ speichern.</para>
+<para>Dieser Artikel enthält Beispiele, die die Verwendung von <literal>rsync</literal> zum lokalen und entfernten Kopieren von Dateien zeigen. Dieses Dokument erklärt außerdem, wie man einen <literal>rsync</literal> Server konfiguriert und verwendet.</para>
+</topic>

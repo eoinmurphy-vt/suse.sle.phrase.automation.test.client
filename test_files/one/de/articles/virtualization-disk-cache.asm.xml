@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?xml-model href="https://cdn.docbook.org/schema/5.2/rng/assemblyxi.rnc"
+            type="application/relax-ng-compact-syntax"?>
+<!DOCTYPE assembly
+[
+    <!ENTITY % entities SYSTEM "../common/generic-entities.ent">
+    %entities;
+]>
+<assembly version="5.2" xml:lang="de"
+          xmlns:xlink="http://www.w3.org/1999/xlink"
+          xmlns:trans="http://docbook.org/ns/transclusion"
+          xmlns:its="http://www.w3.org/2005/11/its"
+          xmlns="http://docbook.org/ns/docbook">
+<!-- R E S O U R C E S -->
+  <resources>
+    <resource xml:id="_concept-virtual-disk-cache" href="../concepts/virtual-disk-cache.xml"/>
+    <resource xml:id="_reference-virtual-disk-cache-modes" href="../references/virtual-disk-cache-modes.xml"/>
+    <resource xml:id="_task-virtual-disk-cache-mode-configure-using-vmm" href="../tasks/virtual-disk-cache-mode-configure-using-vmm.xml"/>
+    <resource xml:id="_task-virtual-disk-cache-mode-configure-using-virsh" href="../tasks/virtual-disk-cache-mode-configure-using-virsh.xml"/>
+    <resource href="../common/legal.xml" xml:id="_legal"/>
+    <resource href="../common/license_gfdl1.2.xml" xml:id="_gfdl"/>
+  </resources>
+  <!-- S T R U C T U R E -->
+  <structure renderas="article" xml:id="virtual-disk-cache-mode-configure" xml:lang="de">
+    <merge>
+      <title>Konfigurieren eines virtuellen Festplatten-Cache-Modus</title>
+      <revhistory xml:id="rh-vm-disk-cache-configure">
+        <revision><date>2026-10-05</date>
+          <revdescription>
+            <para>
+              Überarbeitete Zusammenfassung
+            </para>
+          </revdescription>
+        </revision>
+        <revision><date>2025-11-03</date>
+        <revdescription>
+          <para>
+            Erste Version
+          </para>
+        </revdescription>
+        </revision>
+      </revhistory>
+    <!-- Maintainer-->
+    <meta name="maintainer" content="souvik.sarkar@suse.com" its:translate="no"/>
+
+    <!-- Series-->
+    <meta name="series" its:translate="no">Smart Docs</meta>
+
+    <!-- Task -->
+    <meta name="task" its:translate="no">
+      <phrase>Virtualisierung</phrase>
+    </meta>
+
+    <!-- Docmanager -->
+    <dm:docmanager xmlns:dm="urn:x-suse:ns:docmanager">
+      <dm:bugtracker>
+        <dm:url>https://bugzilla.suse.com/enter_bug.cgi</dm:url>
+        <dm:component>Dokumentation</dm:component>
+        <dm:product>SUSE Linux Enterprise Server &productnumber;</dm:product>
+        <dm:assignee>souvik.sarkar@suse.com</dm:assignee>
+      </dm:bugtracker>
+      <dm:translation>Ja</dm:translation>
+    </dm:docmanager>
+
+    <!-- Architecture -->
+   <meta name="architecture">        
+        <phrase os="sles;sles4sap">&ppc64le;</phrase>
+        <phrase os="sles;sles4sap">&x86-64;</phrase>
+        <phrase os="sles;sles4sap">&zseries;</phrase>
+        <phrase os="sles;sles4sap;sles4nvidia">&aarch64;</phrase>
+      </meta>
+
+    <!-- Productname & Version -->
+   <meta name="productname" its:translate="no">
+        <productname version="&productnumber;" os="sles;sles4sap;sles4nvidia">&productname;</productname>
+      </meta>
+
+    <!-- Social Media -->
+    <meta name="title" its:translate="yes">Konfigurieren eines virtuellen Festplatten-Cache-Modus</meta>
+    <meta name="social-descr" its:translate="yes">Steigerung der Lese-/Schreibleistung von VMs</meta>
+
+    <!-- Search -->
+    <meta name="description" its:translate="yes">Virtuelle Maschinen können Festplatten-Cache-Modi verwenden, um Lese- und Schreibvorgänge effektiver zu gestalten</meta>
+
+      <abstract>
+        <para>Ein virtueller Festplatten-Cache-Modus konfiguriert, wie E/A-Operationen der virtuellen Maschine den Arbeitsspeicher des Host-Servers in &productname; nutzen. Durch die Auswahl der geeigneten Caching-Strategie&mdash;wie none, writethrough oder writeback&mdash;können Administratoren E/A-Leistung und Datensicherheit bei Host-Abstürzen oder Live-Migrationen abwägen. Die Feinabstimmung dieser Einstellung optimiert die Reaktionsfähigkeit des Gast-Speichers und bewahrt gleichzeitig die kritische Datenintegrität in Virtualisierungsumgebungen.</para>
+<para><emphasis role="bold">Voraussetzungen</emphasis></para>
+<itemizedlist>
+<listitem>
+<para>Erweiterte Kenntnisse der Linux-Systemadministration</para>
+</listitem>
+<listitem>
+<para>Eine funktionierende libvirt-Umgebung mit mindestens einer eingerichteten virtuellen Maschine</para>
+</listitem>
+<listitem>
+<para>Installierte Virtual Machine Manager-Anwendung</para>
+</listitem>
+</itemizedlist>
+      </abstract>
+    </merge>
+    <module resourceref="_concept-virtual-disk-cache" renderas="section"/>
+    <module resourceref="_reference-virtual-disk-cache-modes" renderas="section"/>
+    <module resourceref="_task-virtual-disk-cache-mode-configure-using-vmm" renderas="section">
+      <merge>
+        <title>Konfiguration mit &vmm;</title>
+        <abstract>
+          <para></para>
+        </abstract>
+      </merge>
+    </module>
+    <module resourceref="_task-virtual-disk-cache-mode-configure-using-virsh" renderas="section">
+      <merge>
+        <title>Konfiguration mit &virsh;</title>
+        <abstract>
+          <para></para>
+        </abstract>
+      </merge>
+    </module>
+    <module resourceref="_legal"/>
+    <module resourceref="_gfdl">
+      <output renderas="appendix"/>
+    </module>
+  </structure>
+</assembly>

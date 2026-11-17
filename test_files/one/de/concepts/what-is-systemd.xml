@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic
+[
+  <!ENTITY % entities SYSTEM "../common/generic-entities.ent">
+    %entities;
+]>
+<!-- refers to legacy doc: https://github.com/SUSE/doc-sle/blob/main/xml/adm_sudo.xml -->
+<!-- point back to this document with a similar comment added to your legacy doc piece -->
+<!-- refer to README.md for file and id naming conventions -->
+<!-- metadata is dealt with on the assembly level -->
+<topic xml:id="about-systemd"
+ role="concept" xml:lang="de"
+ xmlns="http://docbook.org/ns/docbook" version="5.2"
+ xmlns:its="http://www.w3.org/2005/11/its"
+ xmlns:xi="http://www.w3.org/2001/XInclude"
+ xmlns:xlink="http://www.w3.org/1999/xlink"
+ xmlns:trans="http://docbook.org/ns/transclusion">
+   <info>
+    <meta name="maintainer" content="amrita.sakthivel@suse.com" its:translate="no"/>
+    <title>Was ist &systemd;?</title>
+  </info>
+    <para>
+      &systemd; ist ein System- und Dienstemanager für Linux-Betriebssysteme. Es ist das Standard-Initialisierungssystem für große Linux-Distributionen. &systemd; wird nicht direkt vom Benutzer gestartet, sondern installiert durch das <filename>/sbin/init </filename> und während des frühen Bootvorgangs gestartet. &systemd; fungiert als das Init-System, das Benutzerbereichsdienste hochfährt und aufrechterhält, wenn es als erster Prozess beim Booten (PID 1) ausgeführt wird. PID 1 ist bekannt als <emphasis>init</emphasis> und ist der erste Linux-Benutzermodus-Prozess, der erstellt wird. Es läuft bis zum Herunterfahren des Systems.
+      </para>
+      <para>&systemd; besitzt PID 1 und wird direkt vom Kernel gestartet. Alle anderen Prozesse werden direkt von &systemd; oder einem seiner Kindprozesse gestartet. &systemd; bindet das Dateisystem des Hosts ein und verwaltet temporäre Dateien. Es ist abwärtskompatibel zu den SysV-Init-Skripten. SysV ist ein Initialisierungssystem, das älter als &systemd; ist.</para>
+
+        <para>In &systemd; ist eine Unit eine Ressource, die das System zu bedienen und zu verwalten weiß. Dies ist das primäre Objekt, das die &systemd;-Werkzeuge verwenden. Diese Ressourcen werden mit Konfigurationsdateien definiert, die Unit-Dateien genannt werden.</para>
+         <para><command>systemctl</command> ist das zentrale Verwaltungswerkzeug zur Steuerung des Init-Systems. Es wird verwendet, um den Status des &systemd;-System- und Dienstemanagers zu untersuchen und zu steuern.</para>
+        <para>Targets in &systemd; sind Gruppen zusammengehöriger Units, die als Synchronisationspunkte während eines Systemstarts fungieren. Target-Unit-Dateien haben eine <literal>.target</literal> Dateiendung. Zielgruppen fassen verschiedene &systemd;-Einheiten durch eine Abhängigkeitskette zusammen.
+        </para>
+        <para>Zur Fehlerbehebung können Sie <command>journalctl</command>verwenden, das zum Abfragen und Anzeigen von Protokollmeldungen aus dem &systemd;-Journal dient.</para>
+         <para>Weitere Informationen zu &systemd; finden Sie unter <link xlink:href="https://systemd.io"/> und <command>man 1 systemd</command>.</para>
+    </topic>

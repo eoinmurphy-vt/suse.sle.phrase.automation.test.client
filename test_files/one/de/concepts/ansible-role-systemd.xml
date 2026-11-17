@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic
+[
+  <!ENTITY % entities SYSTEM "../common/generic-entities.ent">
+    %entities;
+]>
+<!-- refers to legacy doc: <add github link to legacy doc piece, if applicable> -->
+<!-- point back to this document with a similar comment added to your legacy doc piece -->
+<!-- refer to README.md for file and id naming conventions -->
+<!-- metadata is dealt with on the assembly level -->
+<topic xml:id="ansible-role-systemd"
+ role="concept" xml:lang="de"
+ xmlns="http://docbook.org/ns/docbook" version="5.2"
+ xmlns:its="http://www.w3.org/2005/11/its"
+ xmlns:xi="http://www.w3.org/2001/XInclude"
+ xmlns:xlink="http://www.w3.org/1999/xlink"
+ xmlns:trans="http://docbook.org/ns/transclusion">
+  <info>
+    <title>Über die systemd Linux-Systemrolle</title>
+    <meta name="maintainer" content="amrita.sakthivel@suse.com" its:translate="no"/>
+    <abstract>
+      <para>
+       Die systemd Linux-Systemrolle in Ansible automatisiert das vollständige Lebenszyklusmanagement und die Bereitstellung von &systemd; Einheiten und Konfigurationen &productname; 16.0 Systemen.
+      </para>
+    </abstract>
+  </info>
+  <para>Sie können diese Rolle verwenden, um:</para>
+  <itemizedlist>
+  <listitem><para>Benutzerdefinierte oder vorlagenbasierte &systemd; Einheitsdateien wie <literal>.service</literal>, <literal>.timer</literal> usw. in die korrekten Verzeichnisse zu platzieren <filename>/etc/systemd/system/</filename>.</para></listitem>
+  <listitem><para>Den Ausführungsstatus von Diensten steuern, wodurch Sie bestimmte Einheiten einfach starten, stoppen, neu starten oder neu laden können.</para></listitem>
+  <listitem><para>Steuern, ob Einheiten so konfiguriert sind, dass sie beim Booten automatisch starten oder daran gehindert werden.</para></listitem>
+  <listitem><para>Verwenden Sie die aggressivste Methode, um zu verhindern, dass ein Dienst jemals ausgeführt oder manuell gestartet wird, indem Sie die Einheit als <literal>maskiert</literal>.</para></listitem>
+   </itemizedlist>
+<example><title>Starten und Aktivieren einer systemd-Einheit</title>
+<screen>
+--- - name: Bereitstellen und Starten einer systemd-Einheit hosts: managed_nodes become: true tasks: - name: Verwalten einer systemd-Einheit vars: systemd_unit_file_templates: - test.service.j2 systemd_started_units: - item: test.service user: root - item: test1.service user: user1 systemd_enabled_units: - test.service ansible.builtin.include_role: name: suse.linux_system_roles.systemd
+</screen>
+  <itemizedlist>
+   <listitem><para><literal>systemd_unit_file_templates</literal>: gibt eine Liste von Jinja2-Vorlagendateinamen an, die sich auf dem Control Node befinden und als vollständige &systemd; Einheitsdateien auf den verwalteten Knoten gerendert und bereitgestellt werden sollen. Es handelt sich um eine Liste von Zeichenfolgen oder Wörterbüchern. Jedes Element gibt eine Jinja2-Vorlagendatei an, die sich im Verzeichnis <filename>templates/</filename> des Verzeichnisses befindet. Standardmäßig ist dies eine leere Liste <literal>[]</literal> oder <literal>null</literal>.</para></listitem>
+  <listitem><para><literal>systemd_started_units</literal>: gibt an, welche &systemd; Einheiten auf den verwalteten Knoten in den Status „gestartet“ versetzt werden sollen. Es handelt sich um eine Liste von Zeichenfolgen oder Wörterbüchern. Standardmäßig ist dies eine leere Liste <literal>[]</literal>.</para></listitem>
+  <listitem><para><literal>systemd_enabled_units</literal>: gibt an, welche &systemd; Unit-Dateien auf den verwalteten Knoten aktiviert werden sollen, damit sie beim Systemstart automatisch gestartet werden. Es handelt sich um eine Liste von Zeichenfolgen oder Wörterbüchern. Standardmäßig ist dies eine leere Liste <literal>[]</literal>
+  </para></listitem>
+     </itemizedlist>
+  </example>
+<para>Weitere Einzelheiten zu allen Variablen in der systemd Linux-Systemrolle finden Sie in der entsprechenden <literal>README.md</literal> Datei auf dem Steuerknoten:</para>
+  <screen>/usr/share/ansible/collections/ansible_collections/suse/linux_system_roles/docs</screen>
+</topic>
